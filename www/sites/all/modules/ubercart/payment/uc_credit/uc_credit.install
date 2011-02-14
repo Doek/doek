@@ -1,0 +1,14 @@
+<?php
+// $Id: uc_credit.install,v 1.8 2010/02/08 20:18:54 islandusurper Exp $
+
+/**
+ * @file
+ * Install file for the credit module... this is mostly legacy code now.
+ */
+
+function uc_credit_uninstall() {
+  db_delete('variable')
+    ->condition('name', 'uc_credit_%', 'LIKE')
+    ->execute();
+}
+

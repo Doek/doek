@@ -1,0 +1,25 @@
+<?php
+// $Id: domain_source.install,v 1.6 2010/04/01 21:08:36 agentken Exp $
+
+/**
+ * @file
+ * Install file for the Domain Source module
+ */
+
+/**
+ * Implements hook_schema()
+ */
+function domain_source_schema() {
+  $schema['domain_source'] = array(
+    'description' => 'Stores the canonical domain for each node.',
+    'fields' => array(
+      'nid' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
+      'domain_id' => array('type' => 'int', 'not null' => TRUE, 'default' => 0)),
+    'primary key' => array('nid'),
+    'foreign_keys' => array(
+      'nid' => array('node' => 'nid'),
+      'domain_id' => array('domain' => 'domain_id'),
+    ),
+  );
+  return $schema;
+}

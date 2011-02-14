@@ -1,0 +1,7 @@
+/* $Id: preview.css,v 1.14 2010/07/12 19:08:04 jarek Exp $ */
+
+fieldset#edit-color h2,
+fieldset#edit-color #preview {
+  display: none;
+}
+

@@ -1,0 +1,318 @@
+/* $Id: colors.css,v 1.1.2.15 2011/01/13 09:03:00 jmburnz Exp $ */
+/**
+ * Pixture Reloaded Colors
+ */
+/* Main Wrappers */
+body {
+  color: #555555;
+  background: #fdeaf7 url("images/bg-wall.png") repeat-x left top;
+}
+div#page {
+  background: #feffff url("images/header-tile.png") repeat-x left top;
+}
+
+/* HTML elements */
+fieldset legend,
+.form-item label {
+  color: #666666;
+}
+blockquote {
+  background: #f9cbed;
+}
+
+/* Lists */
+.item-list ul li {
+  list-style-image: url("images/bullet-round.png");
+}
+.links {
+  color: #666666;
+}
+/* Menus */
+li.leaf {
+  list-style-image: url("images/bullet-round.png");
+}
+li.collapsed {
+  list-style-image: url("images/bullet-sm-arrow-right.png");
+}
+li.expanded {
+  list-style-image: url("images/bullet-sm-arrow-down.png");
+}
+
+/* Links */
+a:link,
+a:visited,
+a:active,
+a.active {
+  color: #b21f88;
+}
+a:hover,
+a:focus {
+  color: #d23fa8;
+}
+
+/* Tables */
+tr.odd {
+  background: #fdeaf7;
+}
+tr.even {
+  background: #ffffff;
+}
+
+/* Header */
+#header {
+  background: url("images/header.png") no-repeat top left;
+}
+#site-slogan,
+#site-name a,
+.region-header #block-user-login label,
+.nav li a:link,
+.nav li a:hover,
+.nav li a:focus,
+.nav li a:visited,
+.nav li a:active,
+.nav li a.active,
+.nav li a:visited:hover {
+  color: #ffffff;
+}
+#menu-bar,
+#primary-menu-bar {
+  background: url("images/menu-tile.png") repeat-x 0 0;
+}
+.region-header .form-text,
+.region-header .form-submit {
+  border-color: #b21f88;
+}
+
+/* Footer */
+#footer {
+  background: #b800a6; /* fallback for browsers that don't support CSS gradients */
+  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#b800a6), to(#ff6bfe));
+  background-image: -moz-linear-gradient(-90deg, #b800a6, #ff6bfe);
+}
+#footer,
+#footer a {
+  color: #ffffff;
+}
+#footer #block-node-recent {
+  color: #444;
+}
+#footer #block-node-recent a {
+  color: #b21f88;
+}
+
+/* Sidebar */
+.sidebar {
+  background: #feffff;
+}
+
+/* Blocks */
+.block-inner {
+  background: #f9cbec;
+}
+.block-title {
+  color: #ffffff;
+  background: #eb5ac3;
+}
+.block .article,
+.block .article-sticky {
+  background: #ffffff;
+}
+/* Strip backgrounds */
+#header-region .block-inner,
+#block-system-main .block-inner,
+#footer .block-inner,
+#footer .block .block-title {
+  background: none;
+}
+
+/* Poll */
+.poll .bar {
+  background-color: #eeeeee;
+  border: solid 1px #aaaaaa;
+}
+.poll .bar .foreground {
+  background: #b21f88 url("images/bg-lbar.png") repeat-x center left;
+}
+
+/* Articles */
+#main-content .article {
+  background: #ffffff;
+}
+.article h2 {
+  border-bottom: solid 1px #f9cbec;
+}
+.article h2 a:hover {
+  color: #ac2e82;
+}
+.article-sticky h2 {
+  border-bottom: solid 1px #ffffff;
+}
+.article-submitted {
+  color: #666666;
+}
+#main-content .article-teaser {
+  border: 1px solid #f9cbec;
+}
+#main-content .article-teaser.article-sticky {
+  background: #f9cbec;
+}
+
+/* Comments */
+.comment {
+  background: #ffffff;
+}
+.comment-submitted {
+  color: #666666;
+}
+#comments .odd {
+  background: #f9cbec;
+}
+
+/* Aggregator */
+#aggregator .feed-source {
+  background-color: #eeeeee;
+  border: 1px solid #cccccc;
+}
+
+/* Forum */
+#forum td.container {
+  background: #dddddd;
+}
+#forum thead, 
+#forum tbody {
+  border: none;
+}
+
+/* Profile */
+#profile .profile {
+  border: 1px solid #aaaaaa;
+}
+
+/* Administer */
+div.admin-panel {
+  background: #fdeaf7;
+}
+div.admin-panel h3 {
+  background: #eb5ac3;
+  color: #ffffff;
+}
+
+/* Pager */
+div.item-list ul.pager li {
+  border: 1px solid #f9cbec;
+}
+div.item-list ul.pager li:hover,
+div.item-list ul.pager li:focus {
+  border: 1px solid #eb5ac3;
+  color: #b21f88;
+}
+div.item-list ul.pager li.pager-current {
+  border: 1px solid #eb5ac3;
+}
+
+/* Local task tabs */
+ul.primary li a {
+  background: #ffffff;
+  border: solid 1px #f9cbec;
+}
+ul.primary li a:hover {
+  background: #ffffff;
+  border: solid 1px #eb5ac3;
+}
+ul.primary li a.active,
+ul.primary li.active a {
+  border: solid 1px #eb5ac3;
+  background: #f9cbec;
+  color: #000000;
+}
+ul.primary li a.active:hover,
+ul.primary li a.active:focus {
+  border: solid 1px #eb5ac3;
+  background: #f9cbec;
+  color: #000000;
+}
+
+/* Superfish Skin */
+.sf-menu.sf-style-default li,
+.sf-navbar.sf-style-default {
+  background: transparent;
+}
+.sf-menu.sf-style-default li li {
+  background: #b800a6;
+}
+.sf-menu.sf-style-default li li li {
+  background: #b800a6;
+}
+.sf-menu.sf-style-default li:hover,
+.sf-menu.sf-style-default li.sfHover,
+.sf-menu.sf-style-default li.active a,
+.sf-menu.sf-style-default a:focus,
+.sf-menu.sf-style-default a:hover,
+.sf-menu.sf-style-default a:active,
+.sf-navbar.sf-style-default li li {
+  background: #eb5ac3;
+}
+.sf-navbar.sf-style-default li ul li ul {
+  background-color: transparent;
+}
+/* .sf-horizontal */
+.sf-menu.sf-horizontal a {
+  border: 0 !important;
+  color: #ffffff !important;
+}
+/* .sf-navbar */
+.sf-navbar.sf-style-default li ul {
+  background-color: transparent !important;
+  width: 100%;
+}
+.sf-navbar > li > ul > li {
+  border-bottom: 1px solid #b21f88;
+}
+/* .sf-vertical */
+.sf-menu.sf-vertical a {
+  border: 0 !important;
+  color: #b21f88;
+}
+.sf-menu.sf-vertical a:hover,
+.sf-menu.sf-vertical a:focus,
+.sf-menu.sf-vertical ul a,
+.sf-menu.sf-vertical ul ul a,
+.sf-menu.sf-vertical ul ul ul a,
+.sf-menu.sf-vertical ul ul ul ul a {
+  color: #ffffff !important;
+}
+
+/* Calendar styles */
+.calendar-calendar div.date-nav {
+  background-color: transparent;
+  color: #b21f88;
+}
+.calendar-calendar div.date-nav a,
+.calendar-calendar div.date-nav h3 {
+  color: #b21f88;
+}
+.calendar-calendar td {
+  color: #000000;
+}
+.calendar-calendar th {
+  background-color: #f9cbed;
+  color: #b21f88;
+  border: 1px solid #f9cbed;
+}
+.calendar-calendar th.days {
+  background-color: #ffffff;
+  color: #b21f88;
+}
+.calendar-calendar tr td.today,
+.calendar-calendar tr.odd td.today,
+.calendar-calendar tr.even td.today {
+  background-color: #f9cbed;
+}
+.calendar-calendar td.calendar-agenda-hour,
+.calendar-calendar td.calendar-agenda-items,
+.calendar-calendar td.calendar-agenda-hour {
+  border-color: #f9cbed;
+}
+.view-content .calendar-calendar ul.inline li {
+  border: 1px solid #f9cbed;
+}

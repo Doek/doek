@@ -1,0 +1,16 @@
+<?php
+// $Id: uc_2checkout.install,v 1.5 2010/07/15 20:32:39 islandusurper Exp $
+
+/**
+ * @file
+ * Install file for uc_2checkout.module.
+ */
+
+/**
+ * Implement hook_uninstall().
+ */
+function uc_2checkout_uninstall() {
+  db_delete('variable')
+    ->condition('name', 'uc_2checkout_%', 'LIKE')
+    ->execute();
+}

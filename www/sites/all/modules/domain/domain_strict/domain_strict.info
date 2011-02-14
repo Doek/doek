@@ -1,0 +1,14 @@
+;  $Id: domain_strict.info,v 1.3 2009/11/01 20:33:14 agentken Exp $
+name = Domain Strict
+description = Forces users to be assigned to a domain in order to view content on that domain.
+package = Domain Access
+dependencies[] = domain
+core = 7.x
+files[] = domain_strict.module
+
+; Information added by drupal.org packaging script on January 1, 1970 - 00:00
+version = "7.x-2.9"
+core = "7.x"
+project = "domain"
+datestamp = "1296513739"
+

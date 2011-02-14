@@ -1,0 +1,86 @@
+/** 
+ * $Id: tables.css,v 1.1.2.1 2010/10/14 05:35:36 jmburnz Exp $
+ */
+
+/* Tables */
+table {
+  border-spacing:0;
+  border-color:#EEE;
+  margin:1em 0;
+  padding:0;
+  width:100%;
+}
+table,
+td,
+th {
+  vertical-align:middle;
+}
+caption,
+th,
+td {
+  text-align:left;
+}
+thead th {
+  border-bottom:1px solid #EEE;
+  color:#494949;
+  font-weight:700;
+}
+td,
+th {
+  border-bottom:none;
+  margin:0;
+  padding:.375em .5em;
+}
+tr.even,
+tr.odd {
+  border-bottom:none;
+}
+tr.odd,
+tr.info {
+  background-color:#F5F5F5;
+}
+tr.even {
+  background-color:#FFF;
+}
+tr.drag {
+  background-color:#FFFFF0;
+}
+tr.drag-previous {
+  background-color:#FFD;
+}
+tr.odd td.active {
+  background-color:#EEE;
+}
+tr.even td.active {
+  background-color:#F7F7F7;
+}
+td.region,
+td.module,
+td.container td.category {
+  background-color:#EEE;
+  border-bottom:1px solid #CCC;
+  border-top:1.5em solid #FFF;
+  color:#222;
+  font-weight:700;
+}
+tr:first-child td.region,
+tr:first-child td.module,
+tr:first-child td.container {
+  border-top-width:0;
+}
+#forum tr td.forum {
+  background-position:5px 5px;
+}
+#forum tr td.forum .name {
+  padding-left:.375em;
+}
+#forum div.indent {
+  margin-left:.5em;
+}
+#system-themes-form table.sticky-table {
+  position:relative;
+  z-index:10;
+}
+span.tabledrag-changed {
+  display:none;
+}

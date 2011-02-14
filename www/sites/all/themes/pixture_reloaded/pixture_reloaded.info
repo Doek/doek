@@ -1,0 +1,104 @@
+ ; $Id: pixture_reloaded.info,v 1.4.2.18 2011/01/13 06:04:30 jmburnz Exp $
+
+  name        = Pixture Reloaded
+  description = Recolorable multi-column liquid/fixed layout theme. This is a subtheme of <a href="http://drupal.org/project/adaptivetheme">Adaptivetheme</a> - you must first download and install it first. Visit the Settings page to setup your theme - you can change the color, layout and many other settings.
+  core        = 7.x
+  engine      = phptemplate
+  base theme  = adaptivetheme
+  screenshot  = screenshot.png
+
+;----------// Style-sheets
+  stylesheets[all][] = admin-section.css
+  stylesheets[all][] = forms.css
+  stylesheets[all][] = tables.css
+  stylesheets[all][] = gpanels-fluid.css
+  stylesheets[all][] = colors.css
+  stylesheets[all][] = pr.css
+
+;----------// Regions
+
+  ; This theme uses Gpanels from Adaptivetheme core (the ones starting with "GP"). 
+  ; You can add more Gpanel regions - see the "gpanels" directory in Adaptivetheme
+  ; and review the Gpanel regions in the sample subthemes .info file.
+
+  regions[header]            = Header
+  regions[menu_bar]          = Menu Bar
+  regions[help]              = Help
+  regions[secondary_content] = Secondary
+  regions[three_33_first]    = GP 3 x 33% - First
+  regions[three_33_second]   = GP 3 x 33% - Second
+  regions[three_33_third]    = GP 3 x 33% - Third
+  regions[highlight]         = Highlight
+  regions[content]           = Main Content
+  regions[content_aside]     = Aside
+  regions[sidebar_first]     = Sidebar first
+  regions[sidebar_second]    = Sidebar second
+  regions[tertiary_content]  = Tertiary
+  regions[footer]            = Footer
+  regions[article_aside]     = Article aside
+  regions[page_top]          = Page top
+  regions[page_bottom]       = Page bottom
+  regions[four_first]        = GP 4 x 25% - First
+  regions[four_second]       = GP 4 x 25% - Second
+  regions[four_third]        = GP 4 x 25% - Third
+  regions[four_fourth]       = GP 4 x 25% - Fourth
+
+;----------// Site Features
+  ; Pixture reloaded does not support Main or Secondary menus, 
+  ; instead use the block versions and place in the menu bar region.
+  features[] = logo
+  features[] = name
+  features[] = slogan
+  features[] = node_user_picture
+  features[] = comment_user_picture
+  features[] = comment_user_verification
+  features[] = favicon
+
+;----------// Theme Setting Defaults
+  settings[breadcrumb_display]             = 'yes'
+  settings[breadcrumb_separator]           = ' &#187; '
+  settings[breadcrumb_home]                = 0
+  settings[display_search_form_label]      = 1
+  settings[search_snippet]                 = 1
+  settings[search_info_type]               = 1
+  settings[search_info_user]               = 1
+  settings[search_info_date]               = 1
+  settings[search_info_comment]            = 1
+  settings[search_info_upload]             = 1
+  settings[search_info_separator]          = ' - '
+  settings[extra_page_classes]             = 0
+  settings[extra_article_classes]          = 0
+  settings[extra_comment_classes]          = 1
+  settings[extra_block_classes]            = 0
+  settings[extra_menu_classes]             = 1
+  settings[extra_item_list_classes]        = 0
+  settings[menu_item_span_elements]        = 0
+  settings[layout_method]                  = '0'
+  settings[layout_width]                   = '1020px'
+  settings[layout_sidebar_first_width]     = '240'
+  settings[layout_sidebar_last_width]      = '240'
+  settings[layout_enable_settings]         = 'on'
+  settings[layout_enable_width]            = 'on'
+  settings[layout_enable_sidebars]         = 'on'
+  settings[layout_enable_method]           = 'on'
+  settings[equal_heights_sidebars]         = 0
+  settings[equal_heights_blocks]           = 0
+  settings[equal_heights_gpanels]          = 0
+  settings[horizontal_login_block]         = 0
+  settings[horizontal_login_block_enable]  = 'on'  
+  settings[enable_styles]                  = 'on'
+  settings[font_family]                    = 'ff-sss'
+  settings[headings_font_family]           = 'ff-sl'
+  settings[font_size]                      = 'fs-12'
+  settings[headings_styles_caps]           = 0
+  settings[headings_styles_weight]         = 0
+  settings[headings_styles_shadow]         = 0
+  settings[corner_radius]                  = 'rc-4'
+  settings[box_shadows]                    = 'bs-n'
+  
+; Information added by drupal.org packaging script on 2011-01-13
+version = "7.x-1.0"
+core = "7.x"
+project = "pixture_reloaded"
+datestamp = "1294914101"
+

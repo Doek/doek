@@ -1,0 +1,15 @@
+;  $Id: domain_content.info,v 1.8 2010/04/05 21:19:11 agentken Exp $
+name = Domain Content
+description = Provides a content batch editing screen for each active domain.
+package = Domain Access
+dependencies[] = domain
+core = 7.x
+files[] = domain_content.admin.inc
+files[] = domain_content.module
+
+; Information added by drupal.org packaging script on January 1, 1970 - 00:00
+version = "7.x-2.9"
+core = "7.x"
+project = "domain"
+datestamp = "1296513739"
+

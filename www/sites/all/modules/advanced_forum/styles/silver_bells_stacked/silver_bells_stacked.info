@@ -1,0 +1,15 @@
+; $Id: silver_bells_stacked.info,v 1.1.4.2 2011/01/21 11:25:56 troky Exp $
+
+name = Silver Bells Stacked
+description = Shades of grey and white with bells. Author Pane on top.
+version = 2.x
+base style = silver_bells
+extra style = naked_stacked
+
+
+; Information added by drupal.org packaging script on January 1, 1970 - 00:00
+version = "7.x-2.x-dev"
+core = "7.x"
+project = "advanced_forum"
+datestamp = "1297469249"
+

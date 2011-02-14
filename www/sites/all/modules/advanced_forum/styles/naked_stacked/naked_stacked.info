@@ -1,0 +1,12 @@
+; $Id: naked_stacked.info,v 1.1.2.1 2009/06/23 02:59:10 michellec Exp $
+
+name = Naked Stacked
+description = Same as Naked except the Author Pane is on top.
+version = 2.x
+base style = naked
+; Information added by drupal.org packaging script on January 1, 1970 - 00:00
+version = "7.x-2.x-dev"
+core = "7.x"
+project = "advanced_forum"
+datestamp = "1297469249"
+

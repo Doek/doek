@@ -1,0 +1,29 @@
+name = journalcrunch
+description = Theme based on Journal Crunch Worpress template
+version = VERSION
+core = 7.x
+engine = phptemplate
+
+regions[header] = Header
+regions[content] = Content
+regions[sidebar_first] = Sidebar First
+regions[footer_first] = First Footer Block Area
+regions[footer_second] = Second Footer Block Area
+regions[footer_third] = Third Footer Block Area
+regions[footer_fourth] = Fourth Footer Block Area
+regions[help] = Help
+regions[page_top] = Page top
+regions[page_bottom] = Page bottom
+
+stylesheets[all][] = style.css
+
+version = "7.0"
+project = "journalcrunch"
+
+
+; Information added by drupal.org packaging script on January 1, 1970 - 00:00
+version = "7.x-1.0"
+core = "7.x"
+project = "journalcrunch"
+datestamp = "1297186895"
+

@@ -1,0 +1,13 @@
+; $Id: multiform.info,v 1.1 2010/03/05 02:55:40 chx Exp $
+
+name = Multiple forms
+description = Allows displaying and submitting multiple forms in one form
+files[] = multiform.module
+core = 7.x
+
+; Information added by drupal.org packaging script on 2010-10-25
+version = "7.x-1.0-beta1"
+core = "7.x"
+project = "multiform"
+datestamp = "1288013131"
+

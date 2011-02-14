@@ -1,0 +1,21 @@
+; $Id: uc_catalog.info,v 1.10 2010/11/29 22:18:57 islandusurper Exp $
+name = Catalog
+description = Display a hierarchical product catalog page and block.
+dependencies[] = path
+dependencies[] = taxonomy
+dependencies[] = uc_product
+dependencies[] = views
+package = "Ubercart - core (optional)"
+core = 7.x
+files[] = uc_catalog.module
+files[] = uc_catalog.install
+files[] = uc_catalog.admin.inc
+files[] = uc_catalog.pathauto.inc
+files[] = uc_catalog.views_default.inc
+
+; Information added by drupal.org packaging script on 2010-12-09
+version = "7.x-3.0-beta1"
+core = "7.x"
+project = "ubercart"
+datestamp = "1291922443"
+

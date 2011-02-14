@@ -1,0 +1,19 @@
+; $Id: uc_quote.info,v 1.7 2010/07/16 12:57:37 islandusurper Exp $
+name = Shipping Quotes
+description = Retrieve and display quotes for shipping products.
+dependencies[] = rules
+dependencies[] = uc_cart
+package = "Ubercart - core (optional)"
+core = 7.x
+files[] = uc_quote.module
+files[] = uc_quote.install
+files[] = uc_quote.admin.inc
+files[] = uc_quote.pages.inc
+files[] = uc_quote.rules_defaults.inc
+
+; Information added by drupal.org packaging script on 2010-12-09
+version = "7.x-3.0-beta1"
+core = "7.x"
+project = "ubercart"
+datestamp = "1291922443"
+

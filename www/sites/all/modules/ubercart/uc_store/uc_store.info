@@ -1,0 +1,17 @@
+; $Id: uc_store.info,v 1.12 2010/04/07 20:44:27 islandusurper Exp $
+name = Store
+description = REQUIRED. Setup the store settings and manage your Ubercart site.
+package = Ubercart - core
+core = 7.x
+files[] = uc_store.admin.inc
+files[] = uc_store.module
+files[] = uc_store.tokens.inc
+files[] = includes/summaries.inc
+files[] = includes/tapir.inc
+files[] = includes/uc_price.inc
+; Information added by drupal.org packaging script on 2010-12-09
+version = "7.x-3.0-beta1"
+core = "7.x"
+project = "ubercart"
+datestamp = "1291922443"
+

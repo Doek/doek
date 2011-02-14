@@ -1,0 +1,52 @@
+<?php
+// $Id: domain_blocks.install,v 1.4 2011/01/08 01:14:34 nonsie Exp $
+
+/**
+ * @file
+ * Provides domain specific visibility settings for blocks based on domain
+ * access settings.
+ */
+/**
+ * Implements hook_install().
+ */
+function domain_blocks_install() {
+  // Create database tables
+  // Make all blocks accesible by all sites by default
+  // Since {block} stores a separate row for each theme a block will appear on,
+  // we'll use DISTINCT to make sure we're not getting doubles.
+  $existing_blocks = db_query('SELECT DISTINCT module, delta FROM {block}');
+  $existing_blocks = db_select('block', 'b')
+    ->fields('b', array('module', 'delta'))
+    ->execute()
+    ->fetchAll();
+  foreach ($existing_blocks as $block) {
+    $fields = array('module' => $block->module, 'delta' => $block->delta, 'realm' => 'domain_site', 'domain_id' => 0);
+    db_insert('domain_blocks')->fields($fields)->execute();
+  }
+}
+
+/**
+ * Implements hook_schema().
+ * Notice the length of domain_blocks.realm field is not the same as
+ * domain_access.realm. This is due to MySQL key length limitations
+ * (applies to UTF-8 only) - http://bugs.mysql.com/bug.php?id=4541
+ * Since Domain Access only uses grants with length < 14 characters this
+ * inconsistency is irrelevant.
+ */
+function domain_blocks_schema() {
+  $schema['domain_blocks'] = array(
+    'description' => 'Domain Access specific blocks',
+    'fields' => array(
+      'module' => array('type' => 'varchar', 'length' => '64', 'not null' => TRUE, 'default' => ''),
+      'delta' => array('type' => 'varchar', 'length' => '32', 'not null' => TRUE, 'default' => '0'),
+      'realm' => array('type' => 'varchar', 'length' => '20', 'not null ' => TRUE, 'default' => ''),
+      'domain_id' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => '0'),
+    ),
+    'indexes ' => array(
+      'domain_id' => array('domain_id'),
+      'domain_realm_grant' => array('domain_id', 'realm'),
+    ),
+  );
+
+  return $schema;
+}

@@ -1,0 +1,17 @@
+; $Id: domain_blocks.info,v 1.5 2011/02/11 20:38:19 nonsie Exp $
+name = Domain Blocks
+description = Provides domain specific visibility settings for blocks
+package = Domain Access
+dependencies[] = domain
+dependencies[] = block
+core = 7.x
+files[] = domain_blocks.install
+files[] = domain_blocks.module
+
+
+; Information added by drupal.org packaging script on January 1, 1970 - 00:00
+version = "7.x-1.0"
+core = "7.x"
+project = "domain_blocks"
+datestamp = "1297456931"
+

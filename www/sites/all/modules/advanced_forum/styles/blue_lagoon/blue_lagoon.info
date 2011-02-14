@@ -1,0 +1,13 @@
+; $Id: blue_lagoon.info,v 1.1.2.2 2011/01/01 22:30:27 michellec Exp $
+
+name = Blue Lagoon
+description = Based on the Blue Lagoon colors of Garland, this theme is meant to be easily recolorable.
+version = 2.x
+base style = silver_bells
+
+; Information added by drupal.org packaging script on January 1, 1970 - 00:00
+version = "7.x-2.x-dev"
+core = "7.x"
+project = "advanced_forum"
+datestamp = "1297469249"
+

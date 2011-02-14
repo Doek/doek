@@ -1,0 +1,1306 @@
+/* $Id: pr.css,v 1.1.2.25 2011/01/13 09:03:00 jmburnz Exp $ */
+
+body,
+#branding,
+#header hgroup {
+  padding: 0; 
+  margin: 0;
+}
+#columns {
+  padding-top: 8px;
+}
+.content-inner {}
+
+/* Gpanel margins */
+.three-3x33 {
+  margin: 15px 0 0;
+}
+.four-4x25 {
+  margin: 15px 0 10px;
+}
+
+/* Skip Navigation */
+#skip-link {
+  left: 50%;
+  margin-left: -6.5em;
+  margin-top: 0;
+  padding: 0 0.5em;
+  position: absolute;
+  width: 12em;
+  z-index: 50;
+}
+#skip-link a,
+#skip-link a:link,
+#skip-link a:visited {
+  background: #444;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  display: block;
+  line-height: 2;
+  padding: 0;
+  text-align: center;
+  text-decoration: none;
+  -khtml-border-radius: 0 0 10px 10px;
+  -moz-border-radius: 0 0 10px 10px;
+  -webkit-border-top-left-radius: 0;
+  -webkit-border-top-right-radius: 0;
+  -webkit-border-bottom-left-radius: 10px;
+  -webkit-border-bottom-right-radius: 10px;
+  border-radius: 0 0 10px 10px;
+}
+#skip-link a:hover,
+#skip-link a:active,
+#skip-link a:focus {
+  outline: 0;
+}
+
+/* HTML elements */
+html {
+  font-size:75%; /* 16px x 75% = 12px */
+}
+body {
+  line-height:1.5;
+}
+a img {
+  border:none;
+}
+em,
+dfn {
+  font-style:italic;
+}
+ins {
+  border-bottom:none;
+  text-decoration:none;
+}
+pre,
+code,
+tt,
+samp,
+kbd,
+var {
+  font:1em "Lucida Console",Monaco,"DejaVu Sans Mono",monospace;
+}
+blockquote,q {
+  font-style:italic;
+  quotes:"" "";
+}
+blockquote {
+  margin:0 0 1.5em;
+  padding:0 0 0 3em;
+}
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+  content:"";
+}
+blockquote p {
+  margin:0;
+}
+strong,
+dfn,
+caption,
+th {
+  font-weight:700;
+}
+
+/* Lists */
+ul,
+ol {
+  margin:0 0 1.5em 1.667em;
+  padding:0;
+}
+ul ul,
+ul ol,
+ol ol,
+ol ul,
+.block ul ul,
+.block ul ol,
+.block ol ol,
+.block ol ul,
+.item-list ul ul,
+.item-list ul ol,
+.item-list ol ol,
+.item-list ol ul {
+  margin:0 0 0 1em;
+}
+ul {
+  list-style-type:disc;
+}
+ul ul ul {
+  list-style-type:square;
+}
+ol {
+  list-style-type:decimal;
+}
+ol ol {
+  list-style-type:lower-alpha;
+}
+ol ol ol {
+  list-style-type:lower-roman;
+}
+ul ul,
+ul ul ul ul {
+  list-style-type:circle;
+}
+dt {
+  font-weight:700;
+}
+dd {
+  margin:0 0 1.5em 1.667em;
+}
+.item-list ul,
+.item-list ol {
+  margin:0 0 0 1.667em;
+  padding:0;
+}
+.block .menu li {
+  margin: 0;
+}
+.block .menu li.content {
+  padding: 0; /* extra class can equal a standard class, nasty... */
+}
+h1, h2, h3, h4, h5, h6 {
+  margin-bottom: 0.4em;
+}
+h1 {
+  font-size: 1.416em;
+}
+h2 {
+  font-size: 1.25em;
+}
+h3 {
+  font-size: 1.167em;
+}
+h4, h5, h6 {
+  font-size: 1em;
+}
+p {
+  margin-top: 0.4em;
+  margin-bottom: 0.8em;
+  padding:0;
+}
+em {
+  text-decoration: none;
+  font-weight: normal;
+}
+fieldset legend,
+.form-item label {
+  font-size: 1em;
+  font-weight: bold;
+}
+blockquote {
+  margin: 4px 10px;
+  padding: 10px 15px;
+}
+abbr, acronym {
+  border-bottom: none;
+} 
+.article .article-content, 
+.comment .comment-content {
+  line-height: 1.5em;
+}
+h1#page-title {
+  padding: 0;
+  margin: 0 0 0.46em;
+}
+
+/* Links */
+a,
+a.active {
+  text-decoration: none;
+  font-weight: bold;
+}
+a:hover,
+a.active:hover,
+a:focus,
+a.active:focus {
+  text-decoration: underline;
+}
+
+/* Header */
+#header {
+  margin: 0 0 7px;
+  padding: 0;
+  _height: 88px;
+  min-height: 88px;
+}
+#branding {
+  float: left;
+  padding: 0;
+  _height: 80px;
+  min-height: 80px;
+  width: 49.5%; /* Adjust this if you have a very long site name or large logo */
+}
+#logo {
+  display: block;
+  float: left;
+  margin: 0 10px 0 0;
+  overflow: hidden;
+  padding: 10px 0 0 10px;
+}
+#head-elements {
+  _height: 88px;
+  min-height: 88px;
+  margin: 0 0 0 15px;
+  padding: 0;
+}
+#branding {
+  text-transform: uppercase;
+}
+#site-name {
+  font-size: 2.6em;
+  margin: 0;
+  padding: 13px 0 0 0;
+  overflow: hidden;
+  line-height: 1.3em;
+}
+.logo-site-name a:hover,
+.logo-site-name a:focus {
+  text-decoration: none;
+}
+#site-slogan {
+  font-size: 1em;
+  line-height: 1em;
+  text-align: left;
+  margin: 0;
+}
+.region-header {
+  float:right;
+  margin:10px 0 0;
+}
+/* Special casing for the search block in the header region */
+.region-header #block-search-form {
+  margin: 0;
+  padding: 10px 0 0 10px;
+}
+.region-header #block-search-form .block-inner {
+  background: none;
+}
+.region-header #block-search-form input.form-text {
+  width: 160px;
+}
+
+/* Menu-bar */
+.nav {
+  clear: both;
+  height: 32px;
+  line-height: 32px;
+  padding: 0 15px;
+  z-index: 100; /* Needed so Superfish menus appear over flash & slideshows in IE7 */
+  position: relative;
+}
+.nav ul {
+  padding: 0;
+}
+.nav ul,
+.nav ul li,
+#menu-bar ul,
+#menu-bar ul li {
+  margin: 0;
+  list-style: none;
+  list-style-image: none;
+}
+.nav ul li {
+  float: left;
+}
+.nav ul li {
+  padding: 0 15px 0 0; /* RTL */
+}
+.nav ul.links li a {
+  font-weight: bold;
+}
+.nav ul.links li a:hover {
+  background: transparent;
+  text-decoration: underline;
+}
+.nav .block,
+.nav .block-inner,
+.nav .block-inner .block-content  {
+  background: transparent;
+  padding: 0;
+  margin: 0;
+}
+/**
+ * Hide additional menu levels for normal menu blocks - I can't think of a better
+ * way of handling these - you should really use http://drupal.org/project/menu_block 
+ */
+.nav .block-menu ul ul {
+  display: none;
+}
+
+
+/* Articles */
+#main-content .article {
+  margin: 0 0 15px 0;
+  padding: 0;
+}
+#main-content .article-teaser {
+  padding: 10px;
+}
+.article-full-view .article h1.article-title, 
+.article h1.article-title {
+  margin: 0;
+  padding-top: 0px;
+  padding-bottom: 2px;
+}
+.article h1.article-title {
+  font-size: 1.5em;
+}
+.article h1.article-title a:hover {
+  text-decoration: none;
+}
+.article .user-picture {
+  border: none;
+  float: right;
+  margin: 0.5em;
+}
+.article-submitted {
+  margin: 0.3em 0 0 0; 
+  padding: 0;
+}
+.article .article-content {
+  clear: both;
+  margin: 1em 0 0.5em 0;
+}
+.article .field-type-taxonomy-term-refernce {
+  font-size: 0.9em;
+}
+.article .taxonomy {
+  margin: 0; 
+  padding: 0;
+}
+.article .taxonomy li {
+  padding: 1px 5px;
+}
+.article ul.links li {
+  margin: 0 0.25em;
+  padding: 0;
+  float: right;
+}
+/* Node Teaser */
+#content .article-teaser { 
+  margin: 0 0 15px;
+  padding: 10px;
+  overflow: hidden;
+}
+.article h2.field-label {
+  font-size: 1em;
+  border-bottom: none;
+}
+/* sticky node-teaser */
+#content .article-teaser.article-sticky {
+  padding: 10px;
+  margin: 0 0 15px;
+}
+
+/* Comments */
+#comments h2 {
+  border-bottom: none; 
+}
+.comment {
+  border:none;
+  margin:0 0 10px;
+  padding:10px;
+}
+.comment .comment-title a {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+.comment .new {
+  padding-right: 10px;
+  text-align: right;
+  font-weight: bold;
+  font-size: 0.8em;
+  float: right;
+  color: red;
+}
+.comment .picture {
+  border: none;
+  float: left;
+  margin: 15px 0 0 20px;
+}
+.comment .comment-id {
+  font-size: 1.167em;
+  font-weight: bold;
+  padding-right: 10px;
+}
+.comment ul.links {
+  float: right;
+}
+
+/* Blocks */
+.block {
+  margin-bottom: 10px;
+}
+.block-title {
+  font-size: 1.167em;
+  margin: 0px;
+  padding: 5px 10px 4px;
+}
+.block h3 {
+  padding: 0 3px;
+  font-size: 1em;
+}
+.block-content {
+  padding: 10px;
+}
+#block-system-main .block-content {
+  padding: 0;
+}
+.block .item-list ul {
+  margin-left:0;
+}
+.block .item-list ul ul,
+.block .item-list ul ul ul {
+  margin-left:1em;
+}
+.block ul.links {
+  margin:0;
+  padding:0 0 5px;
+}
+.block ul.links li {
+  font-size: .94em;
+}
+/* blocks showing nodes, e.g help out views blocks */
+.block .article h2.article-title {
+  font-size: 1.167em;
+}
+.block .article {
+  padding: 5px 5px 0;
+}
+#block-search-form form {
+  margin: 0;
+}
+#block-system-main {
+  margin-bottom: 15px;
+}
+
+/* Fields */
+.field-type-taxonomy-term-reference .field-label {
+  font-size: 1em;
+}
+.field-type-taxonomy-term-reference ul {
+  margin: 0;
+  padding: 0;
+}
+.field-type-taxonomy-term-reference ul li {
+  display: inline;
+  list-style: none;
+  padding: 0 0.75em 0 0; /* LTR */
+}
+.field-lable-inline .field-label {
+  display: inline;
+}
+
+/* Lists */
+ul {
+  margin: 0;
+  padding: 0 0 0 1em;
+}
+li a, 
+li a:visited, 
+li a:active, 
+li a:hover {
+  font-weight: normal;
+}
+.item-list ul {
+}
+.item-list ul li {
+  margin-left: 1em;
+}
+.item-list .title {
+  font-size: 1em;
+}
+ul.links li {
+  margin: 0;
+  padding: 0 2px;  
+}
+.comment .links {
+  margin-bottom: 0;
+}
+.submitted {
+  font-size: 0.9em;
+}
+.links a {
+  font-weight: normal;
+}
+
+/* Aggregator */
+#aggregator .feed-source {
+  padding: 1em;
+  margin: 1em 0;
+}
+#aggregator .news-item .categories, 
+#aggregator .source, 
+#aggregator .age {
+  font-style: italic;
+  font-size: 0.9em;
+}
+#aggregator .title {
+  margin-bottom: 0.5em;
+  font-size: 1em;
+}
+#aggregator h3 {
+  margin-top: 1em;
+}
+
+/* Tables */
+table, tr, td, thead, tbody {
+  border-spacing: 0;
+  border-collapse: collapse;
+  border-width: 0px;
+}
+table {
+  /* make <td> sizes relative to body size! */
+  font-size: 1em;
+  width: 100%;
+  margin: 0 0 10px 0;
+}
+
+/* Forum */
+#forum {
+  margin: 15px 0;
+}
+#forum td.last-reply {
+  background: none;
+}
+.block-forum h3 {
+  margin-bottom: 0.5em;
+}
+div.forum-topic-navigation a.topic-next {
+  text-align: right;
+}
+div.forum-topic-navigation a.topic-previous {
+  text-align: left;
+}
+#forum tr td.forum  {
+  background-position:5px 4px;
+  padding-bottom:0.6em;
+  padding-left:1.67em;
+  padding-top:0.6em;
+}
+#forum tr td.forum .name {
+  padding-left:2em;
+}
+
+/* Profile */
+#profile .profile {
+  clear: both;
+  padding: .5em;
+  margin: 1em 0em;
+}
+#profile .profile .name {
+  padding-bottom: 0.5em;
+}
+.block-forum h3 {
+  margin-bottom: .5em;
+}
+
+/* Footer, Feed icon */
+#footer {
+  font-size: 0.92em;
+  text-align: center;
+  border: none;
+}
+#footer-inner {
+  min-height: 88px;
+  background-size: 100%; /* CSS3 - one day browsers will support this */
+}
+#footer a {
+  text-decoration: none;
+  font-weight: normal;
+}
+#footer .block {
+  padding: 10px 0 0;
+}
+#footer .block-title {
+  text-align: left;
+  padding: 0 10px;
+}
+#footer .block .block-content > ul.menu {
+  padding: 0;
+}
+#footer ul.menu li {
+  list-style: none;
+  list-style-image: none;
+}
+#secondary {
+  padding: 10px 0;
+}
+.feed-icon {
+  display: block;
+  clear: both;
+  margin: 15px 10px 5px;
+  text-align: right;
+}
+
+/* Prevent overflowing content */
+#content,
+.nav,
+#sidebar-first,
+#sidebar-second,
+#footer {
+  overflow: visible;
+  word-wrap: break-word; /* A very nice CSS3 property */
+}
+
+/* Pager */
+ul.pager {
+  padding: 5px 0;
+  margin: 0;
+}
+div.item-list ul.pager li {
+  padding: 3px 8px;
+  margin: 0 2px;
+}
+div.item-list ul.pager li,
+div.item-list ul.pager li a {
+  font-weight: bold;
+  text-decoration: none;
+}
+
+/* Admin */
+div.messages {
+  margin-bottom:0.5em;
+}
+div.admin-panel h3 a {
+  font-size: 1.33em;
+  color: #fff;
+}
+div.admin-panel {
+  border: 0 none;
+}
+div.admin-panel a {
+  font-weight: normal;
+}
+div.admin-panel .description {
+  margin:0 0 3px;
+  padding:2px 0 3px 10px;
+}
+div.admin-panel .body dl .description {
+  margin:0 0 3px;
+  padding:2px 0 3px;
+}
+#block-system-help {
+  background: none;
+  border: 0;
+  margin: 5px 0;
+  padding: 0;
+}
+#block-system-help .block-inner {
+  padding: 0;
+  margin: 0;
+}
+#block-system-help .block-content {
+  padding: 4px 10px 8px;
+}
+ul.action-links li {
+  list-style: none;
+}
+#palette .form-item {
+  width: 24em;
+}
+.color-form label {
+  width: 12em;
+}
+
+/* Book Navigation */
+.box {
+  background: #eee;
+  padding: 5px;
+  padding: 10px;
+}
+.box h2 {
+  padding-bottom: 2px;
+  border-bottom: solid 1px #aaa;
+}
+.book-navigation {
+  padding-bottom: 5px;
+}
+.book-navigation ul.menu {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+div.page-links a.page-previous,
+div.page-links a.page-next {
+  width: 40%;
+}
+div.page-links a.page-up {
+  width: 19%;
+}
+
+/* Image Galleries (deprecated?) */
+ul.galleries li {
+  border: solid 1px #aaa;
+  background: #fff;
+}
+ul.galleries li h3 a {
+  font-size: 1.1em;
+  font-weight: bold;
+}
+ul.images {
+  border: solid 1px #aaa;
+  overflow: hidden;
+}
+ul.images li {
+  text-align: center;
+}
+
+/* Buttons */
+.form-submit {
+  margin-bottom: 1px;
+  cursor: pointer;
+  padding: 2px 10px;
+  color: #666;
+  font-weight: normal;
+  font-size: 1em;
+  border: solid 1px #888;
+  background: #fff url("images/button.gif") repeat-x center;
+}
+.form-submit:hover {
+  color: #000;
+  border: solid 1px #666;
+  background: #fff url("images/button-o.gif") repeat-x center;
+}
+
+/* Local task tabs */
+ul.primary {
+  border: 0 none;
+  margin: 0 0 15px;
+  padding: 0;
+}
+ul.primary li a {
+  padding: 0.25em 0.9em 0.3em;
+}
+ul.primary li a.active:hover,
+ul.primary li a.active:focus {
+  text-decoration: none;
+}
+ul.secondary {
+  border-bottom: 0;
+  margin: 5px 0;
+  padding: 0.5em 0;
+}
+ul.secondary li {
+  border-right: 0;
+  padding: 0 1em 0 0; /* LTR */
+}
+
+/* Breadcrumb */
+ol#crumbs {
+  margin: 0;
+  padding: 0 15px;
+}
+ol#crumbs li {
+  list-style: none;
+  display: inline;
+}
+
+/* Quicktabs */
+.block-quicktabs .block-inner {
+  background: none !important;
+}
+.block-quicktabs .block-content {
+  padding: 0;
+}
+.block-quicktabs .ui-tabs .ui-tabs-panel {
+  padding: 10px;
+}
+
+/* Superfish */
+/* sf-horizontal - classic drop menu style */
+.nav .block-superfish {
+  padding: 0;
+  margin: 0;
+}
+ul.sf-horizontal {
+  padding: 0;
+}
+.sf-horizontal a {
+  height: 32px;
+  line-height: 32px;
+  padding: 0 10px;
+  border-left: none;
+  border-top: none;
+}
+.sf-horizontal a:hover,
+.sf-horizontal a:focus {
+  text-decoration: none;
+}
+.nav ul.sf-horizontal li {
+  margin: 0;
+  padding: 0;
+}
+.sf-horizontal li:hover ul,
+.sf-horizontal li.sfHover ul {
+  top: 32px;
+}
+.nav .contextual-links-wrapper {
+  display: none;
+}
+/* .sf-navbar - drop down nav bar style */
+ul.sf-navbar {
+  padding: 0;
+  position: absolute;
+  z-index: 99;
+}
+.sf-navbar a {
+  height: 32px;
+  line-height: 32px;
+  padding: 0 10px;
+  border-left: none;
+  border-top: none;
+}
+.sf-navbar a:hover,
+.sf-navbar a:focus,
+.sf-navbar ul ul a:hover,
+.sf-navbar ul ul a:focus,
+.sf-navbar ul ul ul a:hover,
+.sf-navbar ul ul ul a:focus,
+.sf-navbar ul ul ul ul a:hover,
+.sf-navbar ul ul ul ul a:focus {
+  text-decoration: none;
+}
+.sf-navbar ul a:hover,
+.sf-navbar ul a:focus  {
+  text-decoration: underline;
+}
+ul.sf-navbar li {
+  margin: 0;
+  padding: 0;
+}
+.sf-navbar li:hover ul,
+.sf-navbar li.sfHover ul {
+  top: 32px;
+}
+ul.sf-vertical ul,
+ul.sf-navbar ul ul,
+ul.sf-navbar ul ul ul,
+ul.sf-navbar ul ul ul ul {
+  width: 13em;
+}
+ul.sf-navbar ul ul ul,
+ul.sf-navbar ul ul ul ul {
+  left: 100% !important;
+}
+/* sf-vertical - flyout menus for sidebars */
+ul.sf-vertical a {
+  color: #fff !important; /* Tweak this to suit your color scheme */
+}
+ul.sf-vertical,
+ul.sf-vertical ul,
+ul.sf-vertical ul ul,
+ul.sf-vertical ul ul ul {
+  padding: 0;
+  margin: 0;
+}
+.nav .block-content {
+  padding: 5px 0 12px;
+  margin: 0;
+}
+.sf-vertical,
+.sf-vertical li {
+  width: 100%;
+}
+.sf-vertical li:hover ul,
+.sf-vertical li.sfHover ul {
+  left: 100%; /* match ul width */
+  top: 0;
+}
+.sf-vertical a:hover,
+.sf-vertical a:focus {
+  text-decoration: none;
+}
+
+/* Skinr inline menu */
+.ms-im {
+  margin-bottom:.5em;
+}
+.ms-im ul.menu li {
+  display:inline;
+  float:left;
+  white-space:nowrap;
+  list-style:none;
+  list-style-image:none;
+  margin:0;
+  padding:0;
+}
+.ms-im ul.menu li a {
+  padding:0 .5em;
+}
+.ms-im ul li.expanded ul {
+  display:none;
+}
+
+/* Skinr multi-column menu with headers */
+.ms-mc .block-content {
+  overflow:auto;
+}
+.ms-mc .block-content ul li,
+.ms-mc .block-content ul li.expanded ul {
+  width:160px; /* Adjust column width to suit */
+}
+.ms-mc .block-content ul li {
+  display:block;
+  font-weight:700;
+  float:left;
+  list-style:none;
+  list-style-image:none;
+  margin:0;
+}
+.ms-mc .block-content ul li.expanded ul {
+  display:block;
+  margin-left:0;
+  padding: 0;
+}
+.ms-mc .block-content ul li.expanded ul li {
+  border:none;
+  display:block;
+}
+.ms-mc .block-content ul.menu li ul.menu li {
+  font-weight:400;
+}
+/* Hide block titles for both menu styles */
+.ms-im h2,
+.ms-mc h2 {
+  position: absolute !important;
+  clip: rect(1px, 1px, 1px, 1px);
+  clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+ background: none;
+}
+
+/* Login block - horizontal (theme setting) */
+.lb-h {
+  min-width: 320px;
+  margin-top: 1px;
+}
+.region-header .lb-h {
+  float: right;
+} 
+.lb-h .block-inner,
+.lb-h .block-content {
+  background: none;
+  padding: 0;
+}
+.lb-h #user-login-form {
+  margin: 0;
+}
+.lb-h #user-login-form label {
+  line-height: 1.2
+}
+.lb-h .form-item {
+  float:left;
+  margin: 0;
+}
+.lb-h input.form-text {
+  margin:0 3px 0 0;
+  width:110px;
+}
+.lb-h #edit-actions {
+  margin: 0;
+}
+.lb-h input.form-submit {
+  position: absolute;
+  margin: 0;
+  padding:2px 3px;
+  top: 1.25em;
+}
+.lb-h .form-required,
+.lb-h .item-list {
+  display: none;
+}
+.lb-h h2,
+.element-invisible {
+  position: absolute !important;
+  clip: rect(1px, 1px, 1px, 1px);
+  clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+  background: none !important;
+}
+
+/* font family */
+.ff-sss,
+.ff-sss .form-text {font-family: "Helvetica Nueue", "Trebuchet MS", Arial, "Nimbus Sans L", FreeSans, sans-serif;}
+
+.ff-ssl,
+.ff-ssl .form-text {font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;}
+
+.ff-a,
+.ff-a .form-text {font-family: Arial, Helvetica, sans-serif;}
+
+.ff-ss,
+.ff-ss .form-text {font-family: Garamond, Perpetua, "Nimbus Roman No9 L", "Times New Roman", serif;}
+
+.ff-sl,
+.ff-sl .form-text {font-family: Baskerville, Georgia, Palatino, "Palatino Linotype", "Book Antiqua", "URW Palladio L", serif;}
+
+.ff-m,
+.ff-m .form-text {font-family: "Myriad Pro", Myriad, Arial, Helvetica, sans-serif;}
+
+.ff-l,
+.ff-l .form-text {font-family: "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", Verdana, Geneva, sans-serif;}
+
+/* headings font family */
+.hff-sss h1,
+.hff-sss h2,
+.hff-sss h3,
+.hff-sss h4,
+.hff-sss h5,
+.hff-sss h6 {font-family: "Helvetica Nueue", "Trebuchet MS", Arial, "Nimbus Sans L", FreeSans, sans-serif;}
+
+.hff-ssl h1,
+.hff-ssl h2,
+.hff-ssl h3,
+.hff-ssl h4,
+.hff-ssl h5,
+.hff-ssl h6 {font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;}
+
+.hff-a h1,
+.hff-a h2,
+.hff-a h3,
+.hff-a h4,
+.hff-a h5,
+.hff-a h6 {font-family: Arial, Helvetica, sans-serif;}
+
+.hff-ss h1,
+.hff-ss h2,
+.hff-ss h3,
+.hff-ss h4,
+.hff-ss h5,
+.hff-ss h6 {font-family: Garamond, Perpetua, "Nimbus Roman No9 L", "Times New Roman", serif;}
+
+.hff-sl h1,
+.hff-sl h2,
+.hff-sl h3,
+.hff-sl h4,
+.hff-sl h5,
+.hff-sl h6 {font-family: Baskerville, Georgia, Palatino, "Palatino Linotype", "Book Antiqua", "URW Palladio L", serif;}
+
+.hff-m h1,
+.hff-m h2,
+.hff-m h3,
+.hff-m h4,
+.hff-m h5,
+.hff-m h6 {font-family: "Myriad Pro", Myriad, Arial, Helvetica, sans-serif;}
+
+.hff-l h1,
+.hff-l h2,
+.hff-l h3,
+.hff-l h4,
+.hff-l h5,
+.hff-l h6 {font-family: "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", Verdana, Geneva, sans-serif;}
+
+/* Base fontsize */
+.fs-10 {font-size:0.833em}
+.fs-11 {font-size:0.917em}
+.fs-12 {font-size:1em}
+.fs-13 {font-size:1.083em}
+.fs-14 {font-size:1.167em}
+.fs-15 {font-size:1.25em}
+.fs-16 {font-size:1.333em}
+
+/* Heading styles */
+.hs-caps h1,
+.hs-caps h2,
+.hs-caps h3,
+.hs-caps h4,
+.hs-caps h5,
+.hs-caps h6 {
+  text-transform: uppercase;
+}
+.hs-fwn h1,
+.hs-fwn h2,
+.hs-fwn h3,
+.hs-fwn h4,
+.hs-fwn h5,
+.hs-fwn h6 {
+  font-weight: 400;
+}
+.hs-ts .block-title {
+  text-shadow: 0 1px 0 #000;
+}
+
+/* Skinr block title position */
+.ta-l .article-title {
+  text-align: left;
+}
+.ta-r .article-title {
+  text-align: right;
+}
+.ta-c .article-title {
+  text-align: center;
+}
+.ta-r .block-title,
+.ta-r .mini-panel-title {
+  text-align: right;
+}
+.ta-c .block-title,
+.ta-c .mini-panel-title {
+  text-align: center;
+}
+.ta-r .comment-title {
+  text-align: right;
+}
+.ta-c .comment-title {
+  text-align: center;
+}
+.ta-r .pane-title {
+  text-align: right;
+}
+.ta-c .pane-title {
+  text-align: center;
+}
+
+/* Image settings */
+.field-type-image img {
+  border: 1px solid #ccc;
+}
+.ai-l .field-type-image {
+  margin: 4px 20px 10px 0;
+}
+.ai-r .field-type-image {
+  margin: 4px 0 10px 20px;
+} 
+
+/* Box shadows */
+.sc-n #page  {
+  -webkit-box-shadow:0 0 0 transparent;
+  -moz-box-shadow:0 0 0 transparent;
+  box-shadow:0 0 0 transparent;
+}
+.bs-l #page {
+  -webkit-box-shadow:0 0 10px rgba(76, 76, 76, 0.7);
+  -moz-box-shadow:0 0 10px rgba(76, 76, 76, 0.7);
+  box-shadow:0 0 10px rgba(76, 76, 76, 0.7);
+}
+.bs-d #page  {
+  -webkit-box-shadow:0 0 10px rgba(0, 0, 0, 0.9);
+  -moz-box-shadow:0 0 10px rgba(0, 0, 0, 0.9);
+  box-shadow:0 0 10px rgba(0, 0, 0, 0.9);
+}
+
+/* Rounded corners - just say NO to progressive enhancement... */
+ul.primary li a,
+div.item-list ul.pager li {
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  -khtml-border-radius: 2px;
+  border-radius: 2px; 
+}
+      
+input.form-submit,
+input.form-text,
+.rc-4 .article-teaser,
+.rc-4 .comment,
+.rc-4 .block-inner {
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  -khtml-border-radius: 4px;
+  border-radius: 4px;
+}
+div.admin-panel,
+.rc-8 .article-teaser,
+.rc-8 .comment,
+.rc-8 .block-inner {
+  -moz-border-radius: 8px;
+  -webkit-border-radius: 8px;
+  -khtml-border-radius: 8px;
+  border-radius: 8px;  
+}     
+.rc-12 .article-teaser,
+.rc-12 .comment,
+.rc-12 .block-inner {
+  -moz-border-radius: 12px;
+  -webkit-border-radius: 12px;
+  -khtml-border-radius: 12px;
+  border-radius: 12px;
+}
+.rc-4 .block-title {
+  -moz-border-radius: 4px 4px 0 0;
+  -webkit-border-top-left-radius: 4px;
+  -webkit-border-top-right-radius: 4px;
+  -webkit-border-bottom-right-radius: 0;
+  -webkit-border-bottom-left-radius: 0;
+  -khtml-border-radius-topleft: 4px;
+  -khtml-border-radius-topright: 4px;
+  -khtml-border-radius-bottomright: 0;
+  -khtml-border-radius-bottomleft: 0;
+  border-radius: 4px 4px 0 0;
+}
+.rc-8 .block-title {
+  -moz-border-radius: 8px 8px 0 0;
+  -webkit-border-top-left-radius: 8px;
+  -webkit-border-top-right-radius: 8px;
+  -webkit-border-bottom-right-radius: 0;
+  -webkit-border-bottom-left-radius: 0;
+  -khtml-border-radius-topleft: 8px;
+  -khtml-border-radius-topright: 8px;
+  -khtml-border-radius-bottomright: 0;
+  -khtml-border-radius-bottomleft: 0;
+  border-radius: 8px 8px 0 0;
+}
+.rc-12 .block-title {
+  -moz-border-radius: 12px 12px 0 0;
+  -webkit-border-top-left-radius: 12px;
+  -webkit-border-top-right-radius: 12px;
+  -webkit-border-bottom-right-radius: 0;
+  -webkit-border-bottom-left-radius: 0;
+  -khtml-border-radius-topleft: 12px;
+  -khtml-border-radius-topright: 12px;
+  -khtml-border-radius-bottomright: 0;
+  -khtml-border-radius-bottomleft: 0;
+  border-radius: 12px 12px 0 0;
+}
+/* Date/Calendar */
+.calendar-calendar div.date-nav {
+  border: 0;
+  padding: 1px;
+}
+.calendar-calendar td {
+  text-align: center;
+}
+.calendar-calendar th.days {
+  border: 0;
+}
+.calendar-calendar td.calendar-agenda-hour {
+  border-style: solid none none;
+}
+.calendar-calendar td.calendar-agenda-items {
+  border-style: solid;
+}
+.calendar-calendar td.calendar-agenda-hour {
+  border-style: none none solid solid;
+  border-width: 1px;
+}
+.calendar-calendar td.calendar-agenda-hour .calendar-hour {
+  padding: 0 5px;
+  white-space: nowrap;
+}
+.calendar-calendar div.calendar {
+  font-size: 1em;
+}
+.calendar-calendar td .inner div.calendar div {
+  background: #eee;
+  border: 0;
+  padding: 0 5px;
+}
+.calendar-calendar td .inner div.calendar div a {
+  padding: 0;
+  background: #eee;
+  font-weight: 700;
+  text-decoration: underline;
+}
+.calendar-calendar td .inner div,
+.calendar-calendar td .inner div a {
+  border-bottom: 1px solid #fff;
+}
+.view-content .calendar-calendar ul.inline {
+  padding: 0 0 10px;
+  display: block;
+}
+.view-content .calendar-calendar ul.inline li {
+  margin-right: 2px;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  border-radius: 2px;
+}

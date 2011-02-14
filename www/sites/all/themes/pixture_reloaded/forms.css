@@ -1,0 +1,202 @@
+/** 
+ * $Id: forms.css,v 1.1.2.5 2011/01/13 03:27:17 jmburnz Exp $
+ */
+/* Forms */
+form {
+  margin:0 0 1.5em;
+  padding:0;
+}
+.form-item label {
+  font-weight: 400;
+}
+input {
+  margin: .5em 0;
+}
+input.title {
+  font-size: 1.5em;
+}
+input.text,
+input.title,
+textarea,
+select {
+  border: 1px solid #ccc;
+  margin: .5em 0;
+}
+.form-text:focus,
+.form-checkbox:focus,
+.form-radio:focus,
+.form-select:focus {
+  border: 1px solid #fco;
+  background: #ffffdf;
+}
+textarea:focus {
+  border:1px solid #FC0;
+  background:#FFF;
+}
+input.text,
+input.title {
+  padding: .5em;
+}
+input.form-text,
+textarea {
+  border: 1px solid #CCC;
+  height: auto;
+  padding: 2px;
+}
+textarea,
+input {
+  font: 1em normal Arial, Helvetica, sans-serif;
+}
+div.form-item {
+}
+.form-item textarea.error {
+  padding: 2px;
+}
+.form-item .description,
+fieldset .description,
+.fieldset-layout-settings dd {
+  font-size: .9em;
+}
+span.form-required,
+span.marker {}
+#article-admin-filter ul {
+  padding: .5em 0;
+}
+#edit-operation-wrapper select {
+  margin: .5em;
+}
+div.resizable-textarea textarea {
+  margin-top: 0;
+}
+
+/* Fieldsets */
+fieldset {
+  background: transparent;
+  border: 1px solid #dadada;
+  margin: 1.5em 0;
+  padding: .75em;
+}
+*:first-child+html fieldset {
+  background-color:transparent;
+  background-position: 0 .75em;
+  padding: 0 1em .75em;
+}
+*:first-child+html fieldset > .description,
+*:first-child+html fieldset .fieldset-wrapper .description {
+  padding-top: 1.5em;
+}
+fieldset legend {
+  display:block;
+  font-weight: 400;
+  padding: 0 1em 0 0;
+}
+*:first-child+html fieldset legend,
+*:first-child+html fieldset.collapsed legend {
+  display: inline;
+}
+html.js fieldset.collapsed {
+  background: transparent;
+  padding-top: .25em;
+}
+
+/* Search */
+#search-block-form {}
+#search-block-form > div {}
+#search-block-form .container-inline{}
+#edit-search-block-form-1-wrapper {}
+#search-block-form label {}
+#search-block-form input {}
+#search-block-form .form-submit {}
+#search-block-form .form-text {
+  width: 119px; /* Adjust this to suit */
+}
+
+/* Advanced search form */
+fieldset#edit-advanced fieldset {
+  float: left;
+  margin: 0 10px 10px 0;
+}
+fieldset#edit-advanced fieldset .fieldset-legend {
+  background: none;
+  padding-left: 1em;
+}
+.advanced-search-submit {
+  clear: both;
+}
+.search-advanced .criterion {
+  float: none;
+  margin: 0 5px;
+}
+#edit-keywords-fieldset .form-item:first-child {
+  margin-top: 0.4em;
+}
+#search-form {
+  margin: 1em 0;
+}
+#search-form > div {}
+#search-form .container-inline {}
+#search-form label {}
+#search-form input {}
+#search-form .form-item {}
+#search-form .form-submit {}
+
+/* User login */
+#user-login-form ul {
+  margin: 0;
+  padding: 0;
+}
+#user-login-form li.openid-link,
+#user-login-form li.user-link {
+  text-align: center;
+}
+#user-login ul {
+  margin: 0 0 5px;
+}
+#user-login ul li {
+  margin: 0;
+}
+#user-login-form .item-list li {
+  list-style: none;
+  margin: 0;
+}
+#user-login-form li.openid-link,
+#user-login li.openid-link {
+  background: none;
+}
+.hide-label label {
+  position: absolute !important;
+  clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+  clip: rect(1px, 1px, 1px, 1px);
+}
+#user-admin-filter ul li,
+#article-admin-filter ul li {
+  list-style: none;
+}
+.description {
+  color: #555;
+}
+/* Tips overrides */
+.field-type-text-with-summary fieldset {
+  padding: 1em 0;
+}
+.field-type-text-with-summary fieldset .form-item {
+  margin: 0;
+}
+.field-type-text-with-summary fieldset .filter-help {
+  padding: .5em 1.5em;
+}
+
+/* Fix autocomplete drop lists */
+#autocomplete {
+  background: #fff;
+  border: 1px solid #ccc;
+  line-height: 1.2;
+}
+#autocomplete li {
+  padding: 2px;
+}
+#autocomplete li,
+#autocomplete div {
+  float: none;
+  display: block;
+}

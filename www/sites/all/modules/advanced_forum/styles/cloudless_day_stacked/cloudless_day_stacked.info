@@ -1,0 +1,14 @@
+; $Id: cloudless_day_stacked.info,v 1.1.2.1 2009/07/20 20:52:58 michellec Exp $
+
+name = Cloudless Day Stacked
+description = A style with light blues reminiscent of the sky.
+version = 2.x
+base style = cloudless_day
+extra style = naked_stacked
+
+; Information added by drupal.org packaging script on January 1, 1970 - 00:00
+version = "7.x-2.x-dev"
+core = "7.x"
+project = "advanced_forum"
+datestamp = "1297469249"
+

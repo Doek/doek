@@ -1,0 +1,10 @@
+@charset "utf-8";
+/**
+ * $Id: gpanels-fluid-rtl.css,v 1.1.2.1 2010/07/24 02:27:35 jmburnz Exp $
+ * adaptivethemes.com
+ *
+ * @file gpanels-fluid-rtl.css
+ */
+.gpanel .region {
+  float: right;
+}

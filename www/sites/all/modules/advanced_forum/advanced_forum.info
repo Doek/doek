@@ -1,0 +1,22 @@
+; $Id: advanced_forum.info,v 1.12.2.4.2.2 2011/01/26 18:38:47 troky Exp $
+
+name = Advanced Forum
+description = Enables the look and feel of other popular forum software.
+version = 7.x-2.x-dev
+dependencies[] = forum
+dependencies[] = ctools
+dependencies[] = views
+
+; Views handlers
+files[] = includes/views/advanced_forum_handler_field_node_topic_icon.inc
+files[] = includes/views/advanced_forum_handler_field_node_topic_pager.inc
+files[] = includes/views/advanced_forum_plugin_style_forum_topic_list.inc
+
+core = 7.x
+
+; Information added by drupal.org packaging script on January 1, 1970 - 00:00
+version = "7.x-2.x-dev"
+core = "7.x"
+project = "advanced_forum"
+datestamp = "1297469249"
+

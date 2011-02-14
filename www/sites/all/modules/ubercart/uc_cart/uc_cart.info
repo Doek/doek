@@ -1,0 +1,24 @@
+; $Id: uc_cart.info,v 1.13 2010/11/24 15:18:30 islandusurper Exp $
+name = Cart
+description = REQUIRED. Controls the shopping cart for an Ubercart e-commerce site.
+dependencies[] = uc_order
+dependencies[] = uc_product
+package = Ubercart - core
+core = 7.x
+files[] = uc_cart.module
+files[] = uc_cart.install
+files[] = uc_cart.admin.inc
+files[] = uc_cart.pages.inc
+files[] = uc_cart.rules.inc
+files[] = uc_cart.rules_defaults.inc
+files[] = uc_cart.test
+files[] = uc_cart_checkout_pane.inc
+files[] = views/uc_cart.views.inc
+files[] = views/uc_cart_handler_view_cart_user.inc
+
+; Information added by drupal.org packaging script on 2010-12-09
+version = "7.x-3.0-beta1"
+core = "7.x"
+project = "ubercart"
+datestamp = "1291922443"
+

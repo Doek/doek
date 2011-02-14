@@ -1,0 +1,17 @@
+<?php
+// $Id: uc_reports.install,v 1.9 2010/03/03 19:34:12 islandusurper Exp $
+
+/**
+ * @file
+ * Install hooks for uc_reports.module.
+ */
+
+/**
+ * Implement hook_uninstall().
+ */
+function uc_reports_uninstall() {
+  db_delete('variable')
+    ->condition('name', 'uc_reports_%', 'LIKE')
+    ->execute();
+}
+

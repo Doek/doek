@@ -1,0 +1,17 @@
+;  $Id: domain_source.info,v 1.5 2010/03/29 20:29:53 agentken Exp $
+name = Domain Source
+description = Creates a canonical source domain for linking to content from other domains.
+package = Domain Access
+dependencies[] = domain
+core = 7.x
+files[] = domain_source.install
+files[] = domain_source.module
+files[] = domain_source.views.inc
+
+
+; Information added by drupal.org packaging script on January 1, 1970 - 00:00
+version = "7.x-2.9"
+core = "7.x"
+project = "domain"
+datestamp = "1296513739"
+

@@ -1,0 +1,3 @@
+/* $Id: ie.css,v 1.10.2.3 2010/06/14 03:19:40 jmburnz Exp $ */
+/* ie fixes */
+fieldset { background: none; }

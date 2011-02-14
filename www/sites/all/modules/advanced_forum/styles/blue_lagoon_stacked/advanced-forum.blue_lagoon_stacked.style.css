@@ -1,0 +1,23 @@
+/* $Id: advanced-forum.blue_lagoon_stacked.style.css,v 1.1.2.1 2011/01/05 16:02:32 michellec Exp $ */
+
+/* Since this style inherits from Blue Lagoon, only a few adjustments are
+   needed to account for having the Author Pane on top.
+*/
+
+/* Reset styles not needed with AP on top */
+.forum-post-wrapper {
+  background-color: transparent;
+}
+
+.forum-post-panel-main,
+.forum-post-links {
+  background-color: transparent;
+  border-left: none;
+}
+
+/* Add in our AP styling */
+.forum-post-panel-sub {
+  background-color: #EDF5FA;
+  border-bottom: 2px solid #91CDF5;
+}
+

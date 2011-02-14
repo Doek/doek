@@ -1,0 +1,365 @@
+<?php
+// $Id: color.inc,v 1.8.2.12 2011/01/13 09:03:00 jmburnz Exp $
+/*
+ * @file color.inc
+ * color.inc for Pixture Reloaded
+ */
+$info = array(
+  // Fields
+  'fields' => array(
+    'base' => t('Base'),
+    'page' => t('Page background'),
+    'link' => t('Links'),
+    'top' => t('Header top'),
+    'bottom' => t('Header bottom'),
+    'text' => t('Text'),
+    'blockh' => t('Block header'),
+    'blockbg' => t('Block body'),
+    'borders' => t('Borders'),
+    'sticky' => t('Sticky teaser'),
+  ),
+  // Pre-defined color schemes.
+  'schemes' => array(
+    'default' => array(
+      'title' => t('Girly Pink (default)'),
+      'colors' => array(
+        'base' => '#eb52c1',
+        'page' => '#feffff',
+        'link' => '#b21f88',
+        'top' => '#b800a6',
+        'bottom' => '#ff6bfe',
+        'text' => '#555555',
+        'blockh' => '#eb5ac3',
+        'blockbg' => '#f9cbec',
+        'borders' => '#f9cbec',
+        'sticky' => '#f9cbec',
+      ),
+    ),
+    'redcarpet' => array(
+      'title' => t('Red Carpet'),
+      'colors' => array(
+        'base' => '#de8291',
+        'page' => '#feffff',
+        'link' => '#c55964',
+        'top' => '#861509',
+        'bottom' => '#f8306a',
+        'text' => '#555555',
+        'blockh' => '#df8796',
+        'blockbg' => '#f5d9de',
+        'borders' => '#f5d9de',
+        'sticky' => '#f5d9de',
+      ),
+    ),
+    'orangesunset' => array(
+      'title' => t('Orange Sunset'),
+      'colors' => array(
+        'base' => '#f7b42b',
+        'page' => '#feffff',
+        'link' => '#8e6130',
+        'top' => '#ec8c04',
+        'bottom' => '#fade42',
+        'text' => '#555555',
+        'blockh' => '#f7b836',
+        'blockbg' => '#fdE9c0',
+        'borders' => '#fdE9c0',
+        'sticky' => '#fdE9c0',
+      ),
+    ),
+    'goldyellow' => array(
+      'title' => t('Gold Yellow'),
+      'colors' => array(
+        'base' => '#d1bc00',
+        'page' => '#feffff',
+        'link' => '#6c7019',
+        'top' => '#d5be01',
+        'bottom' => '#f0fd58',
+        'text' => '#555555',
+        'blockh' => '#d3bf0d',
+        'blockbg' => '#f1ebb3',
+        'borders' => '#f1ebb3',
+        'sticky' => '#f1ebb3',
+      ),
+    ),
+    'sandstone' => array(
+      'title' => t('Sandstone'),
+      'colors' => array(
+        'base' => '#d1681d',
+        'page' => '#feffff',
+        'link' => '#8b4513',
+        'top' => '#d37029',
+        'bottom' => '#d2691e',
+        'text' => '#000000',
+        'blockh' => '#d37029',
+        'blockbg' => '#f1d2bc',
+        'borders' => '#f1d2bc',
+        'sticky' => '#f1d2bc',
+      ),
+    ),
+    'caramelbrown' => array(
+      'title' => t('Caramel Brown'),
+      'colors' => array(
+        'base' => '#d59648',
+        'page' => '#feffff',
+        'link' => '#865518',
+        'top' => '#572e05',
+        'bottom' => '#eb8919',
+        'text' => '#555555',
+        'blockh' => '#d79b51',
+        'blockbg' => '#f2e0c8',
+        'borders' => '#f2e0c8',
+        'sticky' => '#f2e0c8',
+      ),
+    ),
+    'earthbrown' => array(
+      'title' => t('Earth Brown'),
+      'colors' => array(
+        'base' => '#cfb377',
+        'page' => '#feffff',
+        'link' => '#90712c',
+        'top' => '#463406',
+        'bottom' => '#e6bd5c',
+        'text' => '#555555',
+        'blockh' => '#d1b77e',
+        'blockbg' => '#f1e8d6',
+        'borders' => '#f1e8d6',
+        'sticky' => '#f1e8d6',
+      ),
+    ),
+    'olivegarden' => array(
+      'title' => t('Olive Garden'),
+      'colors' => array(
+        'base' => '#afc94a',
+        'page' => '#feffff',
+        'link' => '#61751f',
+        'top' => '#2d3701',
+        'bottom' => '#d2f943',
+        'text' => '#555555',
+        'blockh' => '#b3cc53',
+        'blockbg' => '#e7efc9',
+        'borders' => '#e7efc9',
+        'sticky' => '#e7efc9',
+      ),
+    ),
+    'forestgreen' => array(
+      'title' => t('Forest Green'),
+      'colors' => array(
+        'base' => '#9bc068',
+        'page' => '#feffff',
+        'link' => '#3c7c41',
+        'top' => '#0e3d0b',
+        'bottom' => '#6beb37',
+        'text' => '#555555',
+        'blockh' => '#a0c370',
+        'blockbg' => '#e1ecd2',
+        'borders' => '#e1ecd2',
+        'sticky' => '#e1ecd2',
+      ),
+    ),
+    'teal' => array(
+      'title' => t('Teal'),
+      'colors' => array(
+        'base' => '#83b49f',
+        'page' => '#feffff',
+        'link' => '#486156',
+        'top' => '#174431',
+        'bottom' => '#52bf90',
+        'text' => '#555555',
+        'blockh' => '#89b8a4',
+        'blockbg' => '#dae9e2',
+        'borders' => '#dae9e2',
+        'sticky' => '#dae9e2',
+      ),
+    ),
+    'aquamarine' => array(
+      'title' => t('Aquamarine'),
+      'colors' => array(
+        'base' => '#55c0e2',
+        'page' => '#feffff',
+        'link' => '#000000',
+        'top' => '#085360',
+        'bottom' => '#007e94',
+        'text' => '#555555',
+        'blockh' => '#5ec3e3',
+        'blockbg' => '#ccecf6',
+        'borders' => '#ccecf6',
+        'sticky' => '#ccecf6',
+      ),
+    ),
+    'oceanwater' => array(
+      'title' => t('Ocean Water'),
+      'colors' => array(
+        'base' => '#7bc0ea',
+        'page' => '#feffff',
+        'link' => '#3561b1',
+        'top' => '#025fb1',
+        'bottom' => '#62c8fd',
+        'text' => '#555555',
+        'blockh' => '#82c3eb',
+        'blockbg' => '#d8ecf9',
+        'borders' => '#d8ecf9',
+        'sticky' => '#d8ecf9',
+      ),
+    ),
+    'deepblue' => array(
+      'title' => t('Deep Blue'),
+      'colors' => array(
+        'base' => '#1c44a9',
+        'page' => '#feffff',
+        'link' => '#4b5cc3',
+        'top' => '#062984',
+        'bottom' => '#5283ff',
+        'text' => '#555555',
+        'blockh' => '#284ead',
+        'blockbg' => '#bbc7e5',
+        'borders' => '#bbc7e5',
+        'sticky' => '#bbc7e5',
+      ),
+    ),
+    'graphite' => array(
+      'title' => t('Graphite'),
+      'colors' => array(
+        'base' => '#9397d7',
+        'page' => '#feffff',
+        'link' => '#575dc1',
+        'top' => '#091c3e',
+        'bottom' => '#d0d6f6',
+        'text' => '#555555',
+        'blockh' => '#203254',
+        'blockbg' => '#dfe0f3',
+        'borders' => '#dfe0f3',
+        'sticky' => '#dfe0f3',
+      ),
+    ),
+    'violet' => array(
+      'title' => t('Violet'),
+      'colors' => array(
+        'base' => '#ba90c6',
+        'page' => '#feffff',
+        'link' => '#935b9f',
+        'top' => '#250c27',
+        'bottom' => '#c271d0',
+        'text' => '#555555',
+        'blockh' => '#be96c9',
+        'blockbg' => '#eadeee',
+        'borders' => '#eadeee',
+        'sticky' => '#eadeee',
+      ),
+    ),
+    'purplehaze' => array(
+      'title' => t('Purple Haze'),
+      'colors' => array(
+        'base' => '#b0a2f6',
+        'page' => '#feffff',
+        'link' => '#7958a7',
+        'top' => '#25008f',
+        'bottom' => '#c49eff',
+        'text' => '#555555',
+        'blockh' => '#b4a7f6',
+        'blockbg' => '#e7e3fC',
+        'borders' => '#e7e3fC',
+        'sticky' => '#e7e3fC',
+      ),
+    ),
+    'silver' => array(
+      'title' => t('Silver'),
+      'colors' => array(
+        'base' => '#aaaeb1',
+        'page' => '#feffff',
+        'link' => '#4d637a',
+        'top' => '#8c909b',
+        'bottom' => '#eeecec',
+        'text' => '#555555',
+        'blockh' => '#aeb2b5',
+        'blockbg' => '#e6e7e8',
+        'borders' => '#e6e7e8',
+        'sticky' => '#e6e7e8',
+      ),
+    ),
+    'ash' => array(
+      'title' => t('Ash'),
+      'colors' => array(
+        'base' => '#464849',
+        'page' => '#feffff',
+        'link' => '#2f416f',
+        'top' => '#2a2b2d',
+        'bottom' => '#5d6779',
+        'text' => '#555555',
+        'blockh' => '#4f5152',
+        'blockbg' => '#c8c8c9',
+        'borders' => '#c8c8c9',
+        'sticky' => '#c8c8c9',
+      ),
+    ),
+    'gothic' => array(
+      'title' => t('Gothic'),
+      'colors' => array(
+        'base' => '#202020',
+        'page' => '#feffff',
+        'link' => '#11275f',
+        'top' => '#000000',
+        'bottom' => '#808080',
+        'text' => '#000000',
+        'blockh' => '#2b2b2b',
+        'blockbg' => '#bdbdbd',
+        'borders' => '#bdbdbd',
+        'sticky' => '#bdbdbd',
+      ),
+    ),
+  ),
+
+  // CSS files (excluding @import) to rewrite with new color scheme.
+  'css' => array(
+    'colors.css',
+  ),
+
+  // Images to copy over
+  'copy' => array(
+    'images/bullet-round.png',
+    'images/bullet-sm-arrow-right.png',
+    'images/bullet-sm-arrow-down.png',
+    'images/button.gif',
+    'images/button-o.gif',
+  ),
+
+  // Coordinates of gradient (x, y, width, height)
+  'gradients' => array(
+    array(
+      'dimension' => array(0,0,800,94),
+      'direction' => 'vertical',
+      'colors' => array('top', 'bottom'),
+    ),
+  ),
+
+  // Color areas to fill (x, y, width, height)
+  'fill' => array(
+    'base' => array(0,0,800,570),
+    'link' => array(240,530,40,40),
+  ),
+
+  // Coordinates of all the theme slices (x, y, width, height).
+  'slices' => array(
+    'images/header.png' => array(2,0,512,88),
+    'images/header-tile.png' => array(792,0,8,88),
+    'images/menu-tile.png' => array(792,0,8,32),
+    'images/bg-footer.png' => array(792,0,8,88),
+    'images/bg-footer-tile.png' => array(792,87,1,1),
+    'images/bg-menu.png' => array(0,88,8,32),
+    'images/bg-title.png' => array(20,130,10,10),
+    'images/bg-wall.png' => array(792,120,8,408),
+    'images/bg-bar-lite.png' => array(0,530,8,40),
+    'images/bg-bar.png' => array(20,530,8,40),
+    'images/bg-lbar-lite.png' => array(270,530,8,40),
+    'images/bg-lbar.png' => array(250,530,8,40),
+    'images/sf-hover-tile.png' => array(0,30,250,1),
+  ),
+
+  // Reference color used for blending. Matches the base.png's colors.
+  'blend_target' => '#ffffff',
+
+  // Preview files.
+  'preview_image' => 'color/color-preview.png',
+  'preview_css' => 'color/preview.css',
+
+  // Base file for image generation
+  'base_image' => 'color/base.png',
+);

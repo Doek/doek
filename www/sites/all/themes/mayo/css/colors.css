@@ -1,0 +1,300 @@
+/* $Id: colors.css,v 1.3 2011/01/06 03:58:38 pixture Exp $ */
+
+/* ---------- Color Module Styles ----------- */
+
+body,
+#page-wrapper {
+  background-color: #808080;
+  color: #3b3b3b;
+}
+#main,
+body.overlay {
+  background-color: #ffffff;
+  color: #3b3b3b;
+}
+#page { /* bg */
+  background-color: #ffffff; 
+}
+#main-menu-links li a.active,
+#main-menu-links li.active-trail a {
+  background-color: #ffffff;
+}
+.tabs ul.secondary li a,
+.tabs ul.primary li a {
+  border-color: #b8b8b8;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  background-color: #ffffff;
+}
+.tabs ul.secondary li a.active:hover,
+.tabs ul.secondary li a:hover,
+.tabs ul.primary li a.active:hover,
+.tabs ul.primary li a:hover {
+  background-color: #d4d4d4;
+}
+.tabs ul.secondary li a.active,
+.tabs ul.primary li a.active {
+}
+.tabs ul.secondary li.active a,
+.tabs ul.primary li.active a {
+  background-color: #ffffff;
+  border-color: #b8b8b8;
+}
+.tabs ul.secondary li {
+  border-color: #b8b8b8;
+}
+#header {
+  background-color: #019bf9;
+  background-image: -webkit-gradient(linear, left top, right top, from(#019bf9), to(#a3dcff));
+  background-image: -moz-linear-gradient(0deg, #019bf9, #a3dcff);
+  border-color: #fbfbfb;
+  /* for IE 5.5-7 */
+  filter:progid:DXImageTransform.Microsoft.Gradient(StartColorStr=#019bf9, EndColorStr=#a3dcff, GradientType=1);
+  /* for IE 8 */
+  -ms-filter:"progid:DXImageTransform.Microsoft.gradient(startColorstr=#019bf9, endColorstr=#a3dcff, GradientType=1)";
+}
+a.visited,
+a {
+  color: #0961d7;
+}
+a:hover,
+a:focus {
+  color: #018fe2;
+}
+a:active {
+  color: #23aeff;
+}
+li a.active { 
+  /* important! */
+  color: #3b3b3b;
+}
+.column-block,
+.sidebar .block {
+  background-color: #ededed;
+  border-color: #eeeeee;
+  color: #5a5a5a;
+}
+.column-block h2,
+.sidebar h2 {
+  border-bottom-color: #bbbbbb;
+  color: #5a5a5a;
+}
+.column-block a,
+.sidebar a {
+  color: #9fb800;
+}
+.sidebar .block table tr td {
+  background-color: #ededed;
+}
+
+.node {
+  background-color: #fefefe;
+  border-color: #dedede;
+}
+.node h2 { /* nodedividers */
+  border-color: #dcdcdc;
+}
+.node-sticky {
+  background-color: #f2f2f2;
+}
+.node .submitted {
+  color: #777777;
+}
+
+#menubar,
+#submenubar,
+#navigation {
+  border-bottom-color: #b8b8b8;
+}
+#navigation ul li {
+  border-right-color: #b8b8b8;
+  color: #3b3b3b;
+}
+#navigation ul li.last {
+  border-right: none;
+}
+.highlight {
+  background-color: #d4d4d4;
+}
+div.item-list ul.pager li a:hover,
+#navigation ul li a:hover {
+  background-color: #d4d4d4;
+}
+#page-title {
+  background-color: #666666;
+  color: #f1f1f1;
+}
+#content .block h2 { /* main content: block title */
+  background-color: #666666;
+  color: #f1f1f1;
+}
+#content .node h2 { /* main content: block title */
+  background-color: transparent;
+  color: #3b3b3b;
+}
+#content .node-sticky h2 { /* main content: block title */
+  background-color: transparent;
+}
+
+#content td {
+  background-color: #fefefe;
+}
+
+#footer-wrapper {
+  background-color: #555555;
+  color: #cccccc;
+}
+#footer-wrapper a {
+  color: #84a202;
+}
+#footer-wrapper .column-block {
+  background-color: #555555;
+  color: #cccccc;
+}
+#footer-wrapper .column-block h2 {
+  border: none;
+  color: #cccccc;
+}
+#footer-wrapper .column-block a {
+  color: #84a202;
+}
+#footer {
+  background-color: #555555;
+  color: #cccccc;
+}
+#footer a {
+  color: #84a202;
+}
+.region-header,
+.region-header a,
+.region-header li a.active,
+#header #name-and-slogan,
+#header #name-and-slogan a {
+  color: #fcfcfc;
+}
+
+form fieldset {
+  border: solid 1px #b8b8b8;
+}
+
+blockquote {
+  border-color: #dcdcdc;
+}
+
+/*-------------- Additional for dark colors --------------*/
+.filter-wrapper {
+  background-color: #ffffff;
+}
+
+.comment {
+  background-color: #fefefe;
+  border-color: #dedede;
+}
+.comment h3 {
+  border-color: #dcdcdc;
+}
+.comment-unpublished {
+  background-color: #fefefe;
+}
+.comment .submitted {
+  color: #777777;
+}
+
+table.views-view-grid tr {
+  background-color: #ffffff;
+  border-color: #d2d2d2;
+}
+
+td.views-field {
+  background-color: #ffffff;
+  border-color: #d2d2d2;
+}
+
+table tr th {
+  background-color: #e7e7e7;
+  border-color: #d2d2d2;
+}
+table tr td,
+td {
+  background-color: #fefefe;
+  border-color: #d2d2d2;
+}
+td.active {
+  background-color: #ffffff;
+}
+table.Array tr {
+  border-bottom-color: #d2d2d2;
+}
+fieldset {
+  border-color: #d2d2d2;
+}
+tr.odd, tr.even {
+  border-color: #d2d2d2;
+}
+.profile .user-picture {
+  background-color: #ffffff;
+}
+
+/*-------------- superfish color ---------------*/
+.sf-menu li a {
+  background-color: #ffffff;
+  border-right-color: #b8b8b8;
+}
+.sf-menu li.last ul li a,
+.sf-menu li ul li a,
+.sf-menu li ul li.last a {
+  /* all other child menu items */
+  border-width: 0px;
+}
+.sf-menu li a.sfHover,
+.sf-menu li a:hover {
+  background-color: #d4d4d4;
+}
+.sf-menu a, .sf-menu a:active, .sf-menu a:visited, .sf-menu a:focus {
+  color: #0961d7;
+}
+.sf-menu ul {
+  /* add border around the child menu block */
+  border-color: #b8b8b8;
+}
+
+/*-------------- nice_menus color ---------------*/
+.nice-menu a, .nice-menu a:active, .nice-menu a:visited, .nice-menu a:focus {
+  color: #0961d7;
+}
+ul.nice-menu li.menuparent a {
+  /* root menu item that has drop down menu */
+  background-color: #ffffff;
+}
+ul.nice-menu li a {
+  /* root menu item that has no drop down menu */
+  background-color: #ffffff;
+  border-right-color: #b8b8b8;
+}
+ul.nice-menu li.menuparent a:hover,
+ul.nice-menu li a:hover {
+  /* root menu item hover color */
+  background-color: #d4d4d4;
+}
+ul.nice-menu li.last ul li a,
+ul.nice-menu li ul li a,
+ul.nice-menu li ul li.last a {
+  /* drop down menu items */
+  border-color: #b8b8b8;
+}
+ul.nice-menu li ul li.menuparent {
+  /* drop down menu items that has child menu */
+  background-color: #ffffff;
+}
+ul.nice-menu li.menuparent li {
+  /* drop down menu items that has no child menu */
+  background: none;
+  background-color: #ffffff;
+}
+ul.nice-menu li.menuparent li:hover {
+  background: none;
+  background-color: #d4d4d4;
+}
+ul.nice-menu li ul {
+  border: solid 1px #b8b8b8;
+}

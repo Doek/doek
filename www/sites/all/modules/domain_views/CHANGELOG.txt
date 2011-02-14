@@ -1,0 +1,34 @@
+// $Id: CHANGELOG.txt,v 1.8 2011/01/16 16:02:08 agentken Exp $
+
+16-JAN-2010
+-- Patch #944698 by sdelbosc and bpresles. Add node revision support to Domain Views.
+-- Fixes node joins.
+-- Creates the 7.x.1.3 release.
+
+30-SEP-2010
+-- Adds missing domain_views_plugin_cache_time.inc to info file.
+-- Code style cleanup.
+-- Patch #926906 by dereine. Fixes hook_theme.
+-- Patch #926908 by dereine. Removes deprecated hook_views_handlers().
+-- Removed JOIN from {node} to {domain}. Use {domain_access} instead.
+-- Adds/fixes domain sitename node field.
+-- Adds domain_sitename field handler.
+-- Adds domain_subdomain field handler.
+-- Fixes domain id filter for nodes.
+-- Fixes argument handler.
+-- Patch #926922 by dereine. Fixes handlers for new API changes.
+-- Creates the 7.x.1.1 release.
+-- Cleans up some stray typos.
+-- Adds handler for domain realm filter.
+-- Creates the 7.x.1.2 release.
+
+24-SEP-2010
+-- Fixed files[] declarations.
+-- Fixes handler domain_views_handler_field_domain_sitename.
+-- Creates the 7.x.1.0 release.
+
+04-MAY-2010
+-- patch #782208 by bleen18. Excellent Views caching patch.
+
+01-NOV-2009
+-- Initial commit of Domain Views.
