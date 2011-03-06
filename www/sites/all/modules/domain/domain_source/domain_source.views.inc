@@ -58,6 +58,22 @@ function domain_source_views_data() {
       'handler' => 'views_handler_sort',
     ),
   );
+  $data['domain_source']['domain_path'] = array(
+    'title' => t('Domain Source Path'),
+    'help' => t('The path to the source domain.'),
+    'field' => array(
+      'handler' => 'domain_views_handler_field_domain_path',
+      'click sortable' => FALSE,
+    ),
+  );
+  $data['domain_source']['domain_name'] = array(
+    'title' => t('Domain Source Name'),
+    'help' => t('The name of the source domain.'),
+    'field' => array(
+      'handler' => 'domain_views_handler_field_domain_name',
+      'click sortable' => FALSE,
+    ),
+  );
 
   return $data;
 }

@@ -85,15 +85,36 @@
     <?php endif; ?>
     <?php print render($title_suffix); ?>
   </div> <!-- /.node-header -->
+  
+  <?php if ($content['field_image']) { ?>
+  <div class="bogopslag-image" style="float: left;">
+    <?php
+      print render($content['field_image']);
+    ?>
+  </div>
+  <?php } ?>
+  
+  <div class="bogopslag-metadata" style="float: right;">
+    <?php
+      print render($content['field_forfatter'])."<br />";
+      print render($content['field_udgave'])."<br />";
+      print render($content['field_forlag'])."<br />";
+      print render($content['field_isbn'])."<br />";
+      print render($content['field_fag'])."<br />";
+      print render($content['field_semester'])."<br />";
+      print render($content['field_stand'])."<br />";
+      print render($content['field_pris'])."<br />";
+      print render($content['field_kontakt'])."<br />";
+    ?>
+  </div>
 
-  <div class="content clearfix"<?php print $content_attributes; ?>>
+  <div class="content"<?php print $content_attributes; ?>>
     <?php print $user_picture; ?>
     <?php
       // We hide the comments and links now so that we can render them later.
       hide($content['comments']);
-      print render($content['field_forfatter']);
-      print render($content['field_udgave'])."<br />";
-      print render($content['field_isbn']);
+      print render($content['field_image'])."<br />";
+      print render($content['body']);
     ?>
   </div>
 
