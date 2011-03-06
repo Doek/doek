@@ -57,8 +57,8 @@
  * array(
  *   'driver' => 'mysql',
  *   'database' => 'databasename',
- *   'username' => 'username',
- *   'password' => 'password',
+ *   'username' => 'doek2011',
+ *   'password' => 'waxCotapME1',
  *   'host' => 'localhost',
  *   'port' => 3306,
  *   'prefix' => 'myprefix_',
@@ -107,8 +107,8 @@
  * $databases['default']['default'] = array(
  *   'driver' => 'mysql',
  *   'database' => 'databasename',
- *   'username' => 'username',
- *   'password' => 'password',
+ *   'username' => 'doek2011',
+ *   'password' => 'waxCotapME1',
  *   'host' => 'localhost',
  *   'prefix' => 'main_',
  *   'collation' => 'utf8_general_ci',
@@ -159,16 +159,16 @@
  *   $databases['default']['default'] = array(
  *     'driver' => 'mysql',
  *     'database' => 'databasename',
- *     'username' => 'username',
- *     'password' => 'password',
+ *     'username' => 'doek2011',
+ *     'password' => 'waxCotapME1',
  *     'host' => 'localhost',
  *     'prefix' => '',
  *   );
  *   $databases['default']['default'] = array(
  *     'driver' => 'pgsql',
  *     'database' => 'databasename',
- *     'username' => 'username',
- *     'password' => 'password',
+ *     'username' => 'doek2011',
+ *     'password' => 'waxCotapME1',
  *     'host' => 'localhost',
  *     'prefix' => '',
  *   );
@@ -183,9 +183,9 @@ $databases = array (
   array (
     'default' => 
     array (
-      'database' => 'doek_drupal_7',
-      'username' => 'root',
-      'password' => 'rootisbad',
+      'database' => 'doek2011',
+      'username' => 'doek2011',
+      'password' => 'waxCotapME1',
       'host' => 'localhost',
       'port' => '',
       'driver' => 'mysql',
