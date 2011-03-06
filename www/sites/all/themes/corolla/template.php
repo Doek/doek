@@ -39,7 +39,6 @@ function corolla_process_html(&$variables) {
  * Override or insert variables into the page template.
  */
 function corolla_process_page(&$variables) {
-  die("Google");
 
   // Since the title and the shortcut link are both block level elements,
   // positioning them next to each other is much simpler with a wrapper div.
