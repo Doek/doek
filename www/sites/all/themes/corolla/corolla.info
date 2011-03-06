@@ -18,6 +18,8 @@ stylesheets[all][]   = style.css
 stylesheets[all][]   = colors.css
 stylesheets[print][] = print.css
 
+scripts[] = clicky.js
+
 regions[header_menu]    = Header menu
 regions[footer_menu]    = Footer menu
 regions[sidebar_first]  = First sidebar
