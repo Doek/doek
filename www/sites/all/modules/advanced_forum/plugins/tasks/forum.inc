@@ -1,5 +1,4 @@
 <?php
-// $Id: forum.inc,v 1.1.2.2 2010/07/06 04:31:18 michellec Exp $
 
 /**
  * Specialized implementation of hook_page_manager_task_tasks(). See api-task.html for

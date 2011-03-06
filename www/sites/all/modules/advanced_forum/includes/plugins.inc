@@ -1,6 +1,5 @@
 <?php
 
-// $Id: plugins.inc,v 1.1.2.1 2009/06/15 17:51:23 michellec Exp $
 
 /**
  * @file

@@ -1,13 +1,12 @@
-; $Id: cloudless_day.info,v 1.1.2.2.2.1 2011/01/05 16:02:32 michellec Exp $
 
 name = Cloudless Day
 description = A style with light blues reminiscent of the sky.
 version = 2.x
 base style = boxy
 
-; Information added by drupal.org packaging script on January 1, 1970 - 00:00
+; Information added by drupal.org packaging script on 2011-03-06
 version = "7.x-2.x-dev"
 core = "7.x"
 project = "advanced_forum"
-datestamp = "1297469249"
+datestamp = "1299369689"
 

@@ -1,5 +1,4 @@
 <?php
-// $Id: advanced-forum.naked.search-result.tpl.php,v 1.1.2.1 2011/01/05 16:02:32 michellec Exp $
 /**
  * @file
  * Style a single search result in the forum and topic search views.

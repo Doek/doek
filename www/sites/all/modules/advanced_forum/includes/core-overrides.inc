@@ -1,5 +1,4 @@
 <?php
-// $Id: core-overrides.inc,v 1.1.2.13.2.4 2011/02/03 11:24:58 troky Exp $
 
 /**
  * @file

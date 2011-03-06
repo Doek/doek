@@ -1,6 +1,5 @@
 <?php
 
-// $Id: mark-read.inc,v 1.1.2.1.2.2 2011/01/27 17:41:20 troky Exp $
 
 /**
  * @file

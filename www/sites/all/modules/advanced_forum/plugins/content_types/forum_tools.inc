@@ -1,6 +1,5 @@
 <?php
 
-// $Id: forum_tools.inc,v 1.1.4.2 2011/01/26 10:10:51 troky Exp $
 
 /**
  * Callback function to supply a list of content types.

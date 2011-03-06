@@ -1,5 +1,4 @@
 <?php
-// $Id: forum_topic_list.inc,v 1.1.2.2 2009/08/10 22:00:15 merlinofchaos Exp $
 
 /**
  * Callback function to supply a list of content types.

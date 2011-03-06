@@ -1,5 +1,4 @@
 <?php
-// $Id: advanced-forum.naked.active-poster.tpl.php,v 1.1.2.1 2011/01/05 16:06:00 michellec Exp $
 
 /**
  * @file

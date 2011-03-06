@@ -1,5 +1,4 @@
 <?php
-// $Id: advanced_forum_preprocess_comment.inc,v 1.1.2.19.2.1 2011/01/05 16:02:31 michellec Exp $
 
 /**
  * @file

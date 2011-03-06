@@ -1,5 +1,4 @@
 <?php
-// $Id: settings.inc,v 1.1.2.15.2.5 2011/02/10 12:19:52 troky Exp $
 
 /**
  * @file

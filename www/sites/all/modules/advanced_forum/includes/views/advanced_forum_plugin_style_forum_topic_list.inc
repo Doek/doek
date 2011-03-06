@@ -1,5 +1,4 @@
 <?php
-// $Id: advanced_forum_plugin_style_forum_topic_list.inc,v 1.1.2.2.2.1 2011/01/05 16:02:31 michellec Exp $
 /**
  * @file
  * Contains the topic list style plugin.

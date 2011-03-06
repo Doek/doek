@@ -1,5 +1,4 @@
 <?php
-// $Id: advanced-forum.naked.topic-list-outer-view.tpl.php,v 1.1.2.2 2011/01/26 19:25:03 troky Exp $
 
 /**
  * @file views-view.tpl.php

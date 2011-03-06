@@ -1,5 +1,4 @@
 <?php
-// $Id: advanced_forum_preprocess_node.inc,v 1.1.2.31.2.4 2011/01/24 14:41:09 troky Exp $
 
 /**
  * @file

@@ -1,5 +1,4 @@
 <?php
-// $Id: advanced_forum_handler_field_node_topic_pager.inc,v 1.1.2.2.2.1 2011/01/05 16:02:31 michellec Exp $
 
 /**
  * @file

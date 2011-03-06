@@ -1,5 +1,4 @@
 <?php
-// $Id: advanced-forum.naked.search-forum.tpl.php,v 1.1.2.1 2011/01/05 16:02:32 michellec Exp $
 /**
  * @file
  * Display the search forum widget.

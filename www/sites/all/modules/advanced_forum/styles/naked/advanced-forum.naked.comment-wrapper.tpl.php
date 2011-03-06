@@ -1,5 +1,4 @@
 <?php
-// $Id: advanced-forum.naked.comment-wrapper.tpl.php,v 1.1.2.2 2011/01/23 10:37:40 troky Exp $
 
 /**
  * @file
