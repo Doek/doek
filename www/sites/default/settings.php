@@ -183,9 +183,9 @@ $databases = array (
   array (
     'default' => 
     array (
-      'database' => 'doek_drupal_7',
-      'username' => 'root',
-      'password' => 'rootisbad',
+      'database' => 'doek_doek2011',
+      'username' => 'doek',
+      'password' => 'yixWccPY',
       'host' => 'localhost',
       'port' => '',
       'driver' => 'mysql',
