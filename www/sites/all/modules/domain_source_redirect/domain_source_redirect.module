@@ -1,0 +1,11 @@
+<?php
+function domain_source_redirect_init() {
+  global $_domain;
+  if ($node = menu_get_object()) {
+    $domain = domain_get_node_match($node->nid);
+    if ($domain['domain_id'] != $_domain['domain_id']) {
+     domain_goto($domain);
+    }
+  }
+}
+?>
