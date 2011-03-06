@@ -1,0 +1,20 @@
+; $Id: rpx_ui.info,v 1.3 2010/12/20 23:37:27 geokat Exp $
+name = Janrain Engage UI
+description = User interface for Janrain Engage.
+dependencies[] = rpx_core
+dependencies[] = rpx_widgets
+package = Janrain Engage
+core = 7.x
+files[] = rpx_ui.module
+files[] = rpx_ui.admin.inc
+files[] = rpx_ui.pages.inc
+files[] = rpx_ui.paths.inc
+configure = admin/config/people/rpx
+
+
+; Information added by drupal.org packaging script on January 1, 1970 - 00:00
+version = "7.x-1.0-beta1"
+core = "7.x"
+project = "rpx"
+datestamp = "1297083159"
+
