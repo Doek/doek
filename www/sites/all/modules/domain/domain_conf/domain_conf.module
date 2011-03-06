@@ -1,5 +1,4 @@
 <?php
-// $Id: domain_conf.module,v 1.65.2.10 2010/12/10 18:35:26 agentken Exp $
 
 /**
  * @defgroup domain_conf Domain Conf: configuration extension
@@ -578,6 +577,9 @@ function domain_conf_block_view($delta = '') {
   // In D7, secondary links may be children of main links.
   if ($delta == 'domain-secondary-links' && variable_get('menu_secondary_links_source', 'user-menu') == variable_get('menu_main_links_source', 'main-menu')) {
     // This does not work right now.
+  }
+  if (!isset($menus[$name])) {
+    return;
   }
   // Output the block.
   $output = menu_tree($data);

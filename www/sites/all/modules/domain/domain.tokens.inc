@@ -1,5 +1,4 @@
 <?php
-// $Id: domain.tokens.inc,v 1.1.2.2 2010/12/10 18:28:01 agentken Exp $
 
 /**
  * @file

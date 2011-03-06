@@ -1,5 +1,4 @@
 <?php
-// $Id: domain_content.admin.inc,v 1.27.2.4 2011/01/16 18:13:36 agentken Exp $
 
 /**
  * @file
@@ -413,7 +412,7 @@ function domain_content_filter_operations(&$operations) {
     return;
   }
   // You must be able to edit to view this page, so check for the new delete perm.
-  if (!user_access('delete domain nodes')) {
+  if (!user_access('delete domain content')) {
     unset($operations['delete']);
   }
   // The publish, promote and sticky operations all depend on having $settings['options'].

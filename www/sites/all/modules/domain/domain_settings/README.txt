@@ -1,5 +1,3 @@
-// $Id: README.txt,v 1.5.2.2 2011/01/16 17:10:34 agentken Exp $
-
 /**
  * @file
  * README file for Domain Settings

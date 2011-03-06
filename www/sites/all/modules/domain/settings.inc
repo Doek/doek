@@ -1,5 +1,4 @@
 <?php
-// $Id: settings.inc,v 1.3 2008/10/06 15:24:46 agentken Exp $
 /**
  *
  * @file

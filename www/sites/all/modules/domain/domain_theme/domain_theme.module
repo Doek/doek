@@ -1,5 +1,4 @@
 <?php
-// $Id: domain_theme.module,v 1.27.2.4 2011/01/23 18:24:22 agentken Exp $
 
 /**
  * @defgroup domain_theme Domain Theme: manage themes

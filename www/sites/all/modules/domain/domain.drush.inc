@@ -1,6 +1,5 @@
 <?php
 
-// $Id: domain.drush.inc,v 1.2.2.1 2010/09/22 20:59:54 agentken Exp $
 
 /**
  * @file
