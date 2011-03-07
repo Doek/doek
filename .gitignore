@@ -1,3 +1,10 @@
+<<<<<<< HEAD
 www/sites/default/**/*
 www/sites/default/settings.php
 shop/
+=======
+www/sites/default/*
+www/sites/default/settings.php
+shop/
+www/sites/default/files/
+>>>>>>> origin/master
