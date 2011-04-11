@@ -1,5 +1,4 @@
 <?php
-// $Id: domain_source.module,v 1.23.2.14 2011/01/04 15:07:33 agentken Exp $
 
 /**
  * @defgroup domain_source Domain Source: editor-defined links.

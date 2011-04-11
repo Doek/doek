@@ -1,6 +1,5 @@
 <?php
 
-// $Id: advanced_forum.install,v 1.16.2.2.2.3 2011/01/28 09:11:00 troky Exp $
 
 /**
  * @file
@@ -8,7 +7,10 @@
  */
 
 function advanced_forum_install() {
-  db_query("UPDATE {system} SET weight = 15 WHERE name = 'advanced_forum'");
+  db_update('system')
+    ->fields(array('weight' => 15))
+    ->condition('name', 'advanced_forum')
+    ->execute();
 }
 
 function advanced_forum_uninstall() {
@@ -37,9 +39,10 @@ function advanced_forum_uninstall() {
 }
 
 function advanced_forum_update_5000() {
-  $ret = array();
-  $ret[] = update_sql("UPDATE {system} SET weight = 10 WHERE name = 'advanced_forum'");
-  return $ret;
+  db_update('system')
+    ->fields(array('weight' => 10))
+    ->condition('name', 'advanced_forum')
+    ->execute();
 }
 
 /* Removed these as they were a bad idea
@@ -51,9 +54,7 @@ function advanced_forum_update_5002() {
 */
 
 function advanced_forum_update_5003() {
-  $ret = array();
-  $ret[] = update_sql('DROP TABLE IF EXISTS  {advforum_last_post}');
-  return $ret;
+  db_drop_table('advforum_last_post');
 }
 
 function advanced_forum_update_5004() {
@@ -61,9 +62,8 @@ function advanced_forum_update_5004() {
 }
 
 function advanced_forum_update_5005() {
-  $ret = array();
-  $ret[] = update_sql("UPDATE {system} SET weight = 15 WHERE name = 'advanced_forum'");
-  return $ret;
+  db_update('system')
+    ->fields(array('weight' => 15))
+    ->condition('name', 'advanced_forum')
+    ->execute();
 }
-
-

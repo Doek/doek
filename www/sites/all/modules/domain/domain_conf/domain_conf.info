@@ -1,4 +1,3 @@
-;  $Id: domain_conf.info,v 1.7 2010/03/30 21:39:23 agentken Exp $
 name = Domain Configuration
 description = Advanced site configuration options for Domain Access.
 package = Domain Access
@@ -8,9 +7,9 @@ files[] = domain_conf.admin.inc
 files[] = domain_conf.install
 files[] = domain_conf.module
 
-; Information added by drupal.org packaging script on January 1, 1970 - 00:00
-version = "7.x-2.9"
+; Information added by drupal.org packaging script on 2011-02-27
+version = "7.x-2.11"
 core = "7.x"
 project = "domain"
-datestamp = "1296513739"
+datestamp = "1298829067"
 

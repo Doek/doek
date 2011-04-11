@@ -1,5 +1,4 @@
 <?php
-// $Id: advanced_forum_preprocess_forums.inc,v 1.1.2.17.2.1 2011/01/05 16:02:31 michellec Exp $
 
 /**
  * @file

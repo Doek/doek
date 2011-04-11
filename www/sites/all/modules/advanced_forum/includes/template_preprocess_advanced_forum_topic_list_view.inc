@@ -1,6 +1,5 @@
 <?php
 
-// $Id: template_preprocess_advanced_forum_topic_list_view.inc,v 1.1.2.14.2.4 2011/01/30 11:00:19 troky Exp $
 
 /**
  * @file

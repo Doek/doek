@@ -1,5 +1,4 @@
 <?php
-// $Id: forum_most_active_poster.inc,v 1.1.2.2.2.1 2011/01/05 16:02:31 michellec Exp $
 
 /**
  * Callback function to supply a list of content types.

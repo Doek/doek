@@ -1,6 +1,5 @@
 <?php
 
-// $Id: settings_custom_url.inc,v 1.30.2.1 2011/01/14 22:04:28 agentken Exp $
 
 /**
  * @file

@@ -1,5 +1,4 @@
 <?php
-// $Id: forum_container.inc,v 1.1.2.1 2009/07/29 23:06:40 merlinofchaos Exp $
 
 /**
  * @file

@@ -1,5 +1,4 @@
 <?php
-// $Id: domain_alias.admin.inc,v 1.10 2010/04/01 21:08:36 agentken Exp $
 
 /**
  * @file

@@ -81,7 +81,6 @@
       <?php if ($logo || $site_name || $site_slogan): ?>
         <div id="branding-wrapper" class="clearfix">
           <div id="branding">
-
             <?php if ($logo): ?>
               <div id="logo"><a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>" rel="home">
                 <img src="<?php print $logo; ?>" alt="<?php print t('Home'); ?>" />
@@ -101,7 +100,6 @@
                     </h1>
                   <?php endif; ?>
                 <?php endif; ?>
-
                 <?php if ($site_slogan): ?>
                   <div id="site-slogan"><?php print $site_slogan; ?></div>
                 <?php endif; ?>

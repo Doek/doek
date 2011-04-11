@@ -1,6 +1,5 @@
 <?php
 
-// $Id: domain_settings.module,v 1.13.2.7 2011/01/16 17:10:34 agentken Exp $
 
 /**
  * @defgroup domain_settings Domain Settings : expanded site configuration options for Domain Access

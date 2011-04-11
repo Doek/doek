@@ -1,5 +1,4 @@
 <?php
-// $Id: domain.module,v 1.190.2.37 2011/01/27 23:23:19 agentken Exp $
 
 /**
  * @defgroup domain Domain Access: A domain-based access control system
@@ -358,7 +357,9 @@ function domain_block_view($delta = '') {
     return;
   }
   $function = 'domain_block_view_' . $delta;
-  return $function();
+  if (function_exists($function)) {
+    return $function();
+  }
 }
 
 /**
@@ -432,7 +433,7 @@ function domain_block_view_information() {
  *
  * Attached domain_id records to all registering users.  These
  * are used to determine which 'domain_editor' group that users
- * with the 'edit domain nodes' and 'delete domain nodes' permissions are in.
+ * with the 'edit domain content' and 'delete domain content' permissions are in.
  */
 function domain_user_load($users) {
   foreach ($users as $uid => $account) {
@@ -599,7 +600,7 @@ function domain_form_user_form_alter(&$form, &$form_state) {
       '#type' => empty($format) ? 'checkboxes' : 'select',
       '#options' => $options,
       '#title' => t('Domain access settings'),
-      '#description' => t('Select the affiliates that this user belongs to.  Used to grant editing permissions for users with the "edit domain nodes" permission.'),
+      '#description' => t('Select the affiliates that this user belongs to.  Used to grant editing permissions for users with the "edit domain content" permission.'),
       '#default_value' => $default
     );
     if ($format) {
@@ -1460,13 +1461,18 @@ function domain_node_load($nodes, $types) {
     $nodes[$node->nid]->domains = $domains[$node->nid]['domain_id'];
     $nodes[$node->nid]->domain_site = $domains[$node->nid]['domain_site'];
     $nodes[$node->nid]->subdomains = array();
-    if ($nodes[$node->nid]->domain_site) {
+    if (!empty($nodes[$node->nid]->domain_site)) {
       $nodes[$node->nid]->subdomains[] = t('All affiliates');
     }
-    foreach ($nodes[$node->nid]->domains as $gid) {
-      ($gid == -1) ? $key = 0 : $key = $gid;
-      $domain = domain_lookup($key);
-      $nodes[$node->nid]->subdomains[] = $domain['sitename'];
+    if (!empty($nodes[$node->nid]->domains)) {
+      foreach ($nodes[$node->nid]->domains as $gid) {
+        ($gid == -1) ? $key = 0 : $key = $gid;
+        $domain = domain_lookup($key);
+        $nodes[$node->nid]->subdomains[] = $domain['sitename'];
+      }
+    }
+    else {
+      $nodes[$node->nid]->subdomains[] = t('This node is not assigned to a domain.');
     }
   }
 }
@@ -1612,8 +1618,8 @@ function domain_get_path_match($path) {
  */
 function domain_get_node_domains($nodes, $reset = FALSE) {
   static $lookup;
-  if (isset($lookup) && $reset) {
-    unset($lookup);
+  if (!isset($lookup) || $reset) {
+    $lookup = array();
   }
   // Ensure we form our data properly.
   if (!is_array($nodes)) {
@@ -1684,9 +1690,9 @@ function domain_node_grants($account, $op) {
   else {
     // The $account may not have domain information loaded, so get it.
     $domains = domain_get_user_domains($account);
-    $perm = 'delete domain nodes';
+    $perm = 'delete domain content';
     if ($op == 'update') {
-      $perm = 'edit domain nodes';
+      $perm = 'edit domain content';
     }
     if (user_access($perm, $account)) {
       if (!empty($domains)) {
@@ -2163,7 +2169,7 @@ function domain_form_alter(&$form, &$form_state, $form_id) {
   // THIS SECTION BREAKS CCK if we don't check for cck_dummy_node_form!  See http://drupal.org/node/186624
   // and note the !$form['#node']->cck_dummy_node_form in the IF check at the top of the function.
   // Some editors cannot administer nodes, so we have to add these form elements.
-  if (user_access('edit domain nodes')) {
+  if (user_access('edit domain content')) {
     $access = variable_get('domain_form_elements', array('options', 'delete', 'comment_settings', 'path'));
     foreach ($access as $item) {
       $form[$item]['#access'] = TRUE;

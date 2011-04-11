@@ -1,5 +1,5 @@
 <?php
-// $Id: advanced_forum_search_topic.view,v 1.1.2.4.2.1 2011/01/05 16:02:31 michellec Exp $
+// $Id$
  
 if (module_exists('nodecomment')) {
 

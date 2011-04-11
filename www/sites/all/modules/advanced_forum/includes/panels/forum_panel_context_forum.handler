@@ -1,6 +1,6 @@
 <?php
 
-// $Id: forum_panel_context_forum.handler,v 1.1.2.1.2.3 2011/02/11 17:22:37 troky Exp $
+// $Id$
 
 $handler = new stdClass;
 $handler->disabled = FALSE; /* Edit this to true to make a default handler disabled initially */

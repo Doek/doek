@@ -1,5 +1,4 @@
 <?php
-// $Id: advanced_forum.views.inc,v 1.1.2.6.2.1 2011/01/05 16:02:31 michellec Exp $
 
 /**
  * @file

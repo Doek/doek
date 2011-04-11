@@ -1,5 +1,4 @@
 <?php
-// $Id: advanced-forum.naked.topic-list-view.tpl.php,v 1.1.2.1 2011/01/05 16:02:32 michellec Exp $
 /**
  * @file views-view-table.tpl.php
  * Template to display a view as a table.

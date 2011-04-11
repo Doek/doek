@@ -1,5 +1,4 @@
 <?php
-// $Id: domain.admin.inc,v 1.66.2.5 2011/01/16 18:13:35 agentken Exp $
 
 /**
  * @file
@@ -247,15 +246,6 @@ function domain_configure_form($form, $form_state, $user_submitted = FALSE) {
     '#description' => t('If set, calls to www.* will be treated as if the www. did not exist.
     <em>Users will be taken from www.example.com to example.com, so your domains must be registered without the www. prefix.</em>')
   );
-
-  /* TODO: enable this?
-  $form['domain_advanced']['domain_access_rules'] = array(
-    '#type' => 'radios',
-    '#title' => t('Node access settings'),
-    '#default_value' => variable_get('domain_access_rules', 0),
-    '#options' => array(0 => t('Use the default Drupal behavior (OR)'), 1 => t('Check Domain Access in addition to other modules (AND)')),
-    '#description' => t('Controls how Domain Access interacts with access control modules such as Organic Groups. Requires the multiple_node_access patch.')
-  );*/
 
   $form['domain_advanced']['domain_search'] = array(
     '#type' => 'radios',
@@ -865,6 +855,7 @@ function domain_batch_form($form, &$form_state, $action, $batch, $domains) {
     $form['domain_batch'][$domain['domain_id']] = $batch['#form'];
     // Add the domain-specific elements.
     $form['domain_batch'][$domain['domain_id']]['#sitename'] = check_plain($domain['sitename']);
+    $form['domain_batch'][$domain['domain_id']]['#subdomain'] = check_plain($domain['subdomain']);
     if (isset($default[$domain['domain_id']])) {
       $form['domain_batch'][$domain['domain_id']]['#default_value'] = $default[$domain['domain_id']];
     }
@@ -899,12 +890,12 @@ function theme_domain_batch_form($variables) {
   if (isset($form['domain_batch_all'])) {
     $output .= drupal_render($form['domain_batch_all']);
   }
-  $header = array(t('Id'), t('Domain'), t('Setting'));
+  $header = array(t('Id'), t('Site name'), t('Setting'));
   $rows = array();
   foreach (element_children($form['domain_batch']) as $key) {
     $temp = $form['domain_batch'][$key]['#title'];
     unset($form['domain_batch'][$key]['#title']);
-    $row = array($key, $form['domain_batch'][$key]['#sitename'], drupal_render($form['domain_batch'][$key]));
+    $row = array($key, $form['domain_batch'][$key]['#sitename'] .'<div class="description">'. $form['domain_batch'][$key]['#subdomain'] .'</div>', drupal_render($form['domain_batch'][$key]));
     $rows[] = $row;
     $form['domain_batch'][$key]['#title'] = $temp;
   }

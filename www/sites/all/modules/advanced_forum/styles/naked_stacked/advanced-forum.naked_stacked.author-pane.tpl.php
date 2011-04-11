@@ -1,5 +1,4 @@
 <?php
-// $Id: advanced-forum.naked_stacked.author-pane.tpl.php,v 1.1.2.2 2011/01/21 11:05:35 troky Exp $
 
 /**
  * @file

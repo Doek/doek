@@ -1,5 +1,3 @@
-// $Id: README.txt,v 1.12 2010/04/03 13:36:28 agentken Exp $
-
 /**
  * @file
  * README file for Domain Theme

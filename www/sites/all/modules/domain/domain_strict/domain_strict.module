@@ -1,5 +1,4 @@
 <?php
-// $Id: domain_strict.module,v 1.9 2010/04/01 21:08:36 agentken Exp $
 
 /**
  * @defgroup domain_strict Domain Strict: strict access control

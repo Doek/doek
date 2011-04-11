@@ -1,5 +1,4 @@
 <?php
-// $Id: domain_settings.install,v 1.2.2.2 2011/01/16 17:11:04 agentken Exp $
 
 /**
  * Rename the variable 'domain_settings_ignore' regarding the way

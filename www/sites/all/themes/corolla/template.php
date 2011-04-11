@@ -16,7 +16,7 @@ function corolla_preprocess_html(&$variables) {
   // Add conditional stylesheets for IEs
   drupal_add_css(path_to_theme() . '/ie8.css', array('group' => CSS_THEME, 'browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE), 'preprocess' => FALSE));
   drupal_add_css(path_to_theme() . '/ie7.css', array('group' => CSS_THEME, 'browsers' => array('IE' => 'lte IE 7', '!IE' => FALSE), 'preprocess' => FALSE)); 
-
+  
   /* Add dynamic stylesheet */
   ob_start();
   include('dynamic.css.php');
@@ -39,6 +39,7 @@ function corolla_process_html(&$variables) {
  * Override or insert variables into the page template.
  */
 function corolla_process_page(&$variables) {
+
   // Since the title and the shortcut link are both block level elements,
   // positioning them next to each other is much simpler with a wrapper div.
   if (!empty($variables['title_suffix']['add_or_remove_shortcut']) ) {

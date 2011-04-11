@@ -1,5 +1,4 @@
 <?php
-// $Id: advanced-forum.naked.post-preview.tpl.php,v 1.1.2.4 2011/02/01 00:09:51 troky Exp $
 
 /**
  * @file

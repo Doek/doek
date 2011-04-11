@@ -1,5 +1,4 @@
 <?php
-// $Id: domain_conf.install,v 1.11 2010/04/01 21:08:36 agentken Exp $
 
 /**
  * @file
@@ -42,7 +41,7 @@ function domain_conf_update_7000() {
  */
 function domain_conf_update_7001() {
   $changes = domain_conf_d7_variable_changes();
-  $domains = domain_domains();
+  $domains = db_query("SELECT * FROM {domain}")->FetchAllAssoc('domain_id');
   $result = db_query("SELECT domain_id, settings FROM {domain_conf}");
   foreach ($result as $object) {
     if (!isset($domains[$object->domain_id])) {
@@ -51,9 +50,9 @@ function domain_conf_update_7001() {
         ->condition('domain_id', $object->domain_id)
         ->execute();
     }
-    else {
+    elseif (!empty($object->settings)) {
       // Update the record with the new variables.
-      $settings = domain_unserialize($object->settings);
+      $settings = unserialize($object->settings);
       foreach ($changes['removed'] as $key) {
         if (isset($settings[$key])) {
           unset($settings[$key]);

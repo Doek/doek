@@ -1,5 +1,4 @@
 <?php
-// $Id: domain_theme.admin.inc,v 1.15.2.8 2011/01/23 18:24:22 agentken Exp $
 
 /**
  * @file

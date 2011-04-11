@@ -1,5 +1,4 @@
 <?php
-// $Id: style.inc,v 1.1.2.16.2.5 2011/01/24 14:41:09 troky Exp $
 
 /**
  * @file
