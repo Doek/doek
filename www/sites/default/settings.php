@@ -183,7 +183,7 @@ $databases = array (
   array (
     'default' => 
     array (
-      'database' => 'doek2011',
+      'database' => 'doek_doek2011',
       'username' => 'doek2011',
       'password' => 'waxCotapME1',
       'host' => 'localhost',
