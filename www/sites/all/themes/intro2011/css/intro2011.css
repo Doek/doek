@@ -1,0 +1,273 @@
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td
+{
+	padding: 0px;
+	font-size: 100%;
+	margin: 0px;
+	border: none 0px currentColor;
+	outline: 0px none invert;
+}
+#ja-wrapper
+{
+	background: url("/intro2011/templates/ja_events/images/bg.jpg") no-repeat top;
+}
+#ja-header
+{
+	position: relative; z-index: 10;
+}
+#ja-header .main {
+	padding: 30px 0px 15px;
+}
+#ja-header .main {
+	padding: 18px 0px; height: 139px;
+}
+.wrap {
+	width: 100%; clear: both;
+}
+.main {
+	margin: 0px auto; width: 980px; position: relative; max-width: 1200px;
+}
+.main .inner {
+	padding-right: 15px; padding-left: 15px;
+}
+/*.main .main-inner1 {
+	margin-right: 15px; margin-left: 15px;
+}*/
+.main .main-inner1 {
+	margin-right: 0px; margin-left: 0px;
+}
+.clearfix::after {
+	height: 0px; clear: both; display: block; visibility: hidden; content: ".";
+}
+* html > body .clearfix {
+	width: 100%; display: block;
+}
+* html .clearfix {
+	height: 1%;
+}
+html[xmlns] .clearfix {
+	display: block;
+}
+h1.logo {
+	float: left;
+	position: relative;
+	z-index: 1;
+	/*width: 184px;
+	height: 28px;*/
+	line-height: 1;
+	font-size: 250%;
+	margin-top: -7px;
+	margin-left: -87px;
+	width: 534px;
+	height: 199px;
+}
+h1.logo a {
+	/*background: url("/intro2011/plugins/system/jat3/base-themes/default/images/logo-t3.gif") no-repeat left;
+	width: 184px;
+	height: 28px;*/
+	background: url("/intro2011/templates/ja_events/images/logo.png") no-repeat left;
+	width: 534px;
+	height: 199px;
+	margin-top: -8px;
+	display: block;
+}
+h1.logo a span {
+	top: -1000px; position: absolute;
+}
+#ja-search
+{
+	right: 0px; bottom: 15px; position: absolute;
+	right: 26px; bottom: -12px;
+}
+#ja-mainnav .main {
+	background: url("/intro2011/templates/ja_events/images/mainnav-bg.png") no-repeat right top;
+}
+#ja-mainnav .main-inner1 {
+	padding: 15px 15px 0px;
+}
+#ja-mainnav .main-inner2 {
+	background: url("/intro2011/templates/ja_events/images/trans1.png");
+}
+.ja-megamenu
+{
+	font-family: "Trebuchet MS",Arial,sans-serif;
+}
+.ja-megamenu ul.level0 li.mega a.mega {
+	padding-top: 15px; padding-bottom: 15px; font-size: 110%;
+}
+.ja-megamenu ul.level0 li.active.mega a.mega {
+	color: rgb(51, 51, 51);
+}
+.ja-megamenu ul.level0 li.over.mega {
+	background: rgb(52, 91, 141);
+}
+.ja-megamenu ul.level0 li.active.mega, .ja-megamenu ul.level0 li.mega a.mega, .ja-megamenu ul.level0 li.over.mega a.mega {
+	color: rgb(255, 255, 255);
+}
+.ja-mainnav-mask
+{
+	background: url("/intro2011/templates/ja_events/images/white-angle.png") no-repeat right top; top: 0px; width: 26px; height: 26px; right: 0px; position: absolute;
+}
+.no-display
+{
+	display: none !important;
+}
+#ja-container
+{
+	position: relative; z-index: 5;
+}
+#ja-container ul.menu {
+	margin: 0px; padding: 0px;
+}
+#ja-container ul.menu li {
+	margin: 0px; padding: 0px; overflow: hidden;
+}
+#ja-container ul.menu li a {
+	padding: 6px 0px; display: block;
+}
+#ja-container ul.menu li.active a {
+	font-weight: bold;
+}
+#ja-container ul.menu li ul {
+	margin: 0px 0px 0px 10px;
+}
+#ja-container ul.menu li li {
+	background: url("/intro2011/plugins/system/jat3/base-themes/default/images/arrow.png") no-repeat left 11px;
+}
+#ja-container ul.menu li li a {
+	text-indent: 10px; font-weight: normal !important;
+}
+#ja-container ul.menu li li a:hover {
+	
+}
+#ja-container ul.menu li li a:active {
+	
+}
+#ja-container ul.menu li li a:focus {
+	
+}
+#ja-container ul.menu li.active > a {
+	font-weight: bold !important;
+}
+#ja-container ul.menu span.separator {
+	display: none;
+}
+#ja-container ul.menu {
+	margin-right: -15px; margin-left: -15px;
+}
+#ja-container ul.menu li {
+	background: url("/intro2011/templates/ja_events/images/nav-sep.gif") no-repeat right bottom; overflow: visible; margin-right: -15px;
+}
+#ja-container ul.menu li a {
+	padding-top: 20px; padding-bottom: 25px; padding-left: 15px; font-family: "Trebuchet MS",Arial,sans-serif; font-size: 150%; font-weight: bold; display: block;
+}
+#ja-container ul.menu li a:hover {
+	background: url("/intro2011/templates/ja_events/images/grad.png") no-repeat right bottom; color: rgb(82, 146, 201); text-decoration: none;
+}
+#ja-container ul.menu li a:focus {
+	background: url("/intro2011/templates/ja_events/images/grad.png") no-repeat right bottom; color: rgb(82, 146, 201); text-decoration: none;
+}
+#ja-container ul.menu li a:active {
+	background: url("/intro2011/templates/ja_events/images/grad.png") no-repeat right bottom; color: rgb(82, 146, 201); text-decoration: none;
+}
+#ja-container ul.menu li.active a {
+	background: url("/intro2011/templates/ja_events/images/grad.png") no-repeat right bottom; color: rgb(82, 146, 201); text-decoration: none;
+}
+#ja-container ul.menu li li {
+	border-top-color: rgb(204, 204, 204); border-bottom-color: currentColor; border-top-width: 1px; border-bottom-width: 0px; border-top-style: dotted; border-bottom-style: none;
+}
+#ja-container ul.menu li img {
+	margin-right: 10px;
+}
+#ja-container .main {
+	background: rgb(84, 148, 201); padding: 0px;
+}
+#ja-container .main-inner1 {
+	padding: 0px 15px 15px;
+}
+#ja-right .ja-r1 .ja-col {
+	width: 100%;
+}
+#ja-mainbody {
+	background: rgb(255, 255, 255);
+}
+#ja-right
+{
+	float: right;
+}
+#ja-right a {
+	color: rgb(255, 255, 255);
+}
+#ja-right a:hover, #ja-right a:focus, #ja-right a:active {
+	color: rgb(255, 255, 255); text-decoration: underline;
+}
+.ja-col
+{
+
+}
+.column
+{
+	overflow: visible;
+}
+.column ul li {
+	zoom: 1;
+}
+.column p, .column pre, .column blockquote, .column h1, .column h2, .column h3, .column h4, .column h5, .column h6, .column ol, .column ul, .column dl {
+	margin: 15px 0px; padding: 0px;
+}
+#ja-bot-banner
+{
+	overflow: hidden;
+	background: url("/intro2011/templates/ja_events/images/botsl-bg.png") repeat-x bottom;
+	overflow: hidden; border-bottom-color: rgb(84, 121, 131);
+	border-bottom-width: 4px;
+	border-bottom-style: solid;
+	position: relative;
+	min-height: 170px;
+}
+#ja-navhelper
+{
+
+}
+#ja-navhelper .main {
+	padding: 5px 0px;
+	text-transform: uppercase;
+}
+.ja-links
+{
+	margin-top: 2px; float: right;
+}
+.ja-links li {
+	display: inline;
+	padding: 0px 10px;
+}
+.ja-links li.top {
+	padding-right: 0px;
+}
+#ja-footer
+{
+	clear: both;
+	font-size: 92%;
+	padding: 20px 0px;
+	background: url("/intro2011/templates/ja_events/images/footer-bg.jpg"); color: rgb(152, 167, 172);
+}
+#ja-footer .main {
+	padding: 0px; text-align: center; position: relative;
+}
+#ja-footer .inner {
+	padding: 0px;
+}
+#ja-footer small {
+	font-size: 100%;
+}
+#ja-footer .ja-copyright {
+	text-align: left; float: left;
+}
+#ja-footer a {
+	color: rgb(255, 255, 255);
+}
+#ja-footer a:hover, #ja-footer a:focus, #ja-footer a:active {
+	color: rgb(255, 255, 255); text-decoration: underline;
+}
+.ja-copyright small {
+	display: block;
+}
