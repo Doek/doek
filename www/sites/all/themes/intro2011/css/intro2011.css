@@ -8,7 +8,7 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 }
 #ja-wrapper
 {
-	background: url("/intro2011/templates/ja_events/images/bg.jpg") no-repeat top;
+	background: url("../images/bg.jpg") no-repeat top;
 }
 #ja-header
 {
@@ -61,10 +61,10 @@ h1.logo {
 	height: 199px;
 }
 h1.logo a {
-	/*background: url("/intro2011/plugins/system/jat3/base-themes/default/images/logo-t3.gif") no-repeat left;
+	/*background: url("http://www.kurtn-nyhedsbrev.dk/intro2011/plugins/system/jat3/base-themes/default/images/logo-t3.gif") no-repeat left;
 	width: 184px;
 	height: 28px;*/
-	background: url("/intro2011/templates/ja_events/images/logo.png") no-repeat left;
+	background: url("../images/logo.png") no-repeat left;
 	width: 534px;
 	height: 199px;
 	margin-top: -8px;
@@ -79,13 +79,13 @@ h1.logo a span {
 	right: 26px; bottom: -12px;
 }
 #ja-mainnav .main {
-	background: url("/intro2011/templates/ja_events/images/mainnav-bg.png") no-repeat right top;
+	background: url("../images/mainnav-bg.png") no-repeat right top;
 }
 #ja-mainnav .main-inner1 {
 	padding: 15px 15px 0px;
 }
 #ja-mainnav .main-inner2 {
-	background: url("/intro2011/templates/ja_events/images/trans1.png");
+	background: url("../images/trans1.png");
 }
 .ja-megamenu
 {
@@ -105,7 +105,7 @@ h1.logo a span {
 }
 .ja-mainnav-mask
 {
-	background: url("/intro2011/templates/ja_events/images/white-angle.png") no-repeat right top; top: 0px; width: 26px; height: 26px; right: 0px; position: absolute;
+	background: url("../images/white-angle.png") no-repeat right top; top: 0px; width: 26px; height: 26px; right: 0px; position: absolute;
 }
 .no-display
 {
@@ -131,7 +131,7 @@ h1.logo a span {
 	margin: 0px 0px 0px 10px;
 }
 #ja-container ul.menu li li {
-	background: url("/intro2011/plugins/system/jat3/base-themes/default/images/arrow.png") no-repeat left 11px;
+	background: url("../images/arrow.png") no-repeat left 11px;
 }
 #ja-container ul.menu li li a {
 	text-indent: 10px; font-weight: normal !important;
@@ -155,22 +155,22 @@ h1.logo a span {
 	margin-right: -15px; margin-left: -15px;
 }
 #ja-container ul.menu li {
-	background: url("/intro2011/templates/ja_events/images/nav-sep.gif") no-repeat right bottom; overflow: visible; margin-right: -15px;
+	background: url("../images/nav-sep.gif") no-repeat right bottom; overflow: visible; margin-right: -15px;
 }
 #ja-container ul.menu li a {
 	padding-top: 20px; padding-bottom: 25px; padding-left: 15px; font-family: "Trebuchet MS",Arial,sans-serif; font-size: 150%; font-weight: bold; display: block;
 }
 #ja-container ul.menu li a:hover {
-	background: url("/intro2011/templates/ja_events/images/grad.png") no-repeat right bottom; color: rgb(82, 146, 201); text-decoration: none;
+	background: url("../images/grad.png") no-repeat right bottom; color: rgb(82, 146, 201); text-decoration: none;
 }
 #ja-container ul.menu li a:focus {
-	background: url("/intro2011/templates/ja_events/images/grad.png") no-repeat right bottom; color: rgb(82, 146, 201); text-decoration: none;
+	background: url("../images/grad.png") no-repeat right bottom; color: rgb(82, 146, 201); text-decoration: none;
 }
 #ja-container ul.menu li a:active {
-	background: url("/intro2011/templates/ja_events/images/grad.png") no-repeat right bottom; color: rgb(82, 146, 201); text-decoration: none;
+	background: url("../images/grad.png") no-repeat right bottom; color: rgb(82, 146, 201); text-decoration: none;
 }
 #ja-container ul.menu li.active a {
-	background: url("/intro2011/templates/ja_events/images/grad.png") no-repeat right bottom; color: rgb(82, 146, 201); text-decoration: none;
+	background: url("../images/grad.png") no-repeat right bottom; color: rgb(82, 146, 201); text-decoration: none;
 }
 #ja-container ul.menu li li {
 	border-top-color: rgb(204, 204, 204); border-bottom-color: currentColor; border-top-width: 1px; border-bottom-width: 0px; border-top-style: dotted; border-bottom-style: none;
@@ -217,7 +217,7 @@ h1.logo a span {
 #ja-bot-banner
 {
 	overflow: hidden;
-	background: url("/intro2011/templates/ja_events/images/botsl-bg.png") repeat-x bottom;
+	background: url("../images/botsl-bg.png") repeat-x bottom;
 	overflow: hidden; border-bottom-color: rgb(84, 121, 131);
 	border-bottom-width: 4px;
 	border-bottom-style: solid;
@@ -248,7 +248,7 @@ h1.logo a span {
 	clear: both;
 	font-size: 92%;
 	padding: 20px 0px;
-	background: url("/intro2011/templates/ja_events/images/footer-bg.jpg"); color: rgb(152, 167, 172);
+	background: url("../images/footer-bg.jpg"); color: rgb(152, 167, 172);
 }
 #ja-footer .main {
 	padding: 0px; text-align: center; position: relative;
