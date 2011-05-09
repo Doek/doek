@@ -1,0 +1,91 @@
+.vejledere-block
+{
+	background: url('../images/contentslide-bg.gif') repeat;
+	margin-left: 0;
+	margin-right: 0;
+	margin-bottom: 10px;
+	margin-top: 10px;
+	padding: 0 0 20px;
+	position: relative;
+}
+
+.vejledere-block h3
+{
+	color: #333;
+	font-size: 22px;
+	text-shadow: 0 1px 1px 1px rgba(0, 0, 0, .3);
+	padding: 0 15px;
+	margin: 0 0 15px;
+	text-transform: none;
+	overflow: hidden;
+	font-family: "Trebuchet MS",Arial,sans-serif;
+	padding-top: 15px;
+}
+.view-content
+{
+	padding: 0 15px;
+}
+
+.vejledere-inner
+{
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	width: auto !important;
+	width: 100%;
+}
+
+.vejledere-more
+{
+	height: 21px;
+	width: 105px;
+	position: absolute;
+	top: 15px;
+	right: 15px;
+	cursor: pointer;
+}
+.vejledere-more:hover
+{
+	background: url('../images/flere-vejledere-hover.png') no-repeat left top;
+}
+.vejledere-more:hover img
+{
+	visibility: hidden;
+}
+
+/* Fields styles */
+
+.vejledere-block-item
+{
+	float: left;
+	width: 215px;
+	height: 222px;
+}
+
+.vejledere-block-item-inner
+{
+	padding: 15px;
+	background: white;
+	width: 170px;
+}
+
+.vejledere-block-item-inner a
+{
+	font-weight: bold;
+	font-size: 13px;
+}
+
+.vejledere-block-item-image img
+{
+	margin: 0px;
+	padding: 0px;
+	overflow: hidden;
+	width: 170px;
+	height: 170px;
+}
+
+.vejledere-block-item-title
+{
+	text-align: left;
+	padding: 5px 0 0;
+}

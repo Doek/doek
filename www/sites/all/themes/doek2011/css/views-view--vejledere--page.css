@@ -1,0 +1,120 @@
+.vejledere-page h1
+{
+	border-bottom: 1px solid #CCC;
+	padding: 0 0 4px;
+}
+
+.vejledere-page-item
+{
+	padding-left: 15px;
+	padding-right: 15px;
+	padding-top: 20px;
+	padding-bottom: 15px;
+}
+
+vejledere-inner
+{
+	width: 100%;
+	float: left;
+	position: relative;
+}
+
+.vejledere-content
+{
+	overflow: hidden;
+	border-bottom: 1px dotted #CCC;
+	color: #666;
+	margin-bottom: 10px;
+	padding: 10px 0 15px;
+}
+
+.vejledere-content-inner
+{
+	padding-bottom: 6px;
+}
+
+.vejledere-picture
+{
+	background: url('../images/img-shadow-br3.png') no-repeat center bottom;
+	position: relative;
+	float: left;
+	margin: 0 15px 0 0;
+	width: auto;
+}
+
+.vejledere-picture img
+{
+	padding: 5px;
+	background: white;
+	border: 1px solid #E2E2E2;
+	height: 170px;
+	width: 170px;
+}
+
+.vejledere-picture .caption
+{
+	position: absolute;
+	text-align: center !important;
+	bottom: 12px;
+	left: 0;
+	display: block;
+	margin: 0 6px;
+	background: url('../images/caption3.png');
+	color: white;
+	padding: 0 15px;
+	width: 140px;
+	line-height: 30px;
+	text-transform: uppercase;
+	font-weight: bold;
+	font-size: 12px;
+}
+
+.vejledere-picture .corner
+{
+	background: url('../images/img-shadow-right.png') no-repeat right top;
+	padding: 0;
+	border: none;
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 23px;
+	height: 23px;
+}
+
+.vejledere-content ul
+{
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.vejledere-content ul li
+{
+	background: url('../images/bullet4.gif') no-repeat 0px 6px;
+	padding-left: 10px;
+	overflow: hidden;
+	font-size: 13px;
+	line-height: 160%;
+}
+
+.list-header
+{
+	font-weight: bold;
+}
+
+.vejleder-more
+{
+	font-size: 11px;
+	margin: 10px 0;
+	float: right;
+}
+
+.vejleder-more a {
+	background: url('../images/button-corner-small2.png') no-repeat left top;
+	color: #DDEBF6;
+	display: block;
+	font-weight: bold;
+	float: left;
+	padding: 4px 5px 4px 15px;
+	text-transform: uppercase;
+}
