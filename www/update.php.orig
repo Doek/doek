@@ -104,14 +104,7 @@ function update_script_selection_form($form, &$form_state) {
 
   if (empty($count)) {
     drupal_set_message(t('No pending updates.'));
-    if ($incompatible_updates_exist) {
-      // Work around issue with collapsible regions
-      $form['start']['#collapsed'] = FALSE;
-      $form['start']['#collapsible'] = FALSE;
-    }
-    else {
-      unset($form);
-    }
+    unset($form);
     $form['links'] = array(
       '#markup' => theme('item_list', array('items' => update_helpful_links())),
     );
