@@ -1,13 +1,12 @@
 <?php
-// $Id: uc_roles.install,v 1.9 2010/07/15 20:32:39 islandusurper Exp $
 
 /**
  * @file
- * uc_roles module install file.
+ * Install, update and uninstall functions for the uc_roles module.
  */
 
 /**
- * Implement hook_schema().
+ * Implements hook_schema().
  */
 function uc_roles_schema() {
   $schema['uc_roles_products'] = array(
@@ -166,7 +165,14 @@ function uc_roles_schema() {
 }
 
 /**
- * Implement hook_uninstall().
+ * Implements hook_update_last_removed().
+ */
+function uc_roles_update_last_removed() {
+  return 6004;
+}
+
+/**
+ * Implements hook_uninstall().
  */
 function uc_roles_uninstall() {
   db_delete('uc_product_features')

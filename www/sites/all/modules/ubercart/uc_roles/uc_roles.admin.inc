@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_roles.admin.inc,v 1.15 2010/07/15 20:32:39 islandusurper Exp $
 
 /**
  * @file
@@ -7,7 +6,7 @@
  */
 
 /**
- * Create the header for the table/pager.
+ * Creates the header for the table/pager.
  */
 function _uc_roles_expiration_header() {
   return array(
@@ -55,7 +54,7 @@ function uc_roles_expiration($form, &$form_state) {
 }
 
 /**
- * Theme user role expiration page.
+ * Themes user role expiration page.
  *
  * @ingroup themeable
  */
@@ -64,7 +63,7 @@ function theme_uc_roles_expiration($variables) {
 
   $header = _uc_roles_expiration_header();
 
-  if (is_array($form['name'])) {
+  if (isset($form['name'])) {
     foreach (element_children($form['name']) as $key) {
       $rows[] = array(
         drupal_render($form['name'][$key]),
@@ -80,7 +79,7 @@ function theme_uc_roles_expiration($variables) {
   }
 
   // Render everything.
-  $output .= theme('table', array('header' => $header, 'rows' => $rows));
+  $output = theme('table', array('header' => $header, 'rows' => $rows));
   $output .= theme('pager');
   $output .= drupal_render_children($form);
 
@@ -90,8 +89,8 @@ function theme_uc_roles_expiration($variables) {
 /**
  * Form builder for role expirations.
  *
- * @ingroup forms
  * @see uc_roles_deletion_form_submit()
+ * @ingroup forms
  */
 function uc_roles_deletion_form($form, &$form_state, $account, $rid) {
   $expiration = db_query("SELECT expiration FROM {uc_roles_expirations} WHERE uid = :uid AND rid = :rid", array(':uid' => $account->uid, ':rid' => $rid))->fetchField();
@@ -137,6 +136,8 @@ function uc_roles_deletion_form($form, &$form_state, $account, $rid) {
 }
 
 /**
+ * Submission handler for uc_roles_deletion_form().
+ *
  * @see uc_roles_deletion_form()
  */
 function uc_roles_deletion_form_submit($form, &$form_state) {

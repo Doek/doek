@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_quote.rules.inc,v 1.1 2010/07/16 12:57:37 islandusurper Exp $
 
 /**
  * @file
@@ -7,7 +6,7 @@
  */
 
 /**
- * Implement hook_rules_condition_info().
+ * Implements hook_rules_condition_info().
  */
 function uc_quote_rules_condition_info() {
   return array(
@@ -24,7 +23,7 @@ function uc_quote_rules_condition_info() {
 }
 
 /**
- * Check an order's shipping method.
+ * Checks an order's shipping method.
  */
 function uc_quote_condition_order_shipping_method($order, $method) {
   // Check the easy way first.
@@ -64,4 +63,3 @@ function uc_quote_condition_order_shipping_method_options() {
 
   return $options;
 }
-

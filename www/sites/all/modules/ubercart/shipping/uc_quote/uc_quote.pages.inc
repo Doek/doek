@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_quote.pages.inc,v 1.11 2010/11/24 15:13:41 islandusurper Exp $
 
 /**
  * @file
@@ -7,7 +6,7 @@
  */
 
 /**
- * Pull the get_quote_from_* triggers and assemble their returned data.
+ * Pulls the get_quote_from_* triggers and assemble their returned data.
  */
 function uc_quote_assemble_quotes($order) {
   global $user;
@@ -45,8 +44,15 @@ function uc_quote_assemble_quotes($order) {
 
   $quote_data = array();
   foreach ($methods as $method) {
-    $set = rules_config_load('get_quote_from_' . $method['id']);
-    if (!$set || $set->execute($order)) {
+    if (module_exists('rules')) {
+      $set = rules_config_load('get_quote_from_' . $method['id']);
+      $apply = !$set || $set->execute($order);
+    }
+    else {
+      $apply = TRUE;
+    }
+
+    if ($apply) {
       $data = uc_quote_action_get_quote($order, $method);
 
       foreach ($data as &$quote) {
@@ -61,12 +67,13 @@ function uc_quote_assemble_quotes($order) {
 }
 
 /**
- * Retrieve shipping quote.
+ * Retrieves shipping quote.
  *
  * @param $order
  *   The order the quote is for.
  * @param $method
  *   The shipping method to generate the quote.
+ *
  * @return
  *   Array of shipping quotes.
  */

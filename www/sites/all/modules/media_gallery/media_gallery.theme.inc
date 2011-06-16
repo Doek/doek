@@ -1,5 +1,4 @@
 <?php
-// $Id: media_gallery.theme.inc,v 1.4 2011/01/18 02:32:22 effulgentsia Exp $
 
 /**
  * @file
@@ -65,7 +64,7 @@ function theme_media_gallery_teaser($variables) {
   $link_vars['link_path'] = $uri['path'];
   $link_vars['classes'] = array('media-gallery-thumb');
 
-  $output = '<div class="media-collection-item-wrapper"><img class="stack-image" src="' . base_path() . drupal_get_path('module', 'media_gallery') . '/images/stack_bg.png" />' . theme('media_gallery_item', $link_vars);
+  $output = '<div class="media-collection-item-wrapper"><img class="stack-image" src="' . base_path() . drupal_get_path('module', 'media_gallery') . '/images/stack_bg.png" />' . theme('media_gallery_item', $link_vars) . '</div>';
 
   // Set the variables to theme the meta data if there is a term on the node
   if (isset($node->term)) {
@@ -81,20 +80,19 @@ function theme_media_gallery_teaser($variables) {
     $description = array();
     if (isset($type_count['image'])) {
       $count = $type_count['image'];
-      $description[] = format_plural($count, '<span>%num image</span>', '<span>%num images</span>', array('%num' => $count));
+      $description[] = format_plural($count, '<span>@num image</span>', '<span>@num images</span>', array('@num' => $count));
       unset($type_count['image']);
     }
     if (isset($type_count['video'])) {
       $count = $type_count['video'];
-      $description[] = format_plural($count, '<span>%num video</span>', '<span>%num videos</span>', array('%num' => $count));
+      $description[] = format_plural($count, '<span>@num video</span>', '<span>@num videos</span>', array('@num' => $count));
       unset($type_count['video']);
     }
     if (!empty($type_count)) {
       $count = array_sum($type_count);
-      $description[] = format_plural($count, '<span>%num other item</span>', '<span>%num other items</span>', array('%num' => $count));
+      $description[] = format_plural($count, '<span>@num other item</span>', '<span>@num other items</span>', array('@num' => $count));
     }
     $meta_vars['description'] = implode(', ', $description);
-    $output .= '</div>';
 
     // Add the meta information
     $output .= theme('media_gallery_meta', $meta_vars);
@@ -304,11 +302,11 @@ function theme_media_gallery_media_item_detail($variables) {
       '</div>' .
       '<div class="media-gallery-detail-info">' .
         '<span class="media-gallery-back-link">' .
-          l('« Back to gallery', 'node/' . $gallery_node->nid) .
+          l(t('« Back to gallery'), 'node/' . $gallery_node->nid) .
         '</span>' .
         '<span class="media-gallery-detail-image-info-wrapper">' .
           '<span class="media-gallery-image-count">' .
-            t("Item %current of %total", array('%current' => $i_current + 1, '%total' => $num_items)) .
+            t("Item @current of @total", array('@current' => $i_current + 1, '@total' => $num_items)) .
           '</span>' .
           '<span class="media-gallery-controls">' .
             $previous_link .
@@ -369,20 +367,17 @@ function theme_media_gallery_block_thumbnail($variables) {
  * Displays a media item (entity) as a thumbnail on a Gallery collection page
  */
 function theme_media_gallery_collection_thumbnail($variables) {
-  $element = $variables['element'];
-
-  // Get the rendered file without annoying DIV wrappers.
-  $element['file']['#theme'] = 'media_gallery_file_field_inline';
-  $image = drupal_render($element['file']);
-
-  $link_vars = array();
-  $link_vars['image'] = $image;
-  $link_vars['link_path'] = 'something';
-  $link_vars['classes'] = 'media-gallery-thumb';
-
-  $output = '<div class="media-gallery-item-wrapper">' . theme('media_gallery_item', $link_vars) . '</div>';
-
-  return $output;
+  // In the default configuration of the module, the collection thumbnail
+  // display format is used for node teasers, and theme_media_gallery_teaser()
+  // bypasses calling this theme function. However, if someone configures their
+  // site differently (to use this display format in a different view mode), we
+  // need some sensible behavior here. For now, we just theme the media item
+  // the same way we theme it when it appears in a block thumbnail.
+  // @todo: Ideally, some of the code in theme_media_gallery_teaser() would
+  //   move here instead, so that people could configure their site to
+  //   reproduce the default "media gallery node teaser" style in other view
+  //   modes as well.
+  return theme('media_gallery_block_thumbnail', $variables);
 }
 
 /**

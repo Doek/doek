@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_catalog.pathauto.inc,v 1.1 2010/11/29 22:18:57 islandusurper Exp $
 
 /**
  * @file
@@ -7,7 +6,7 @@
  */
 
 /**
- * Implement hook_pathauto().
+ * Implements hook_pathauto().
  */
 function uc_catalog_pathauto($op) {
   switch ($op) {
@@ -27,9 +26,9 @@ function uc_catalog_pathauto($op) {
 }
 
 /**
- * Implement hook_pathauto_bulkupdate().
+ * Implements hook_pathauto_bulkupdate().
  *
- * Generate aliases for all categories without aliases
+ * Generate aliases for all categories without aliases.
  */
 function uc_catalog_pathauto_bulkupdate(&$context) {
   if (!isset($context['sandbox']['current'])) {
@@ -79,10 +78,10 @@ function uc_catalog_pathauto_bulkupdate(&$context) {
 }
 
 /**
- * Create aliases for taxonomy objects
+ * Creates aliases for taxonomy objects.
  *
  * @param $category
- *   A taxonomy object
+ *   A taxonomy object.
  */
 function _uc_catalog_pathauto_alias($category, $op) {
   module_load_include('inc', 'pathauto');
@@ -106,7 +105,7 @@ function _uc_catalog_pathauto_alias($category, $op) {
 }
 
 /**
- * Implement hook_path_alias_types().
+ * Implements hook_path_alias_types().
  */
 function uc_catalog_path_alias_types() {
   return array('catalog/' => t('Catalog pages'));

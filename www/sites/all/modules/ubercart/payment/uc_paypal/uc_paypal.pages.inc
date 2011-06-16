@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_paypal.pages.inc,v 1.19 2010/10/11 18:37:56 islandusurper Exp $
 
 /**
  * @file
@@ -7,7 +6,7 @@
  */
 
 /**
- * Process Instant Payment Notifiations from PayPal.
+ * Processes Instant Payment Notifiations from PayPal.
  */
 function uc_paypal_ipn() {
   if (!isset($_POST['invoice'])) {
@@ -46,13 +45,17 @@ function uc_paypal_ipn() {
   $payment_currency = check_plain($_POST['mc_currency']);
   $payment_fee = check_plain($_POST['mc_fee']);
   $receiver_email = check_plain($_POST['business']);
+  if ($receiver_email == '') {
+    $receiver_email = check_plain($_POST['receiver_email']);
+  }
   $txn_id = check_plain($_POST['txn_id']);
   $txn_type = check_plain($_POST['txn_type']);
   $payer_email = check_plain($_POST['payer_email']);
 
-  // Express Checkout IPNs may not have the WPS email stored. But if it is, make
-  // sure that the right account is being paid.
-  if (variable_get('uc_paypal_wps_email', '') && $receiver_email != variable_get('uc_paypal_wps_email', '')) {
+  // Express Checkout IPNs may not have the WPS email stored. But if it is,
+  // make sure that the right account is being paid.
+  $uc_paypal_wps_email = variable_get('uc_paypal_wps_email', '');
+  if (!empty($uc_paypal_wps_email) && drupal_strtolower($receiver_email) != drupal_strtolower($uc_paypal_wps_email)) {
     watchdog('uc_paypal', 'IPN for a different PayPal account attempted.', array(), WATCHDOG_ERROR);
     return;
   }
@@ -114,8 +117,8 @@ function uc_paypal_ipn() {
         break;
 
       case 'Completed':
-        if ($payment_amount != $order->order_total) {
-          watchdog('uc_paypal', 'Payment @txn_id for order @order_id did not equal the order total.', array('@txn_id' => $txn_id, '@order_id' => $order->order_id), WATCHDOG_WARNING, l(t('view'), 'admin/store/orders/'. $order->order_id));
+        if (abs($payment_amount - $order->order_total) > 0.01) {
+          watchdog('uc_paypal', 'Payment @txn_id for order @order_id did not equal the order total.', array('@txn_id' => $txn_id, '@order_id' => $order->order_id), WATCHDOG_WARNING, l(t('view'), 'admin/store/orders/' . $order->order_id));
         }
         $comment = t('PayPal transaction ID: @txn_id', array('@txn_id' => $txn_id));
         uc_payment_enter($order_id, 'paypal_wps', $payment_amount, $order->uid, NULL, $comment);
@@ -167,7 +170,9 @@ function uc_paypal_ipn() {
   }
 }
 
-// Handles the review page for Express Checkout Mark Flow.
+/**
+ * Handles the review page for Express Checkout Mark Flow.
+ */
 function uc_paypal_ec_review_redirect() {
   if (!isset($_SESSION['TOKEN']) || ($order = uc_order_load($_SESSION['cart_order'])) == FALSE) {
     unset($_SESSION['cart_order']);
@@ -189,7 +194,9 @@ function uc_paypal_ec_review_redirect() {
   drupal_goto('cart/checkout/review');
 }
 
-// Handles the review page for Express Checkout Shortcut Flow.
+/**
+ * Handles the review page for Express Checkout Shortcut Flow.
+ */
 function uc_paypal_ec_review() {
   if (!isset($_SESSION['TOKEN']) || ($order = uc_order_load($_SESSION['cart_order'])) == FALSE) {
     unset($_SESSION['cart_order']);
@@ -199,7 +206,7 @@ function uc_paypal_ec_review() {
     drupal_goto('cart');
   }
 
-  if ($_SESSION['have_details'][$order->order_id] !== TRUE) {
+  if (!isset($_SESSION['have_details'][$order->order_id])) {
     $nvp_request = array(
       'METHOD' => 'GetExpressCheckoutDetails',
       'TOKEN' => $_SESSION['TOKEN'],
@@ -228,7 +235,7 @@ function uc_paypal_ec_review() {
     }
 
     $order->delivery_street1 = check_plain($nvp_response['SHIPTOSTREET']);
-    $order->delivery_street2 = check_plain($nvp_response['SHIPTOSTREET2']);
+    $order->delivery_street2 = isset($nvp_response['SHIPTOSTREET2']) ? check_plain($nvp_response['SHIPTOSTREET2']) : '';
     $order->delivery_city = check_plain($nvp_response['SHIPTOCITY']);
     $order->delivery_zone = !empty($zone_id) ? $zone_id : 0;
     $order->delivery_postal_code = check_plain($nvp_response['SHIPTOZIP']);
@@ -255,7 +262,9 @@ function uc_paypal_ec_review() {
   return $build;
 }
 
-// Returns the form for the custom Review Payment screen for Express Checkout.
+/**
+ * Returns the form for the custom Review Payment screen for Express Checkout.
+ */
 function uc_paypal_ec_review_form($form, &$form_state, $order) {
   if (module_exists('uc_quote') && variable_get('uc_paypal_ec_review_shipping', TRUE) && uc_order_is_shippable($order)) {
     $result = uc_checkout_pane_quotes('view', $order, NULL);
@@ -336,7 +345,7 @@ function uc_paypal_ec_review_form($form, &$form_state, $order) {
 }
 
 function uc_paypal_ec_review_form_validate($form, &$form_state) {
-  if ($form_state['values']['shippable'] == 'true') {
+  if (isset($form_state['values']['shippable']) && $form_state['values']['shippable'] == 'true') {
     if (!isset($_POST['quote-option'])) {
       form_set_error('shipping', t('You must calculate and select a shipping option.'));
     }
@@ -346,7 +355,7 @@ function uc_paypal_ec_review_form_validate($form, &$form_state) {
 function uc_paypal_ec_review_form_submit($form, &$form_state) {
   $order = uc_order_load($_SESSION['cart_order']);
 
-  if ($form_state['values']['shippable'] == 'true') {
+  if (isset($form_state['values']['shippable']) && $form_state['values']['shippable'] == 'true') {
     $method_accessorials= split("---", isset($_POST['quote-option']) ? strval($_POST['quote-option']) : 0);
     $order->quote['method'] = $method_accessorials[0];
     $order->quote['accessorials'] = $method_accessorials[1];
@@ -385,7 +394,9 @@ function uc_paypal_ec_review_form_submit($form, &$form_state) {
   $form_state['redirect'] = 'cart/echeckout/submit';
 }
 
-// Present the final total to the user for checkout!
+/**
+ * Presents the final total to the user for checkout!
+ */
 function uc_paypal_ec_submit() {
   if (!isset($_SESSION['TOKEN']) || ($order = uc_order_load($_SESSION['cart_order'])) == FALSE) {
     unset($_SESSION['cart_order'], $_SESSION['have_details']);
@@ -415,7 +426,9 @@ function uc_paypal_ec_submit() {
   return $build;
 }
 
-// Submits an order, calling the NVP API to send the order total to PayPal.
+/**
+ * Submits an order, calling the NVP API to send the order total to PayPal.
+ */
 function uc_paypal_ec_submit_form($form, &$form_state) {
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
@@ -426,7 +439,9 @@ function uc_paypal_ec_submit_form($form, &$form_state) {
   return $form;
 }
 
-// Handles a complete Website Payments Standard sale.
+/**
+ * Handles a complete Website Payments Standard sale.
+ */
 function uc_paypal_complete($order) {
   // If the order ID specified in the return URL is not the same as the one in
   // the user's session, we need to assume this is either a spoof or that the
@@ -434,7 +449,7 @@ function uc_paypal_complete($order) {
   // legitimate checkout, the IPN will still come in from PayPal so the order
   // gets processed correctly. We'll leave an ambiguous message just in case.
   if (intval($_SESSION['cart_order']) != $order->order_id) {
-    drupal_set_message(t('Thank you for your order! We will be notified by PayPal that we have received your payment.'));
+    drupal_set_message(t('Thank you for your order! PayPal will notify us once your payment has been processed.'));
     drupal_goto('cart');
   }
 
@@ -449,7 +464,9 @@ function uc_paypal_complete($order) {
   drupal_goto('cart/checkout/complete');
 }
 
-// Handles a canceled Website Payments Standard sale.
+/**
+ * Handles a canceled Website Payments Standard sale.
+ */
 function uc_paypal_cancel() {
   unset($_SESSION['cart_order']);
 

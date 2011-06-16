@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_order_handler_field_order_fullname.inc,v 1.1 2010/11/24 15:18:30 islandusurper Exp $
 
 /**
  * @file
@@ -11,12 +10,18 @@
  */
 class uc_order_handler_field_order_fullname extends views_handler_field {
 
+  /**
+   *
+   */
   function option_definition() {
     $options = parent::option_definition();
     $options['format'] = array('default' => 'first_last');
     return $options;
   }
 
+  /**
+   *
+   */
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
@@ -32,11 +37,17 @@ class uc_order_handler_field_order_fullname extends views_handler_field {
     );
   }
 
+  /**
+   *
+   */
   function query() {
     $this->ensure_my_table();
     $this->add_additional_fields();
   }
 
+  /**
+   *
+   */
   function render($values) {
     $prefix = $this->definition['prefix'];
     $first = $values->{$this->aliases[$prefix . '_first_name']};

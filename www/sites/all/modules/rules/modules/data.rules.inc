@@ -1,5 +1,4 @@
 <?php
-// $Id: data.rules.inc,v 1.1.2.8 2011/02/15 14:21:10 fago Exp $
 
 /**
  * @file General data related rules integration
@@ -139,57 +138,51 @@ function rules_data_action_info() {
     );
   }
 
-  // Get an array of types that are savable.
-  if ($types = array_keys(rules_entity_type_options('save'))) {
-    $return['entity_save'] = array(
-      'label' => t('Save entity'),
-      'parameter' => array(
-        'data' => array(
-          'type' => $types,
-          'label' => t('Entity'),
-          'description' => t('Specifies the entity, which should be saved permanently.'),
-          'restriction' => 'selector',
-          'wrapped' => TRUE,
-         ),
-         'immediate' => array(
-           'type' => 'boolean',
-           'label' => t('Force saving immediately'),
-           'description' => t('Usually saving is postponed till the end of the evaluation, so that multiple saves can be fold into one. If this set, saving is forced to happen immediately.'),
-           'default value' => FALSE,
-           'optional' => TRUE,
-           'restriction' => 'input',
-         ),
-      ),
-      'group' => t('Entities'),
-      'access callback' => 'rules_data_action_access',
-      'base' => 'rules_action_entity_save',
-      'callbacks' => array(
-        'access' => 'rules_action_entity_savedelete_access',
-      ),
-    );
-  }
+  $return['entity_save'] = array(
+    'label' => t('Save entity'),
+    'parameter' => array(
+      'data' => array(
+        'type' => 'entity',
+        'label' => t('Entity'),
+        'description' => t('Specifies the entity, which should be saved permanently.'),
+        'restriction' => 'selector',
+        'wrapped' => TRUE,
+       ),
+       'immediate' => array(
+         'type' => 'boolean',
+         'label' => t('Force saving immediately'),
+         'description' => t('Usually saving is postponed till the end of the evaluation, so that multiple saves can be fold into one. If this set, saving is forced to happen immediately.'),
+         'default value' => FALSE,
+         'optional' => TRUE,
+         'restriction' => 'input',
+       ),
+    ),
+    'group' => t('Entities'),
+    'access callback' => 'rules_data_action_access',
+    'base' => 'rules_action_entity_save',
+    'callbacks' => array(
+      'access' => 'rules_action_entity_savedelete_access',
+    ),
+  );
 
-  // Get an array of types that are deletable.
-  if ($types = array_keys(rules_entity_type_options('delete'))) {
-    $return['entity_delete'] = array(
-      'label' => t('Delete entity'),
-      'parameter' => array(
-        'data' => array(
-          'type' => $types,
-          'label' => t('Entity'),
-          'description' => t('Specifies the entity, which should be deleted permanently.'),
-          'restriction' => 'selector',
-          'wrapped' => TRUE,
-        ),
+  $return['entity_delete'] = array(
+    'label' => t('Delete entity'),
+    'parameter' => array(
+      'data' => array(
+        'type' => 'entity',
+        'label' => t('Entity'),
+        'description' => t('Specifies the entity, which should be deleted permanently.'),
+        'restriction' => 'selector',
+        'wrapped' => TRUE,
       ),
-      'group' => t('Entities'),
-      'access callback' => 'rules_data_action_access',
-      'base' => 'rules_action_entity_delete',
-      'callbacks' => array(
-        'access' => 'rules_action_entity_savedelete_access',
-      ),
-    );
-  }
+    ),
+    'group' => t('Entities'),
+    'access callback' => 'rules_data_action_access',
+    'base' => 'rules_action_entity_delete',
+    'callbacks' => array(
+      'access' => 'rules_action_entity_savedelete_access',
+    ),
+  );
   $return['list_add'] = array(
     'label' => t('Add list item'),
     'parameter' => array(
@@ -584,6 +577,19 @@ function rules_data_condition_info() {
       ),
       'group' => t('Data'),
       'base' => 'rules_condition_data_is',
+    ),
+    'data_is_empty' => array(
+      'label' => t('Data value is empty'),
+      'parameter' => array(
+        'data' => array(
+          'type' => '*',
+          'label' => t('Data to check'),
+          'description' => t('The data to be checked to be empty, specified by using a data selector, e.g. "node:author:name".'),
+          'allow null' => TRUE,
+         ),
+      ),
+      'group' => t('Data'),
+      'base' => 'rules_condition_data_is_empty',
     ),
     'entity_is_new' => array(
       'label' => t('Entity is new'),

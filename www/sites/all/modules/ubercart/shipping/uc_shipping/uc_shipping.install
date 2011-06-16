@@ -1,13 +1,12 @@
 <?php
-// $Id: uc_shipping.install,v 1.13 2010/12/09 18:52:30 islandusurper Exp $
 
 /**
  * @file
- * Install hooks for uc_shipping.module.
+ * Install, update and uninstall functions for the uc_shipping module.
  */
 
 /**
- * Implement hook_schema().
+ * Implements hook_schema().
  */
 function uc_shipping_schema() {
   $schema = array();
@@ -343,7 +342,14 @@ function uc_shipping_schema() {
 }
 
 /**
- * Change {uc_packages}.label_image to an integer file id.
+ * Implements hook_update_last_removed().
+ */
+function uc_shipping_update_last_removed() {
+  return 6005;
+}
+
+/**
+ * Changes {uc_packages}.label_image to an integer file id.
  */
 function uc_shipping_update_7000(&$sandbox) {
   $sandbox['#finished'] = 0;
@@ -369,7 +375,7 @@ function uc_shipping_update_7000(&$sandbox) {
       $limit = 200;
       $images = array();
 
-      $packages = db_query("SELECT package_id, label_image FROM {uc_packages} WHERE package_id > :package_id AND label_image IS NOT NULL", 0, $limit, array(':package_id' => $sandbox['last']));
+      $packages = db_query_range("SELECT package_id, label_image FROM {uc_packages} WHERE package_id > :package_id AND label_image IS NOT NULL", 0, $limit, array(':package_id' => $sandbox['last']));
 
       foreach ($packages as $package) {
         $found = TRUE;
@@ -386,7 +392,7 @@ function uc_shipping_update_7000(&$sandbox) {
           'timestamp' => $stat['ctime'],
         );
 
-        $fid = db_insert('file')->fields($file)->execute();
+        $fid = db_insert('file_managed')->fields($file)->execute();
 
         db_update('uc_packages')
           ->fields(array('label_image_id' => $fid))
@@ -405,7 +411,7 @@ function uc_shipping_update_7000(&$sandbox) {
       db_drop_field('uc_packages', 'label_image');
       db_change_field('uc_packages', 'label_image_id', 'label_image', $schema, array(
         'foreign keys' => array(
-          'label_image' => array('file' => 'fid'),
+          'label_image' => array('file_managed' => 'fid'),
         ),
       ));
 

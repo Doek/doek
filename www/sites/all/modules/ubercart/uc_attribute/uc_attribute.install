@@ -1,13 +1,12 @@
 <?php
-// $Id: uc_attribute.install,v 1.16 2010/10/07 19:09:12 islandusurper Exp $
 
 /**
  * @file
- * Install hooks for uc_attribute.module.
+ * Install, update and uninstall functions for the uc_attribute module.
  */
 
 /**
- * Implement hook_schema()
+ * Implements hook_schema().
  */
 function uc_attribute_schema() {
   $schema = array();
@@ -64,12 +63,6 @@ function uc_attribute_schema() {
         'length' => 255,
         'not null' => TRUE,
         'default' => '',
-      ),
-      'format' => array(
-        'description' => 'Format of the attribute description.',
-        'type' => 'int',
-        'not null' => FALSE,
-        'default' => NULL,
       ),
     ),
     'primary key' => array('aid'),
@@ -403,14 +396,14 @@ function uc_attribute_schema() {
 }
 
 /**
- * Implement hook_uninstall().
+ * Implements hook_uninstall().
  */
 function uc_attribute_uninstall() {
   variable_del('uc_attribute_option_price_format');
 }
 
 /**
- * Implement hook_update_dependencies().
+ * Implements hook_update_dependencies().
  */
 function uc_attribute_update_dependencies() {
   $dependencies['uc_attribute'][7000] = array(
@@ -418,6 +411,13 @@ function uc_attribute_update_dependencies() {
   );
 
   return $dependencies;
+}
+
+/**
+ * Implements hook_update_last_removed().
+ */
+function uc_attribute_update_last_removed() {
+  return 6005;
 }
 
 /**
@@ -450,4 +450,11 @@ function uc_attribute_update_7001() {
   db_update('uc_attributes')
     ->fields(array('format' => filter_fallback_format()))
     ->execute();
+}
+
+/**
+ * Remove attribute description format..
+ */
+function uc_attribute_update_7002() {
+  db_drop_field('uc_attributes', 'format');
 }

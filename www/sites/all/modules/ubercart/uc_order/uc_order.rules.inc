@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_order.rules.inc,v 1.4 2010/08/25 13:41:19 islandusurper Exp $
 
 /**
  * @file
@@ -8,7 +7,7 @@
  */
 
 /**
- * Implement hook_rules_data_info().
+ * Implements hook_rules_data_info().
  */
 function uc_order_rules_data_info() {
   $types['uc_order'] = array(
@@ -34,7 +33,7 @@ function uc_order_rules_data_info() {
 }
 
 /**
- * Implement hook_rules_event_info().
+ * Implements hook_rules_event_info().
  */
 function uc_order_rules_event_info() {
   $events['uc_order_status_update'] = array(
@@ -67,7 +66,7 @@ function uc_order_rules_event_info() {
 }
 
 /**
- * Implement hook_rules_condition_info().
+ * Implements hook_rules_condition_info().
  */
 function uc_order_rules_condition_info() {
   $conditions['uc_order_condition_has_products'] = array(
@@ -141,7 +140,7 @@ function uc_order_rules_condition_info() {
       'weight_units' => array(
         'type' => 'text',
         'label' => t('Unit of measurement'),
-        'options list' => 'uc_order_weight_units_options',
+        'options list' => 'uc_order_condition_weight_units_options',
       ),
       'product_weight_value' => array(
         'type' => 'decimal',
@@ -170,7 +169,7 @@ function uc_order_rules_condition_info() {
 }
 
 /**
- * Implement hook_rules_action_info().
+ * Implements hook_rules_action_info().
  */
 function uc_order_rules_action_info() {
   $order_arg = array(
@@ -218,6 +217,7 @@ function uc_order_rules_action_info() {
       'from' => array(
         'type' => 'text',
         'label' => t('Sender'),
+        'description' => t("Enter the 'From' email addresses, or leave blank to use your store email address. You may use order tokens for dynamic email addresses."),
       ),
       'addresses' => array(
         'type' => 'text',
@@ -280,7 +280,7 @@ function uc_order_rules_action_info() {
  ******************************************************************************/
 
 /**
- * Check that the order has the selected combination of products.
+ * Checks that the order has the selected combination of products.
  */
 function uc_order_condition_has_products($order, $products, $required, $forbidden) {
   $order_products = array();
@@ -320,7 +320,7 @@ function uc_order_condition_has_products_options() {
 }
 
 /**
- * Check that the order has the selected number of products.
+ * Checks that the order has the selected number of products.
  *
  * @see uc_order_condition_count_products_form()
  */
@@ -377,7 +377,7 @@ function uc_order_condition_value_operator_options() {
 }
 
 /**
- * Checkt the weight of the order's products.
+ * Checks the weight of the order's products.
  *
  * @see uc_order_condition_products_weight_form()
  */
@@ -424,7 +424,7 @@ function uc_order_condition_weight_units_options() {
 }
 
 /**
- * Check that the order is shippable.
+ * Checks that the order is shippable.
  */
 function uc_order_condition_is_shippable($order, $settings) {
   return uc_order_is_shippable($order);
@@ -435,7 +435,7 @@ function uc_order_condition_is_shippable($order, $settings) {
  ******************************************************************************/
 
 /**
- * Update an order's status.
+ * Updates an order's status.
  *
  * @see uc_order_action_update_status_form()
  */
@@ -462,7 +462,7 @@ function uc_order_action_update_status_options() {
 }
 
 /**
- * Add a comment to an order.
+ * Adds a comment to an order.
  *
  * @see uc_order_action_add_comment_form()
  */
@@ -485,9 +485,10 @@ function uc_order_action_order_comment_types() {
 }
 
 /**
- * Send an email concerning an order.
+ * Sends an email concerning an order.
  *
- * The recipients, subject, and message fields take order token replacements.
+ * The 'Sender', 'Recipients', 'Subject', and 'Message' fields accept
+ * order token replacements.
  *
  * @see uc_order_action_email_form()
  */
@@ -499,23 +500,37 @@ function uc_order_action_email($order, $from, $addresses, $subject, $message, $f
     'message' => $message,
     'format' => $format,
   );
+
   // Token replacements for the subject and body
   $settings['replacements'] = array(
     'uc_order' => $order,
   );
 
-  // Apply token replacements to from and recipient e-mail addressses.
+  // Apply token replacements to the 'from' e-mail address.
   $from = token_replace($settings['from'], $settings['replacements']);
-  $addresses = token_replace($settings['addresses'], $settings['replacements']);
+  if (empty($from)) {
+    $from = uc_store_email_from();
+  }
 
+  // Apply token replacements to 'recipient' e-mail addresses.
+  $addresses = token_replace($settings['addresses'], $settings['replacements']);
   // Split up our recipient e-mail addresses.
   $recipients = array();
   foreach (explode("\n", $addresses) as $address) {
-    $recipients[] = trim($address);
+    $address = trim($address);
+    // Remove blank lines
+    if (!empty($address)) {
+      $recipients[] = $address;
+    }
+  }
+
+  if (empty($recipients)) {
+    watchdog('uc_order', 'Attempted to send an order e-mail with no recipient.', array(), WATCHDOG_ERROR);
+    return;
   }
 
   foreach ($recipients as $email) {
-    $sent = drupal_mail('uc_order', 'action-mail', $email, uc_store_mail_recipient_language($email), $settings, empty($settings['from']) ? uc_store_email_from() : $settings['from']);
+    $sent = drupal_mail('uc_order', 'action-mail', $email, uc_store_mail_recipient_language($email), $settings, $from);
 
     if (!$sent['result']) {
       watchdog('uc_order', 'Attempt to e-mail @email concerning order @order_id failed.', array('@email' => $email, '@order_id' => $order->order_id), WATCHDOG_ERROR);
@@ -539,9 +554,9 @@ function uc_order_message_formats() {
 }
 
 /**
- * Email an invoice.
+ * Emails an invoice.
  *
- * The subject and addresses fields take order token replacements.
+ * The 'Sender', 'Subject' and 'Addresses' fields take order token replacements.
  */
 function uc_order_action_email_invoice($order, $from, $addresses, $subject, $template, $view) {
   $settings = array(
@@ -551,16 +566,27 @@ function uc_order_action_email_invoice($order, $from, $addresses, $subject, $tem
     'template' => $template,
     'view' => $view,
   );
-  // Token replacements for the subject and body
+  // Token replacements for the from, subject and body
   $settings['replacements'] = array(
     'uc_order' => $order,
   );
 
-  $recipients = array();
-  $addresses = token_replace($settings['addresses'], $settings['replacements']);
+  // Apply token replacements to the 'from' e-mail address.
+  $from = token_replace($settings['from'], $settings['replacements']);
+  if (empty($from)) {
+    $from = uc_store_email_from();
+  }
 
+  // Apply token replacements to 'recipient' e-mail addresses.
+  $addresses = token_replace($settings['addresses'], $settings['replacements']);
+  // Split up our recipient e-mail addresses.
+  $recipients = array();
   foreach (explode("\n", $addresses) as $address) {
-    $recipients[] = trim($address);
+    $address = trim($address);
+    // Remove blank lines
+    if (!empty($address)) {
+      $recipients[] = $address;
+    }
   }
 
   $settings['message'] = theme('uc_order', array('order' => $order, 'op' => $settings['view'], 'template' => $settings['template']));
@@ -571,7 +597,7 @@ function uc_order_action_email_invoice($order, $from, $addresses, $subject, $tem
   }
 
   foreach ($recipients as $email) {
-    $sent = drupal_mail('uc_order', 'action-mail', $email, uc_store_mail_recipient_language($email), $settings, empty($settings['from']) ? uc_store_email_from() : $settings['from']);
+    $sent = drupal_mail('uc_order', 'action-mail', $email, uc_store_mail_recipient_language($email), $settings, $from);
 
     if (!$sent['result']) {
       watchdog('uc_order', 'Attempt to e-mail invoice for order @order_id to @email failed.', array('@email' => $email, '@order_id' => $order->order_id), WATCHDOG_ERROR);

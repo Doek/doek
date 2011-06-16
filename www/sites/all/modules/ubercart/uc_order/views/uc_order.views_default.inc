@@ -1,11 +1,13 @@
 <?php
-// $Id: uc_order.views_default.inc,v 1.1 2010/11/24 15:18:30 islandusurper Exp $
 
 /**
  * @file
  * Provide default Views configurations for uc_order.module.
  */
 
+/**
+ * Implements hook_views_default_views().
+ */
 function uc_order_views_default_views() {
   $view = new view;
   $view->name = 'uc_orders';

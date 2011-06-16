@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_cart.rules.inc,v 1.1 2010/07/16 12:57:36 islandusurper Exp $
 
 /**
  * @file
@@ -12,7 +11,7 @@
  ******************************************************************************/
 
 /**
- * Implement hook_rules_event_info().
+ * Implements hook_rules_event_info().
  */
 function uc_cart_rules_event_info() {
   $events['uc_checkout_complete'] = array(
@@ -28,4 +27,3 @@ function uc_cart_rules_event_info() {
 
   return $events;
 }
-

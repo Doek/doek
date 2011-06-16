@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_taxes.api.php,v 1.4 2010/07/16 12:57:37 islandusurper Exp $
 
 /**
  * @file
@@ -12,10 +11,11 @@
  */
 
 /**
- * Calculate tax line items for an order.
+ * Calculates tax line items for an order.
  *
  * @param $order
  *   An order object or an order id.
+ *
  * @return
  *   An array of tax line item objects keyed by a module-specific id.
  */
@@ -77,4 +77,3 @@ function hook_uc_calculate_tax($order) {
 /**
  * @} End of "addtogroup hooks".
  */
-

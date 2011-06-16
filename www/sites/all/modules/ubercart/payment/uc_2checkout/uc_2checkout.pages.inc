@@ -1,12 +1,13 @@
 <?php
-// $Id: uc_2checkout.pages.inc,v 1.8 2010/10/18 18:25:10 islandusurper Exp $
 
 /**
  * @file
  * 2checkout menu items.
- *
  */
 
+/**
+ * Finalizes 2checkout transaction.
+ */
 function uc_2checkout_complete($cart_id = 0) {
   watchdog('2Checkout', 'Receiving new order notification for order !order_id.', array('!order_id' => check_plain($_POST['merchant_order_id'])));
 
@@ -25,7 +26,7 @@ function uc_2checkout_complete($cart_id = 0) {
 
   if ($_POST['demo'] == 'Y' xor variable_get('uc_2checkout_demo', TRUE)) {
     watchdog('uc_2checkout', 'The 2checkout payment for order <a href="!order_url">@order_id</a> demo flag was set to %flag, but the module is set to %mode mode.',
-      array('!order_url' => url('admin/store/orders/'. $order->order_id), '@order_id' => $order->order_id, '%flag' => $_POST['demo'] == 'Y' ? 'Y' : 'N', '%mode' => variable_get('uc_2checkout_demo', TRUE) ? 'Y' : 'N'), WATCHDOG_ERROR);
+      array('!order_url' => url('admin/store/orders/' . $order->order_id), '@order_id' => $order->order_id, '%flag' => $_POST['demo'] == 'Y' ? 'Y' : 'N', '%mode' => variable_get('uc_2checkout_demo', TRUE) ? 'Y' : 'N'), WATCHDOG_ERROR);
     if (!variable_get('uc_2checkout_demo', TRUE)) {
       return MENU_ACCESS_DENIED;
     }

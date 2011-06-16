@@ -1,5 +1,4 @@
 <?php
-// $Id: rules.plugins.inc,v 1.1.2.11 2011/02/15 17:05:10 fago Exp $
 
 /**
  * @file Contains plugin info and implementations not needed for rule evaluation.
@@ -103,12 +102,11 @@ class RulesCondition extends RulesAbstractPlugin implements RulesConditionInterf
     return $result;
   }
 
-  public function export($prefix = '',$php = FALSE) {
+  protected function exportToArray() {
     $not = $this->negate ? 'NOT ' : '';
     $export = $this->exportSettings();
     // Abbreviate the export making "USING" implicit.
-    $export = array($not . $this->elementName => isset($export['USING']) ? $export['USING'] : array());
-    return $this->isRoot() ? $this->returnExport($export, $prefix, $php) : $export;
+    return array($not . $this->elementName => isset($export['USING']) ? $export['USING'] : array());
   }
 
   public function import(array $export) {
@@ -260,10 +258,14 @@ class Rule extends RulesActionContainer {
     return $vars;
   }
 
-  public function export($prefix = '',$php = FALSE) {
-    $export = parent::export($prefix, $php);
+  protected function exportFlat() {
+    return $this->isRoot();
+  }
+
+  protected function exportToArray() {
+    $export = parent::exportToArray();
     if (!$this->isRoot()) {
-      $export['LABEL'] = $this->label;
+      $export[strtoupper($this->plugin())]['LABEL'] = $this->label;
     }
     return $export;
   }
@@ -277,8 +279,8 @@ class Rule extends RulesActionContainer {
   }
 
   public function import(array $export) {
-    if (!$this->isRoot() && isset($export['LABEL'])) {
-      $this->label = $export['LABEL'];
+    if (!$this->isRoot() && isset($export[strtoupper($this->plugin())]['LABEL'])) {
+      $this->label = $export[strtoupper($this->plugin())]['LABEL'];
     }
     parent::import($export);
   }
@@ -312,12 +314,14 @@ class Rule extends RulesActionContainer {
   }
 
   /**
-   * Overriden to expose the variables of all actions.
+   * Overriden to expose the variables of all actions for embedded rules.
    */
   public function providesVariables() {
     $provides = parent::providesVariables();
-    foreach ($this->actions() as $action) {
-      $provides += $action->providesVariables();
+    if (!$this->isRoot()) {
+      foreach ($this->actions() as $action) {
+        $provides += $action->providesVariables();
+      }
     }
     return $provides;
   }
@@ -569,6 +573,13 @@ class RulesLoop extends RulesActionContainer {
       $state2 = clone $state;
       $state2->addVariable($item_var_name, $list[$key], $item_var_info);
       parent::evaluate($state2);
+
+      // Update variables from parent scope.
+      foreach ($state->variables as $var_key => &$var_value) {
+        if (array_key_exists($var_key, $state2->variables)) {
+          $var_value = $state2->variables[$var_key];
+        }
+      }
     }
   }
 
@@ -580,11 +591,11 @@ class RulesLoop extends RulesActionContainer {
     return !empty($this->label) ? $this->label : t('Loop');
   }
 
-  protected function exportChildren($key = 'LOOP OVER') {
+  protected function exportChildren($key = 'DO') {
     return parent::exportChildren($key);
   }
 
-  protected function importChildren($export, $key = 'LOOP OVER') {
+  protected function importChildren($export, $key = 'DO') {
     parent::importChildren($export, $key);
   }
 }
@@ -663,6 +674,7 @@ class RulesEventSet extends RulesRuleSet {
           // the static cache.
           $event->rule(clone $rule);
         }
+        $event->sortChildren();
         $event->optimize();
         // Allow modules to alter the cached event set.
         drupal_alter('rules_event_set', $name, $event);

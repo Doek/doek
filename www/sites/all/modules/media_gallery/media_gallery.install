@@ -72,7 +72,7 @@ function media_gallery_install() {
   cache_clear_all('*', 'cache', TRUE);
   drupal_static_reset('image_styles');
   drupal_static_reset('image_effects');
-  drupal_static_reset('styles_presets');
+  styles_style_flush();
 
   // Add the taxonomy vocabulary for media gallery collections.
   $vocabulary = media_gallery_create_taxonomy_vocab();
@@ -125,6 +125,13 @@ function media_gallery_requirements() {
     $field = field_info_field($field_name);
     // If the field doesn't exist, we will create it on install.
     if (!$field) {
+      continue;
+    }
+    // Between Media Gallery beta2 and beta3, field definitions were changed
+    // from list_number to list_float, to keep up with Drupal core changes.
+    // list_update_7001() handles the updating of existing fields, but
+    // update.php checks all requirements prior to running any update function.
+    if ($field['type'] == 'list_number' && $field_definition['type'] == 'list_float') {
       continue;
     }
     if ($field['type'] != $field_definition['type']) {

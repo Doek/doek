@@ -1,5 +1,4 @@
 <?php
-// $Id: hong_kong_344_1.cif,v 1.6 2010/04/14 14:20:56 islandusurper Exp $
 
 function hong_kong_install() {
   // Make the entry in the country table.

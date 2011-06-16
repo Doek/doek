@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_order.admin.inc,v 1.37 2010/10/07 19:10:46 islandusurper Exp $
 
 /**
  * @file
@@ -7,141 +6,65 @@
  */
 
 /**
- * Display an overview of the order settings.
- */
-function uc_order_settings_overview() {
-  $summaries = array();
-
-  // don't load admin/store/settings/orders/edit/workflow/create
-  $summaries = array_merge($summaries, uc_summarize_child_form_pages('admin/store/settings/orders/edit/basic', FALSE, TRUE));
-  $summaries = array_merge($summaries, uc_summarize_child_form_pages('admin/store/settings/orders/edit/workflow', FALSE, TRUE));
-  $summaries = array_merge($summaries, uc_summarize_child_form_pages('admin/store/settings/orders/edit/panes', FALSE, TRUE));
-
-  // Theme it all up in a summaries overview.
-  return array(
-    '#theme' => 'uc_summary_overview',
-    '#summaries' => $summaries,
-  );
-}
-
-/**
- * Generate the settings form for orders.
+ * Generates the settings form for orders.
  *
  * @ingroup forms
  */
 function uc_order_settings_form($form, &$form_state) {
+  $form['order-settings'] = array('#type' => 'vertical_tabs');
+
   $form['admin'] = array(
     '#type' => 'fieldset',
     '#title' => t('Admin settings'),
-    '#summary callback' => 'uc_summarize_form',
-    '#collapsible' => FALSE,
-    '#collapsed' => FALSE,
+    '#group' => 'order-settings',
   );
-
   $form['admin']['uc_order_number_displayed'] = array(
     '#type' => 'select',
     '#title' => t('Number of orders on overview screen'),
     '#options' => drupal_map_assoc(range(10, 100, 10)),
-    '#summary' => t('Displaying @orders orders at a time on the admin overview', array('@orders' => variable_get('uc_order_number_displayed', 30))),
     '#default_value' => variable_get('uc_order_number_displayed', 30),
   );
   $form['admin']['uc_order_logging'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable order logging'),
-    '#summary callback' => 'uc_summarize_checkbox',
-    '#summary arguments' => array(
-      t('Order logging is enabled.'),
-      t('Order logging is disabled.'),
-    ),
     '#default_value' => variable_get('uc_order_logging', TRUE),
   );
   $form['admin']['uc_order_capitalize_addresses'] = array(
     '#type' => 'checkbox',
     '#title' => t('Capitalize address on order screens'),
-    '#summary callback' => 'uc_summarize_checkbox',
-    '#summary arguments' => array(
-      t('Addresses on order view pages are capitalized.'),
-      t('Addresses on order view pages are not capitalized.'),
-    ),
     '#default_value' => variable_get('uc_order_capitalize_addresses', TRUE),
   );
-  if (module_exists('ubrowser') && module_exists('uc_catalog')) {
-    $form['admin']['uc_ubrowser_product_select'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Use the uBrowser product select on order edit screens'),
-      '#summary callback' => 'uc_summarize_checkbox',
-      '#summary arguments' => array(
-        t('You are using the uBrowser to add products to orders.'),
-        t('You are not using the uBrowser to add products to orders.'),
-      ),
-      '#default_value' => variable_get('uc_ubrowser_product_select', TRUE),
-    );
-  }
 
   $form['customer'] = array(
     '#type' => 'fieldset',
     '#title' => t('Customer settings'),
-    '#summary callback' => 'uc_summarize_form',
-    '#collapsible' => FALSE,
-    '#collapsed' => FALSE,
+    '#group' => 'order-settings',
   );
   $form['customer']['uc_cust_view_order_invoices'] = array(
     '#type' => 'checkbox',
     '#title' => t('Allow customers to view order invoices from their order history.'),
     '#description' => t('Enabling this feature allows pop-up invoices to be opened when a particular order is being viewed.'),
-    '#summary callback' => 'uc_summarize_checkbox',
-    '#summary arguments' => array(
-      t('Customers are allowed to view order invoices from their accounts.'),
-      t('Customers are not allowed to view order invoices from their accounts.'),
-    ),
     '#default_value' => variable_get('uc_cust_view_order_invoices', TRUE),
   );
   $form['customer']['uc_cust_order_invoice_template'] = array(
     '#type' => 'select',
     '#title' => t('On-site invoice template'),
-    '#description' => t('Select the invoice template to use when invoices are viewed on the site.<br />This is separate from the template used to e-mail invoices to customers which is configured through <a href="!url">Rules</a>.', array('!url' => url(RULES_UI_PATH))),
+    '#description' => t('Select the invoice template to use when invoices are viewed on the site.'),
     '#options' => uc_order_template_options(),
-    '#summary' => t('You are using the %template order invoice template.', array('%template' => variable_get('uc_cust_order_invoice_template', 'customer'))),
     '#default_value' => variable_get('uc_cust_order_invoice_template', 'customer'),
   );
+  if (module_exists('uc_cart') && module_exists('rules')) {
+    $form['customer']['uc_cust_order_invoice_template']['#description'] .= '<br />' . t('This is separate from the template used to e-mail invoices to customers which is configured through <a href="!url">Rules</a>.', array('!url' => url('admin/store/settings/checkout/rules')));
+  }
 
   return system_settings_form($form);
 }
 
 /**
- * Summarize the order status settings.
+ * Displays the order workflow form for order state and status customization.
  *
- * @param $form
- *   The form passed from the summarizer
- * @param $states
- *   An array of order statuses
- * @return
- *   An array of summary information
- *
- * This function summarizes the order statuses that have been defined. It is
- * organized under a parent node specifying that the following settings are
- * order statuses.
- */
-function _uc_order_states_summarize($form, $states) {
-  $statuses = $items = array();
-
-  foreach ($states as $state) {
-    $items[] = t('@state', array('@state' => $state['title']));
-  }
-
-  $statuses[] = array(
-    'data' => t('The following order statuses have been defined:'),
-    'children' => $items,
-  );
-
-  return $statuses;
-}
-
-/**
- * Display the order workflow form for order state and status customization.
- *
- * @ingroup forms
  * @see uc_order_workflow_form_submit()
+ * @ingroup forms
  */
 function uc_order_workflow_form($form, &$form_state) {
   $states = uc_order_state_list();
@@ -152,14 +75,11 @@ function uc_order_workflow_form($form, &$form_state) {
     '#title' => t('Order states'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
-    '#summary callback' => 'uc_summarize_null',
     '#theme' => 'uc_order_state_table',
     '#tree' => TRUE,
   );
 
   foreach ($states as $state) {
-
-    $form['order_states'][$state['id']]['#summary callback'] = 'uc_summarize_form';
     $form['order_states'][$state['id']]['title'] = array(
       '#markup' => $state['title'],
     );
@@ -189,8 +109,6 @@ function uc_order_workflow_form($form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Order statuses'),
     '#collapsible' => FALSE,
-    '#summary callback' => '_uc_order_states_summarize',
-    '#summary arguments' => array($states),
     '#theme' => 'uc_order_status_table',
     '#tree' => TRUE,
   );
@@ -216,13 +134,13 @@ function uc_order_workflow_form($form, &$form_state) {
       '#delta' => 20,
       '#default_value' => $status['weight'],
     );
+    $form['order_statuses'][$status['id']]['locked'] = array(
+      '#type' => 'value',
+      '#value' => $status['locked'],
+    );
     if ($status['locked']) {
       $form['order_statuses'][$status['id']]['state'] = array(
         '#markup' => uc_order_state_data($status['state'], 'title'),
-      );
-      $form['order_statuses'][$status['id']]['locked'] = array(
-        '#type' => 'hidden',
-        '#value' => TRUE,
       );
     }
     else {
@@ -237,12 +155,6 @@ function uc_order_workflow_form($form, &$form_state) {
     }
   }
 
-  $form['order_statuses']['actions'] = array('#type' => 'actions');
-  $form['order_statuses']['actions']['create'] = array(
-    '#type' => 'submit',
-    '#value' => t('Create new status'),
-  );
-
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -253,6 +165,8 @@ function uc_order_workflow_form($form, &$form_state) {
 }
 
 /**
+ * Form submission handler for uc_order_workflow_form().
+ *
  * @see uc_order_workflow_form()
  */
 function uc_order_workflow_form_submit($form, &$form_state) {
@@ -285,13 +199,7 @@ function uc_order_workflow_form_submit($form, &$form_state) {
     }
   }
 
-  switch ($form_state['values']['op']) {
-    case t('Submit changes'):
-      drupal_set_message(t('Order workflow information saved.'));
-      break;
-    case t('Create new status'):
-      $form_state['redirect'] = 'admin/store/settings/orders/edit/workflow/create';
-  }
+  drupal_set_message(t('Order workflow information saved.'));
 }
 
 /**
@@ -301,6 +209,7 @@ function uc_order_workflow_form_submit($form, &$form_state) {
  */
 function uc_order_panes_form($form, &$form_state) {
   $panes = _uc_order_pane_list();
+  $form['pane-settings'] = array('#type' => 'vertical_tabs');
 
   foreach ($panes as $pane) {
     foreach ($pane['show'] as $view) {
@@ -336,12 +245,10 @@ function uc_order_panes_form($form, &$form_state) {
       '#theme' => 'uc_pane_sort_table',
       '#pane_prefix' => 'uc_order_pane',
       '#type' => 'fieldset',
-      '#title' => t('Order panes on !screen screen', array('!screen' => $titles[$view])),
-      '#summary callback' => '_uc_order_panes_summarize',
-      '#summary arguments' => array($data, $titles[$view], $view),
+      '#title' => t('!screen screen', array('!screen' => $titles[$view])),
+      '#group' => 'pane-settings',
     );
     $form['panes'][$view] = array_merge($fieldset, $form['panes'][$view]);
-    $form['panes']['#summary callback'] = 'uc_summarize_form';
   }
 
   return system_settings_form($form);
@@ -350,17 +257,15 @@ function uc_order_panes_form($form, &$form_state) {
 /**
  * Present the form to create a custom order status.
  *
+ * @see uc_order_status_create_form_validate()
+ * @see uc_order_status_create_form_submit()
  * @ingroup forms
- * @see
- *   uc_order_status_create_form_validate()
- *   uc_order_status_create_form_submit()
  */
 function uc_order_status_create_form($form, &$form_state) {
   $form['status_id'] = array(
     '#type' => 'textfield',
     '#title' => t('Order status ID'),
     '#description' => t('Must be a unique ID with no spaces.'),
-    '#summary callback' => 'uc_summarize_null',
     '#size' => 32,
     '#maxlength' => 32,
     '#required' => TRUE,
@@ -370,7 +275,6 @@ function uc_order_status_create_form($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Title'),
     '#description' => t('The order status title displayed to users.'),
-    '#summary callback' => 'uc_summarize_null',
     '#size' => 32,
     '#maxlength' => 48,
     '#required' => TRUE,
@@ -385,7 +289,6 @@ function uc_order_status_create_form($form, &$form_state) {
     '#type' => 'select',
     '#title' => t('Order state'),
     '#description' => t('Set which order state this status is for.'),
-    '#summary callback' => 'uc_summarize_null',
     '#options' => $options,
     '#default_value' => 'post_checkout',
   );
@@ -413,6 +316,7 @@ function uc_order_status_create_form($form, &$form_state) {
  * Ensure the new status id is unique and has no spaces.
  *
  * @see uc_order_status_create_form()
+ * @see uc_order_status_create_form_submit()
  */
 function uc_order_status_create_form_validate($form, &$form_state) {
   $new_status = strtolower(trim($form_state['values']['status_id']));
@@ -429,7 +333,10 @@ function uc_order_status_create_form_validate($form, &$form_state) {
 }
 
 /**
+ * Form submission handler for uc_order_status_create_form_submit().
+ *
  * @see uc_order_status_create_form()
+ * @see uc_order_status_create_form_validate()
  */
 function uc_order_status_create_form_submit($form, &$form_state) {
   db_insert('uc_order_statuses')
@@ -448,9 +355,9 @@ function uc_order_status_create_form_submit($form, &$form_state) {
 }
 
 /**
- * Display the main order admin screen, an overview of all received orders.
+ * Displays the main order admin screen, an overview of all received orders.
  */
-function uc_order_admin($query = NULL, $args = NULL, $search = FALSE) {
+function uc_order_admin($condition = NULL, $search = FALSE) {
   $header = array(
     array('data' => t('Actions')),
     array('data' => t('Order ID'), 'field' => 'o.order_id', 'sort' => 'desc'),
@@ -460,42 +367,32 @@ function uc_order_admin($query = NULL, $args = NULL, $search = FALSE) {
     array('data' => t('Status'), 'field' => 'os.title'),
   );
 
-  $address = variable_get('uc_customer_list_address', 'billing');
-  if ($address == 'shipping') {
-    $address = 'delivery';
+  $address = variable_get('uc_customer_list_address', 'billing') == 'shipping' ? 'delivery' : 'billing';
+
+  $query = db_select('uc_orders', 'o')
+    ->fields('o', array(
+      'order_id',
+      'uid',
+      'order_total',
+      'created',
+      $address . '_first_name',
+      $address . '_last_name',
+      'order_status',
+    ));
+
+  $query->leftJoin('uc_order_statuses', 'os', 'o.order_status = os.order_status_id');
+  $query->fields('os', array('title'));
+
+  if (!is_null($condition) && $condition->count()) {
+    $query->condition($condition);
   }
-  else {
-    $address = 'billing';
-  }
 
-  if (is_null($query)) {
-    $query = db_select('uc_orders', 'o')
-      ->fields('o', array(
-        'order_id',
-        'uid',
-        'order_total',
-        'created',
-      ));
-    $o_first_name = $query->addField('o', $address . '_first_name');
-    $o_last_name = $query->addField('o', $address . '_last_name');
-    $o_order_status = $query->addField('o', 'order_status');
-
-    $os = $query->leftJoin('uc_order_statuses', 'os', 'o.order_status = os.order_status_id');
-
-    $query->fields($os, array('title'));
-    $show_status = 1;
-
-    if (arg(3) == 'sort' && !is_null(arg(4))) {
-      $_SESSION['sort_status'] = arg(4);
+  if (!isset($_GET['status']) || $_GET['status'] != 'all') {
+    if (!empty($_GET['status']) && is_string($_GET['status'])) {
+      $query->condition('o.order_status', $_GET['status']);
     }
-
-    if (!isset($_SESSION['sort_status']) || $_SESSION['sort_status'] != 'all') {
-      if (!empty($_SESSION['sort_status']) && is_string($_SESSION['sort_status'])) {
-        $query->condition($o_order_status, $_SESSION['sort_status']);
-      }
-      else {
-        $query->condition($o_order_status, uc_order_status_list('general', TRUE), 'IN');
-      }
+    else {
+      $query->condition('o.order_status', uc_order_status_list('general', TRUE), 'IN');
     }
   }
 
@@ -507,21 +404,13 @@ function uc_order_admin($query = NULL, $args = NULL, $search = FALSE) {
 
   $result = $query->execute();
   foreach ($result as $order) {
-    if ($address == 'shipping') {
-      $order_name = $order->delivery_first_name . ' ' . $order->delivery_last_name;
-    }
-    else {
-      $order_name = $order->billing_first_name . ' ' . $order->billing_last_name;
-    }
-    if (trim($order_name) == '') {
-      if ($order->uid !== 0) {
-        $account = db_query("SELECT name FROM {users} WHERE uid = :uid", array(':uid' => $order->uid))->fetchField();
-      }
-      if (empty($account)) {
-        $order_name = t('User: none');
+    $order_name = trim($order->{$address . '_first_name'} . ' ' . $order->{$address . '_last_name'});
+    if (!$order_name) {
+      if ($order->uid && $account = db_query("SELECT name FROM {users} WHERE uid = :uid", array(':uid' => $order->uid))->fetchField()) {
+        $order_name = t('User: !name', array('!name' => $account));
       }
       else {
-        $order_name = t('User: !name', array('!name' => $account));
+        $order_name = t('User: none');
       }
     }
 
@@ -531,7 +420,7 @@ function uc_order_admin($query = NULL, $args = NULL, $search = FALSE) {
         array('data' => $order->order_id),
         array('data' => check_plain($order_name), 'nowrap' => 'nowrap'),
         array('data' => array('#theme' => 'uc_price', '#price' => $order->order_total), 'align' => 'right'),
-        array('data' => format_date($order->created, 'custom', variable_get('uc_date_format_default', 'm/d/Y')), 'align' => 'center'),
+        array('data' => format_date($order->created, 'uc_store'), 'align' => 'center'),
         array('data' => $order->title),
       ),
       'id' => 'order-' . $order->order_id,
@@ -563,6 +452,7 @@ function uc_order_admin($query = NULL, $args = NULL, $search = FALSE) {
     '#header' => $header,
     '#rows' => $rows,
     '#attributes' => array('class' => array('uc-orders-table')),
+    '#weight' => 1,
   );
   $build['pager'] = array(
     '#theme' => 'pager',
@@ -574,13 +464,13 @@ function uc_order_admin($query = NULL, $args = NULL, $search = FALSE) {
 }
 
 /**
- * Create the order status select box on the order overview screen.
+ * Creates the order status select box on the order overview screen.
  *
- * @ingroup forms
  * @see uc_order_admin_sort_form_submit()
+ * @ingroup forms
  */
 function uc_order_admin_sort_form($form, &$form_state) {
-  $options = array('-1' => t('Active orders'));
+  $options = array('' => t('Active orders'));
 
   foreach (uc_order_status_list() as $status) {
     $options[$status['id']] = $status['title'];
@@ -588,18 +478,11 @@ function uc_order_admin_sort_form($form, &$form_state) {
 
   $options['all'] = t('All orders');
 
-  if (!isset($_SESSION['sort_status']) || is_null($_SESSION['sort_status'])) {
-    $default_status = -1;
-  }
-  else {
-    $default_status = $_SESSION['sort_status'];
-  }
-
   $form['status'] = array(
     '#type' => 'select',
     '#title' => t('View by status'),
     '#options' => $options,
-    '#default_value' => $default_status,
+    '#default_value' => isset($_GET['status']) ? $_GET['status'] : NULL,
     '#attributes' => array('onchange' => 'this.form.submit();')
   );
 
@@ -614,29 +497,29 @@ function uc_order_admin_sort_form($form, &$form_state) {
 }
 
 /**
+ * Form submission handler for uc_order_admin_sort_form().
+ *
  * @see uc_order_admin_sort_form()
  */
 function uc_order_admin_sort_form_submit($form, &$form_state) {
-  if ($form_state['values']['status'] == '-1') {
-    unset($_SESSION['sort_status']);
-    drupal_goto('admin/store/orders');
+  $options = array();
+  if ($form_state['values']['status']) {
+    $options['query']['status'] = $form_state['values']['status'];
   }
-  else {
-    $_SESSION['sort_status'] = $form_state['values']['status'];
-    drupal_goto('admin/store/orders/sort/' . $form_state['values']['status']);
-  }
+  drupal_goto('admin/store/orders', $options);
 }
 
 /**
- * Create the textfield box to select an order by ID on the order overview screen.
+ * Creates a textfield box to select an order by ID on the order
+ * overview screen.
  *
- * @ingroup forms
  * @see uc_order_select_form_submit()
+ * @ingroup forms
  */
 function uc_order_select_form($form, &$form_state) {
   $form['order_id'] = array(
     '#type' => 'textfield',
-    '#title' => t('View order'),
+    '#title' => t('View order number'),
     '#size' => 10,
     '#maxlength' => 10
   );
@@ -652,6 +535,8 @@ function uc_order_select_form($form, &$form_state) {
 }
 
 /**
+ * Form submission handler for uc_order_select_form().
+ *
  * @see uc_order_select_form()
  */
 function uc_order_select_form_submit($form, &$form_state) {
@@ -661,7 +546,7 @@ function uc_order_select_form_submit($form, &$form_state) {
 }
 
 /**
- * Create a new order and redirect to its edit screen.
+ * Creates a new order and redirect to its edit screen.
  */
 function uc_order_create() {
   drupal_add_js(array('ucURL' => array('adminOrders' => url('admin/store/orders/'))), 'setting');
@@ -685,10 +570,10 @@ function uc_order_create() {
 }
 
 /**
- * Select a customer to whom to assign a new order.
+ * Selects a customer to whom to assign a new order.
  *
- * @ingroup forms
  * @see uc_order_create_form_submit()
+ * @ingroup forms
  */
 function uc_order_create_form($form, &$form_state) {
   $form['customer'] = array(
@@ -709,10 +594,6 @@ function uc_order_create_form($form, &$form_state) {
     '#size' => 10,
     '#disabled' => TRUE,
   );
-  $form['customer']['primary_email'] = array(
-    '#type' => 'hidden',
-    '#default_value' => '',
-  );
   $form['customer']['text']['primary_email_text'] = array(
     '#type' => 'textfield',
     '#title' => t('Primary e-mail'),
@@ -732,6 +613,8 @@ function uc_order_create_form($form, &$form_state) {
 }
 
 /**
+ * Form submission handler for uc_order_create_form().
+ *
  * @see uc_order_create_form()
  */
 function uc_order_create_form_submit($form, &$form_state) {
@@ -744,7 +627,7 @@ function uc_order_create_form_submit($form, &$form_state) {
 }
 
 /**
- * Display a search form to browse all received orders.
+ * Displays a search form to browse all received orders.
  */
 function uc_order_usearch() {
   $build = array();
@@ -762,59 +645,42 @@ function uc_order_usearch() {
     $start_date = db_like(arg(11));
     $end_date = db_like(arg(12));
 
-    $query = db_select('uc_orders', 'o');
-    $os = $query->leftJoin('uc_order_statuses', 'os', 'o.order_status = os.order_status_id');
-    $query->fields('o', array(
-        'order_id',
-        'order_total',
-        'created',
-      ))
-      ->fields($os, array('title'));
-    $ob_first_name = $query->addField('o', 'billing_first_name', 'ob_first_name');
-    $ob_last_name = $query->addField('o', 'billing_last_name', 'ob_last_name');
-    $ob_company = $query->addField('o', 'billing_company', 'ob_company');
-    $os_first_name = $query->addField('o', 'delivery_first_name', 'os_first_name');
-    $os_last_name = $query->addField('o', 'delivery_last_name', 'os_last_name');
-    $os_company = $query->addField('o', 'delivery_company', 'os_company');
-    $o_order_status = $query->addField('o', 'order_status', 'o_order_status');
+    $condition = db_and();
 
-    $query->condition($o_order_status, uc_order_status_list('specific', TRUE), 'NOT IN')
-      ->orderBy('created', 'DESC');
-
-    if ($billing_first_name !== '0' && $billing_first_name !== '%') {
-      $query->condition($ob_first_name, $billing_first_name, 'LIKE');
+    if ($billing_first_name && $billing_first_name !== '%') {
+      $condition->condition('o.billing_first_name', $billing_first_name, 'LIKE');
     }
-    if ($billing_last_name !== '0' && $billing_last_name !== '%') {
-      $query->condition($ob_last_name, $billing_last_name, 'LIKE');
+    if ($billing_last_name && $billing_last_name !== '%') {
+      $condition->condition('o.billing_last_name', $billing_last_name, 'LIKE');
     }
-    if ($billing_company !== '0' && $billing_company !== '%') {
-      $query->condition($ob_company, $billing_company, 'LIKE');
+    if ($billing_company && $billing_company !== '%') {
+      $condition->condition('o.billing_company', $billing_company, 'LIKE');
     }
-    if ($shipping_first_name !== '0' && $shipping_first_name !== '%') {
-      $query->condition($os_first_name, $shipping_first_name, 'LIKE');
+    if ($shipping_first_name && $shipping_first_name !== '%') {
+      $condition->condition('o.delivery_first_name', $shipping_first_name, 'LIKE');
     }
-    if ($shipping_last_name !== '0' && $shipping_last_name !== '%') {
-      $query->condition($os_last_name, $shipping_last_name, 'LIKE');
+    if ($shipping_last_name && $shipping_last_name !== '%') {
+      $condition->condition('o.delivery_last_name', $shipping_last_name, 'LIKE');
     }
-    if ($shipping_company !== '0' && $shipping_company !== '%') {
-      $query->condition($os_company, $shipping_company, 'LIKE');
+    if ($shipping_company && $shipping_company !== '%') {
+      $condition->condition('o.delivery_company', $shipping_company, 'LIKE');
     }
 
-    if ($start_date !== '0') {
-      $query->condition('created', $start_date, '>=');
+    if ($start_date) {
+      $condition->condition('created', $start_date, '>=');
     }
-    if ($end_date !== '0') {
-      $query->condition('created', $end_date, '<=');
+    if ($end_date) {
+      $condition->condition('created', $end_date, '<=');
     }
 
-    $build += uc_order_admin($query, $args, TRUE);
+    $build += uc_order_admin($condition, TRUE);
   }
 
   return $build;
 }
 
 /**
- * Display a form to select a previously entered address.
+ * Displays a form to select a previously entered address.
  *
  * @see uc_order_address_book_form()
  */
@@ -829,10 +695,10 @@ function uc_order_address_book() {
 }
 
 /**
- * Present previously entered addresses as selectable options.
+ * Presents previously entered addresses as selectable options.
  *
- * @ingroup forms
  * @see uc_order_address_book()
+ * @ingroup forms
  */
 function uc_order_address_book_form($form, &$form_state, $uid = 0, $type = 'billing', $func = '') {
   $select = uc_select_address($uid, $type, $func);
@@ -859,7 +725,7 @@ function uc_order_address_book_form($form, &$form_state, $uid = 0, $type = 'bill
 }
 
 /**
- * Present the customer search results and let one of them be chosen.
+ * Presents the customer search results and let one of them be chosen.
  *
  * @see uc_order_select_customer_form()
  */
@@ -869,37 +735,31 @@ function uc_order_select_customer($email = NULL) {
 
   // Return the search results and let them pick one!
   if (arg(4) == 'search') {
-    $first_name = str_replace('*', '%', db_like(arg(5)));
-    $last_name = str_replace('*', '%', db_like(arg(6)));
-    $email = str_replace('*', '%', db_like(arg(7)));
+    $first_name = str_replace('*', '%', db_like($_POST['first_name']));
+    $last_name = str_replace('*', '%', db_like($_POST['last_name']));
+    $email = str_replace('*', '%', db_like($_POST['email']));
 
     $query = db_select('users', 'u')->distinct();
-    $o = $query->leftJoin('uc_orders', 'o', 'u.uid = o.uid');
-
-    $u_uid = $query->addField('u', 'uid', 'u_uid');
-    $u_mail = $query->addField('u', 'mail', 'u_mail');
-    $o_email = $query->addField('o', 'primary_email', 'o_email');
-    $ob_first_name = $query->addField('o', 'billing_first_name', 'ob_first_name');
-    $ob_last_name = $query->addField('o', 'billing_last_name', 'ob_last_name');
-    $o_order_status = $query->addField('o', 'order_status', 'o_order_status');
-
-    $query->condition($u_uid, 0, '>')
+    $query->leftJoin('uc_orders', 'o', 'u.uid = o.uid');
+    $query->fields('u', array('uid', 'mail'))
+      ->fields('o', array('billing_first_name', 'billing_last_name'))
+      ->condition('u.uid', 0, '>')
       ->condition(db_or()
-        ->isNull($o_order_status)
-        ->condition($o_order_status, uc_order_status_list('general', TRUE), 'IN')
+        ->isNull('o.order_status')
+        ->condition('o.order_status', uc_order_status_list('general', TRUE), 'IN')
       )
-      ->orderBy($ob_last_name);
+      ->orderBy('o.billing_last_name');
 
-    if ($first_name !== '0' && $first_name !== '%') {
-      $query->condition($ob_first_name, $first_name, 'LIKE');
+    if ($first_name && $first_name !== '%') {
+      $query->condition('o.billing_first_name', $first_name, 'LIKE');
     }
-    if ($last_name !== '0' && $last_name !== '%') {
-      $query->condition($ob_last_name, $last_name, 'LIKE');
+    if ($last_name && $last_name !== '%') {
+      $query->condition('o.billing_last_name', $last_name, 'LIKE');
     }
-    if ($email !== '0' && $email !== '%') {
+    if ($email && $email !== '%') {
       $query->condition(db_or()
-        ->condition($o_email, $email, 'LIKE')
-        ->condition($u_mail, $email, 'LIKE')
+        ->condition('o.primary_email', $email, 'LIKE')
+        ->condition('u.mail', $email, 'LIKE')
       );
     }
 
@@ -927,7 +787,7 @@ function uc_order_select_customer($email = NULL) {
 
   // Check to see if the e-mail address for a new user is unique.
   if (arg(5) == 'check') {
-    $email = check_plain(arg(6));
+    $email = check_plain($_POST['email']);
     $build['email'] = array('#markup' => '');
     if (!valid_email_address($email)) {
       $build['email']['#markup'] .= t('Invalid e-mail address.') . '<br />';
@@ -936,7 +796,7 @@ function uc_order_select_customer($email = NULL) {
     if ($user = $result->fetchObject()) {
       $build['email']['#markup'] .= t('An account already exists for that e-mail.') . '<br /><br />';
       $build['email']['#markup'] .= '<b>' . t('Use this account now?') . '</b><br />'
-        . t('User !uid - !mail', array('!uid' => $user->uid, '!mail' => $user->mail)) . ' <input type="button" '
+        . t('User @uid - @mail', array('@uid' => $user->uid, '@mail' => $user->mail)) . ' <input type="button" '
         . 'onclick="select_existing_customer(' . $user->uid . ', \''
         . $user->mail . '\');" value="' . t('Apply') . '" /><br /><br /><hr /><br/>';
     }
@@ -980,8 +840,8 @@ function uc_order_select_customer($email = NULL) {
 /**
  * Form to choose a customer from a list.
  *
- * @ingroup forms
  * @see uc_order_select_customer()
+ * @ingroup forms
  */
 function uc_order_select_customer_form($form, &$form_state, $options = NULL) {
   if (is_null(arg(4))) {
@@ -1080,7 +940,7 @@ function uc_order_select_customer_form($form, &$form_state, $options = NULL) {
 }
 
 /**
- * Return the sortable table listing of a customer's orders.
+ * Returns the sortable table listing of a customer's orders.
  *
  * @param $uid
  *   The user ID whose orders you wish to list.
@@ -1117,10 +977,12 @@ function uc_order_history($user) {
   $os_title = $query->addField('os', 'title');
   $op_products = $query->addExpression('SUM(op.qty)', 'products');
 
-  $query->groupBy($o_order_id)
-    ->groupBy($o_created)
-    ->groupBy($os_title)
-    ->groupBy($o_total)
+  $query->groupBy('o.order_id')
+    ->groupBy('o.created')
+    ->groupBy('os.title')
+    ->groupBy('o.order_total')
+    ->groupBy('o.order_status')
+    ->groupBy('o.uid')
     ->orderByHeader($header)
     ->limit(20);
   $query->setCountQuery($count_query);
@@ -1136,11 +998,11 @@ function uc_order_history($user) {
     }
 
     $rows[] = array(
-      array('data' => format_date($order->created, 'custom', variable_get('uc_date_format_default', 'm/d/Y'))),
+      array('data' => format_date($order->created, 'uc_store')),
       array('data' => $link, 'nowrap' => 'nowrap'),
       array('data' => check_plain($order->title)),
       array('data' => (!is_null($order->products) ? $order->products : 0), 'align' => 'center'),
-      array('data' => array('#theme' => 'uc_price', '#price' => $order->total), 'align' => 'right'),
+      array('data' => array('#theme' => 'uc_price', '#price' => $order->order_total), 'align' => 'right'),
     );
   }
 
@@ -1165,13 +1027,12 @@ function uc_order_history($user) {
 }
 
 /**
- * Display the order edit screen, constructed via hook_uc_order_pane().
+ * Displays the order edit screen, constructed via hook_uc_order_pane().
  *
+ * @see uc_order_edit_form_validate()
+ * @see uc_order_edit_form_submit()
+ * @see theme_uc_order_edit_form()
  * @ingroup forms
- * @see
- *   theme_uc_order_edit_form()
- *   uc_order_edit_form_validate()
- *   uc_order_edit_form_submit()
  */
 function uc_order_edit_form($form, &$form_state, $order) {
   $form['#order'] = $order;
@@ -1212,49 +1073,11 @@ function uc_order_edit_form($form, &$form_state, $order) {
 }
 
 /**
- * @ingroup themeable
- * @see uc_order_edit_form()
- */
-function theme_uc_order_edit_form($variables) {
-  $form = $variables['form'];
-  $output = '';
-
-  $panes = _uc_order_pane_list();
-  foreach ($panes as $pane) {
-    if (in_array('edit', $pane['show']) &&
-        variable_get('uc_order_pane_' . $pane['id'] . '_show_edit', TRUE)) {
-      $func = $pane['callback'];
-      if (function_exists($func) && ($contents = $func('edit-theme', $form['#order'], $form)) != NULL) {
-        if (isset($pane['theme_all']) && is_array($pane['theme_all']) && in_array('edit', $pane['theme_all'])) {
-          $output .= $contents;
-        }
-        else {
-          $output .= '<div class="order-pane ' . $pane['class'] . '">';
-          if ($func('show-title', NULL) !== FALSE) {
-            $output .= '<div class="order-pane-title">' . $pane['title'] . ': '
-                     . $func('edit-title', $form['#order'], $form) . '</div>';
-          }
-          $output .= $contents . '</div>';
-        }
-      }
-    }
-  }
-
-  $last = '<div class="order-pane abs-left">' . drupal_render($form['order_id']) . drupal_render($form['order_modified'])
-    . drupal_render($form['form_id']) . drupal_render($form['form_token'])
-    . drupal_render($form['form_build_id'])
-    . drupal_render($form['actions'])
-    . '</div>';
-
-  $output .= drupal_render_children($form) . $last;
-
-  return $output;
-}
-
-/**
  * Prevent order edits from colliding.
  *
  * @see uc_order_edit_form()
+ * @see uc_order_edit_form_submit()
+ * @see theme_uc_order_edit_form()
  */
 function uc_order_edit_form_validate($form, &$form_state) {
   $order = uc_order_load($form_state['values']['order_id']);
@@ -1267,6 +1090,8 @@ function uc_order_edit_form_validate($form, &$form_state) {
 
 /**
  * @see uc_order_edit_form()
+ * @see uc_order_edit_form_validate()
+ * @see theme_uc_order_edit_form()
  */
 function uc_order_edit_form_submit($form, &$form_state) {
   $order = uc_order_load($form_state['values']['order_id']);
@@ -1350,6 +1175,48 @@ function uc_order_edit_form_submit($form, &$form_state) {
 
 /**
  * @see uc_order_edit_form()
+ * @see uc_order_edit_form_validate()
+ * @see uc_order_edit_form_submit()
+ * @ingroup themeable
+ */
+function theme_uc_order_edit_form($variables) {
+  $form = $variables['form'];
+  $output = '';
+
+  $panes = _uc_order_pane_list();
+  foreach ($panes as $pane) {
+    if (in_array('edit', $pane['show']) &&
+        variable_get('uc_order_pane_' . $pane['id'] . '_show_edit', TRUE)) {
+      $func = $pane['callback'];
+      if (function_exists($func) && ($contents = $func('edit-theme', $form['#order'], $form)) != NULL) {
+        if (isset($pane['theme_all']) && is_array($pane['theme_all']) && in_array('edit', $pane['theme_all'])) {
+          $output .= $contents;
+        }
+        else {
+          $output .= '<div class="order-pane ' . $pane['class'] . '">';
+          if ($func('show-title', NULL) !== FALSE) {
+            $output .= '<div class="order-pane-title">' . $pane['title'] . ': '
+                     . $func('edit-title', $form['#order'], $form) . '</div>';
+          }
+          $output .= $contents . '</div>';
+        }
+      }
+    }
+  }
+
+  $last = '<div class="order-pane abs-left">' . drupal_render($form['order_id']) . drupal_render($form['order_modified'])
+    . drupal_render($form['form_id']) . drupal_render($form['form_token'])
+    . drupal_render($form['form_build_id'])
+    . drupal_render($form['actions'])
+    . '</div>';
+
+  $output .= drupal_render_children($form) . $last;
+
+  return $output;
+}
+
+/**
+ * @see uc_order_edit_form()
  */
 function uc_order_edit_form_delete($form, &$form_state) {
   $form_state['redirect'] = 'admin/store/orders/' . $form_state['values']['order_id'] . '/delete';
@@ -1358,9 +1225,8 @@ function uc_order_edit_form_delete($form, &$form_state) {
 /**
  * Form to add a line item to an order.
  *
- * @see
- *   uc_order_add_line_item_form_validate()
- *   uc_order_add_line_item_submit()
+ * @see uc_order_add_line_item_form_validate()
+ * @see uc_order_add_line_item_submit()
  */
 function uc_order_add_line_item_form($form, &$form_state, $order, $line_item_id) {
   $func = _uc_line_item_data($line_item_id, 'callback');
@@ -1438,10 +1304,9 @@ function uc_order_add_line_item_form_submit($form, &$form_state) {
 /**
  * Set recipients of an invoice, and mail it.
  *
+ * @see uc_order_mail_invoice_form_validate()
+ * @see uc_order_mail_invoice_form_submit()
  * @ingroup forms
- * @see
- *   uc_order_mail_invoice_form_validate()
- *   uc_order_mail_invoice_form_submit()
  */
 function uc_order_mail_invoice_form($form, &$form_state, $order) {
   $form['order_id'] = array(
@@ -1501,7 +1366,7 @@ function uc_order_mail_invoice_form_submit($form, &$form_state) {
 }
 
 /**
- * Display a log of changes made to an order.
+ * Displays a log of changes made to an order.
  */
 function uc_order_log($order) {
   $result = db_query("SELECT * FROM {uc_order_log} WHERE order_id = :id ORDER BY created, order_log_id", array(':id' => $order->order_id));
@@ -1513,7 +1378,7 @@ function uc_order_log($order) {
 
   $build = array();
 
-  if (count($rows)) {
+  if (isset($rows)) {
     $header = array(t('Time'), t('User'), t('Changes'));
     $build['log'] = array(
       '#theme' => 'table',
@@ -1522,7 +1387,7 @@ function uc_order_log($order) {
     );
   }
   else {
-    $build['log'] = array('#markup' => t('No changes have been logged for this order.'));
+    $build['log'] = array('#markup' => '<p>' . t('No changes have been logged for this order.') . '</p>');
   }
 
   return $build;
@@ -1532,6 +1397,7 @@ function uc_order_log($order) {
  * Confirmation form to delete an order.
  *
  * @see uc_order_delete_confirm_form_submit()
+ * @ingroup forms
  */
 function uc_order_delete_confirm_form($form, &$form_state, $order) {
   if (!uc_order_can_delete($order)) {

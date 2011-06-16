@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_payment_checkout_pane.inc,v 1.15 2010/08/25 13:41:19 islandusurper Exp $
 
 /**
  * @file
@@ -41,7 +40,9 @@ function uc_checkout_pane_payment($op, &$order, $form = NULL, &$form_state = NUL
       }
 
       if (count($options)) {
-        if (isset($form_state['values']) && in_array($form_state['values']['panes']['payment']['payment_method'], array_keys($options))) {
+        if (isset($form_state['values'])  &&
+          isset($form_state['values']['panes']['payment']['payment_method']) &&
+          in_array($form_state['values']['panes']['payment']['payment_method'], array_keys($options))) {
           $default = $form_state['values']['panes']['payment']['payment_method'];
         }
         else {
@@ -153,6 +154,8 @@ function uc_payment_checkout_payment_details($form, $form_state) {
  * We need a theme function for the radios element in case another module alters
  * the default or available payment methods... we need the JS to grab the right
  * default payment details.
+ *
+ * @ingroup themeable
  */
 function theme_uc_payment_method_select($variables) {
   $form = $variables['form'];

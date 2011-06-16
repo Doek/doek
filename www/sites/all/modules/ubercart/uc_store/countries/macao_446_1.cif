@@ -1,5 +1,4 @@
 <?php
-// $Id: macao_446_1.cif,v 1.6 2010/09/28 20:29:45 islandusurper Exp $ 1.0.0
 
 /**
  * Implements hook_install() using the name of the country as the base of

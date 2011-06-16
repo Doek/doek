@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_file.rules.inc,v 1.1 2010/07/16 12:57:37 islandusurper Exp $
 
 /**
  * @file
@@ -7,7 +6,7 @@
  */
 
 /**
- * Implement hook_rules_data_info().
+ * Implements hook_rules_data_info().
  *
  * An entity is defined in order to get file expiration(s) down to token in the
  * email.
@@ -96,6 +95,7 @@ function uc_file_rules_data_info() {
 
 /**
  * Callback for getting download expiration properties.
+ *
  * @see entity_metadata_node_entity_info_alter()
  */
 function uc_file_get_expiration_properties($expiration, array $options, $name, $entity_type) {
@@ -109,6 +109,7 @@ function uc_file_get_expiration_properties($expiration, array $options, $name, $
 
 /**
  * Callback for setting download expiration properties.
+ *
  * @see entity_metadata_node_entity_info_alter()
  */
 function uc_file_set_expiration_properties($expiration, $name, $value) {
@@ -121,7 +122,7 @@ function uc_file_set_expiration_properties($expiration, $name, $value) {
 }
 
 /**
- * Implement hook_rules_action_info().
+ * Implements hook_rules_action_info().
  */
 function uc_file_rules_action_info() {
   // Renew file expirations.
@@ -194,7 +195,7 @@ function uc_file_message_formats() {
 }
 
 /**
- * Implement hook_rules_event_info().
+ * Implements hook_rules_event_info().
  */
 function uc_file_rules_event_info() {
   $events['uc_file_notify_grant'] = array(
@@ -247,22 +248,22 @@ function uc_file_action_order_email($order, $file_expiration, $from, $addresses,
     $sent = drupal_mail('uc_order', 'action-mail', $email, uc_store_mail_recipient_language($email), $settings, $settings['from']);
 
     if (!$sent['result']) {
-      watchdog('ca', 'Attempt to e-mail @email concerning order @order_id failed.', array('@email' => $email, '@order_id' => $order->order_id), WATCHDOG_ERROR);
+      watchdog('uc_file', 'Attempt to e-mail @email concerning order @order_id failed.', array('@email' => $email, '@order_id' => $order->order_id), WATCHDOG_ERROR);
     }
   }
 }
 
 /**
- * Renew an orders product files.
- *
- * @param $order
- *   An Ubercart order object.
+ * Renews an orders product files.
  *
  * This function updates access limits on all files found on all products
  * on a given order. First, the order user is loaded, then the order's products
- * are scanned for file product features. An order comment is saved, and the user is
- * notified in Drupal, as well as through the email address associated with the
- * order.
+ * are scanned for file product features. An order comment is saved, and the
+ * user is notified in Drupal, as well as through the email address associated
+ * with the order.
+ *
+ * @param $order
+ *   An Ubercart order object.
  */
 function uc_file_action_order_renew($order) {
 

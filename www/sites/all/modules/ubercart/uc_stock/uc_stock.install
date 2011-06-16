@@ -1,13 +1,12 @@
 <?php
-// $Id: uc_stock.install,v 1.12 2010/04/01 18:43:40 islandusurper Exp $
 
 /**
  * @file
- * The installation file
+ * Install, update and uninstall functions for the uc_stock module.
  */
 
 /**
- * Implement hook_schema().
+ * Implements hook_schema().
  */
 function uc_stock_schema() {
   $schema = array();
@@ -65,7 +64,7 @@ function uc_stock_schema() {
 }
 
 /**
- * Implement hook_uninstall().
+ * Implements hook_uninstall().
  */
 function uc_stock_uninstall() {
   db_delete('variable')
@@ -80,7 +79,14 @@ function uc_stock_uninstall() {
 }
 
 /**
- * Change name of a format variable.
+ * Implements hook_update_last_removed().
+ */
+function uc_stock_update_last_removed() {
+  return 6000;
+}
+
+/**
+ * Changes name of a format variable.
  */
 function uc_stock_update_7000() {
   $format = variable_get('uc_stock_threshold_notification_format');
@@ -91,4 +97,3 @@ function uc_stock_update_7000() {
 
   variable_del('uc_stock_threshold_notification_format');
 }
-

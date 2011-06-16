@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_order.api.php,v 1.9 2010/12/09 18:53:37 islandusurper Exp $
 
 /**
  * @file
@@ -12,7 +11,7 @@
  */
 
 /**
- * Add invoice templates to the list of suggested template files.
+ * Adds invoice templates to the list of suggested template files.
  *
  * Allows modules to declare new "types" of invoice templates (other than the
  * default 'admin' and 'customer').
@@ -26,7 +25,7 @@ function hook_uc_invoice_templates() {
 }
 
 /**
- * Used to define line items that are attached to orders.
+ * Defines line items that are attached to orders.
  *
  * A line item is a representation of charges, fees, and totals for an order.
  * Default line items include the subtotal and total line items, the tax line
@@ -96,7 +95,7 @@ function hook_uc_line_item() {
 }
 
 /**
- * Alter a line item on an order when the order is loaded.
+ * Alters a line item on an order when the order is loaded.
  *
  * @param &$item
  *   The line item array.
@@ -111,7 +110,7 @@ function hook_uc_line_item_alter(&$item, $order) {
 }
 
 /**
- * Alter the line item definitions declared in hook_line_item().
+ * Alters the line item definitions declared in hook_line_item().
  *
  * @param &$items
  *   The combined return value of hook_line_item().
@@ -133,9 +132,9 @@ function hook_uc_line_item_data_alter(&$items) {
 
 
 /**
- * Perform actions on orders.
+ * Performs actions on orders.
  *
- * An order in Übercart represents a single transaction. Orders are created
+ * An order in Ubercart represents a single transaction. Orders are created
  * during the checkout process where they sit in the database with a status of In
  * Checkout. When a customer completes checkout, the order's status gets updated
  * to show that the sale has gone through. Once an order is created, and even
@@ -145,12 +144,15 @@ function hook_uc_line_item_data_alter(&$items) {
  *
  * @param $op
  *   The action being performed.
- * @param &$order
- *   This is the order object or a reference to it as noted below.
+ * @param $order
+ *   This is the order object.
  * @param $arg2
  *   This is variable and is based on the value of $op:
  *   - new: Called when an order is created. $order is a reference to the new
  *       order object, so modules may add to or modify the order at creation.
+ *   - presave: Before an order object is saved, the hook gets invoked with this
+ *       op to let other modules alter order data before it is written to the
+ *       database. $order is a reference to the order object.
  *   - save: When an order object is being saved, the hook gets invoked with this
  *       op to let other modules do any necessary saving. $order is a reference to
  *       the order object.
@@ -189,7 +191,7 @@ function hook_uc_line_item_data_alter(&$items) {
  *       Expects in return a value (positive or negative) by which to modify the
  *       order total.
  */
-function hook_uc_order($op, &$order, $arg2) {
+function hook_uc_order($op, $order, $arg2) {
   switch ($op) {
     case 'save':
       // Do something to save payment info!
@@ -198,7 +200,7 @@ function hook_uc_order($op, &$order, $arg2) {
 }
 
 /**
- * Add links to local tasks for orders on the admin's list of orders.
+ * Adds links to local tasks for orders on the admin's list of orders.
  *
  * @param $order
  *   An order object.
@@ -238,7 +240,7 @@ function hook_uc_order_actions($order) {
 }
 
 /**
- * Register callbacks for an order pane.
+ * Registers callbacks for an order pane.
  *
  * This hook is used to add panes to the order viewing and administration screens.
  * The default panes include areas to display and edit addresses, products,
@@ -388,7 +390,7 @@ function hook_uc_order_product_alter(&$product, $order) {
 }
 
 /**
- * Respond to order product deletion.
+ * Responds to order product deletion.
  */
 function hook_uc_order_product_delete($order_product_id) {
   // Put back the stock.
@@ -397,7 +399,7 @@ function hook_uc_order_product_delete($order_product_id) {
 }
 
 /**
- * Register static order states.
+ * Registers static order states.
  *
  * Order states are module-defined categories for order statuses. Each state
  * will have a default status that is used when modules need to move orders to
@@ -443,4 +445,3 @@ function hook_uc_order_state() {
 /**
  * @} End of "addtogroup hooks".
  */
-

@@ -1,7 +1,7 @@
-/* $Id: uc_cart.css,v 1.8 2010/10/07 19:11:25 islandusurper Exp $ */
-
-/* These classes should really be universal... pretty standard stuff. */
-
+/**
+ * @file
+ * Styles for uc_cart module.
+ */
 .solid-border {
   border: solid 1px #bbb;
   padding: 5px;
@@ -11,20 +11,16 @@
   padding: 5px;
 }
 
-.show-onload {
-  display: none;
-}
-
 .display-none {
   display: none;
 }
 
 .order-review-table {
-  width: auto;
-  margin: auto;
   border: solid 1px #999;
   font-size: .9em;
   line-height: 1.4em;
+  margin: auto;
+  width: auto;
 }
 
 .order-review-table td {
@@ -33,17 +29,17 @@
 }
 
 .order-review-table .pane-title-row {
-  text-align: center;
-  font-weight: bold;
-  border: solid 1px #999;
   background-color: #ddd;
+  border: solid 1px #999;
+  font-weight: bold;
   padding: .5em 1em;
+  text-align: center;
 }
 
 .order-review-table .title-col {
-  text-align: right;
   font-weight: bold;
   padding-left: 3em;
+  text-align: right;
 }
 
 .order-review-table .data-col {
@@ -59,9 +55,9 @@
 }
 
 .order-review-table .review-button-row {
-  text-align: right;
   background-color: #ddd;
   border: solid 1px #999;
+  text-align: right;
 }
 
 .order-review-table .review-button-row form {
@@ -94,19 +90,18 @@
 }
 
 .address-book-icon {
+  margin-left: 2px;
   position: relative;
   top: 2px;
-  margin-left: 2px;
 }
 
 /**
  * CSS rules for the cart form at /cart.
  */
-
 #cart-form-products {
-  width: 100%;
   border: solid 1px #bbb;
   margin-top: .5em;
+  width: 100%;
 }
 
 #cart-form-products td.desc {
@@ -118,10 +113,10 @@
 }
 
 #cart-form-buttons {
-  width: 100%;
   border: solid 1px #bbb;
   margin: .5em 0em;
   text-align: right;
+  width: 100%;
 }
 
 #cart-form-pane #uc-cart-view-form {
@@ -138,21 +133,20 @@
 
 #continue-shopping-link {
   float: left;
+  left: .75em;
   position: relative;
   top: .5em;
-  left: .75em;
 }
 
 #continue-shopping-button {
-  margin-right: 100%;
   margin-left: .5em;
+  margin-right: 100%;
   white-space: nowrap;
 }
 
 /**
  * CSS rules for the cart review table.
  */
-
 .cart-review {
   border: solid 1px #bbb;
 }
@@ -162,8 +156,8 @@
 }
 
 .cart-review thead tr {
-  font-weight: bold;
   border: 0em;
+  font-weight: bold;
 }
 
 .cart-review tbody {
@@ -200,33 +194,18 @@ td.subtotal {
 /**
  * CSS rules for the default checkout panes.
  */
-
-.address-pane-table tbody {
-  border-top: 0px;
+#uc-cart-checkout-form .uc-store-address-field .form-item label {
+  padding: 5px 6px 6px;
 }
 
-.address-pane-table table td {
-  padding: 2px;
-}
-
-.field-label {
-  text-align: right;
-  font-weight: bold;
-}
-
-.address-pane-table {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.address-pane-table .form-item {
-  display: inline;
+#uc-cart-checkout-form .form-item {
+  margin-bottom: 2px;
+  margin-top: 2px;
 }
 
 /**
  * CSS rules for payment details tables.
  */
-
 .inline-pane-table tbody {
   border-top: 0em;
 }
@@ -238,11 +217,10 @@ td.subtotal {
 /**
  * CSS rules for the bottom of the checkout form at /cart/checkout.
  */
-
 #checkout-form-bottom {
-  width: 100%;
   border: solid 1px #bbb;
   text-align: right;
+  width: 100%;
 }
 
 #checkout-form-bottom .form-button, #checkout-form-bottom .form-submit {

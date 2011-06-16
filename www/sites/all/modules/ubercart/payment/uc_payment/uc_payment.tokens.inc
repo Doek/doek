@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_payment.tokens.inc,v 1.3 2010/08/25 13:42:23 islandusurper Exp $
 
 /**
  * @file
@@ -7,7 +6,7 @@
  */
 
 /**
- * Implement hook_token_info().
+ * Implements hook_token_info().
  */
 function uc_payment_token_info() {
   $order['payment-method'] = array(
@@ -25,7 +24,7 @@ function uc_payment_token_info() {
 }
 
 /**
- * Implement hook_tokens().
+ * Implements hook_tokens().
  */
 function uc_payment_tokens($type, $tokens, $data = array(), $options = array()) {
   $values = array();
@@ -49,4 +48,3 @@ function uc_payment_tokens($type, $tokens, $data = array(), $options = array()) 
 
   return $values;
 }
-

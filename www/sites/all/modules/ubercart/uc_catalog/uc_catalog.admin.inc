@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_catalog.admin.inc,v 1.15 2010/07/15 20:32:38 islandusurper Exp $
 
 /**
  * @file
@@ -8,7 +7,7 @@
 
 
 /**
- * Display an overview of the catalog settings.
+ * Displays an overview of the catalog settings.
  */
 function uc_catalog_settings_overview() {
   // Theme all the pages beneath this path into summary overviews.
@@ -21,7 +20,7 @@ function uc_catalog_settings_overview() {
 /**
  * Catalog settings form.
  *
- * Configure the display of the catalog breadcrumb.
+ * Configures the display of the catalog breadcrumb.
  *
  * @ingroup forms
  */
@@ -90,7 +89,7 @@ function uc_catalog_settings_form($form, &$form_state) {
     '#title' => t('Number of columns in the grid of categories'),
     '#default_value' => variable_get('uc_catalog_category_columns', 3),
     '#summary' => t('Subcategories are being displayed in @columns columns.', array('@columns' => variable_get('uc_catalog_category_columns', 3))),
-    '#options' => drupal_map_assoc(uc_range(1, 5)),
+    '#options' => drupal_map_assoc(range(1, 5)),
   );
 
   $form['catalog-products-list'] = array('#type' => 'fieldset',
@@ -107,42 +106,6 @@ function uc_catalog_settings_form($form, &$form_state) {
     '#default_value' => variable_get('uc_product_nodes_per_page', 12),
     '#description' => t("Determines how many products will be listed on every catalog category. Notice that if you are using grid display it must be multiple of the grid width value, otherwise the last row will not match."),
     '#size' => 2,
-  );
-
-  $form['block-display'] = array('#type' => 'fieldset',
-    '#title' => t('Catalog block settings'),
-    '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
-    '#summary callback' => '_uc_catalog_block_summarize',
-    '#attributes' => array('class' => array('block-display')),
-  );
-  $form['block-display']['uc_catalog_block_title'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Make the block title a link to the top-level catalog page.'),
-    '#summary callback' => 'uc_summarize_checkbox',
-    '#summary arguments' => array(
-      t('Block title is pointing to the top-level catalog page.'),
-      t('Block title is not pointing to the top-level catalog page.'),
-    ),
-    '#default_value' => variable_get('uc_catalog_block_title', FALSE),
-  );
-  $form['block-display']['uc_catalog_expand_categories'] = array('#type' => 'checkbox',
-    '#title' => t('Always expand categories in the catalog block'),
-    '#summary callback' => 'uc_summarize_checkbox',
-    '#summary arguments' => array(
-      t('Expanding categories in the catalog block.'),
-      t('Not expanding categories in the catalog block.'),
-    ),
-    '#default_value' => variable_get('uc_catalog_expand_categories', FALSE),
-  );
-  $form['block-display']['uc_catalog_block_nodecount'] = array('#type' => 'checkbox',
-    '#title' => t('Display node counts in the catalog block'),
-    '#summary callback' => 'uc_summarize_checkbox',
-    '#summary arguments' => array(
-      t('The number of nodes in a category are being shown in the catalog block.'),
-      t('The number of nodes in a category are not being shown in the catalog block.'),
-    ),
-    '#default_value' => variable_get('uc_catalog_block_nodecount', TRUE),
   );
 
   return system_settings_form($form);
@@ -168,7 +131,7 @@ function uc_catalog_grid_settings_form($form, &$form_state) {
   $form['uc_catalog_grid_display_width'] = array(
     '#type' => 'select',
     '#title' => t('Number of columns in the product grid'),
-    '#options' => drupal_map_assoc(uc_range(1, 5)),
+    '#options' => drupal_map_assoc(range(1, 5)),
     '#default_value' => variable_get('uc_catalog_grid_display_width', 3),
     '#summary' => t('The grid will be displayed in @columns columns.', array('@columns' => variable_get('uc_catalog_grid_display_width', 3))),
   );
@@ -216,7 +179,7 @@ function uc_catalog_grid_settings_form($form, &$form_state) {
 }
 
 /**
- * Display links to all products that have not been categorized.
+ * Displays links to all products that have not been categorized.
  */
 function uc_catalog_orphaned_products() {
   $build = array();
@@ -231,8 +194,8 @@ function uc_catalog_orphaned_products() {
     $vid = variable_get('uc_catalog_vid', 0);
     $product_types = uc_product_types();
     $field = field_info_field('taxonomy_catalog');
-    $types = array_intersect($types, $field['bundles']['node']);
-    $result = db_query("SELECT DISTINCT n.nid, n.title FROM {node} AS n LEFT JOIN {taxonomy_index} AS ti ON n.nid = ti.nid LEFT JOIN {taxonomy_term_data} AS td ON ti.tid = td.tid WHERE n.type IN (:types) AND ti.tid IS NULL AND td.vid = :vid", array(':types' => $types, ':vid' => $vid));
+    $types = array_intersect($product_types, $field['bundles']['node']);
+    $result = db_query("SELECT DISTINCT n.nid, n.title FROM {node} AS n LEFT JOIN (SELECT ti.nid, td.vid FROM {taxonomy_index} AS ti LEFT JOIN {taxonomy_term_data} AS td ON ti.tid = td.tid WHERE td.vid = :vid) AS txnome ON n.nid = txnome.nid WHERE n.type IN (:types) AND txnome.vid IS NULL", array(':vid' => $vid, ':types' => $types));
 
     $rows = array();
     while ($node = $result->fetchObject()) {

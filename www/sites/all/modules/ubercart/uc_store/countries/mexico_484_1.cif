@@ -1,5 +1,4 @@
 <?php
-// $Id: mexico_484_1.cif,v 1.6 2010/04/14 14:20:56 islandusurper Exp $
 
 /**
 * Implements hook_install() using the name of the country as the base of

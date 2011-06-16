@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_product.views.inc,v 1.6 2010/11/24 15:18:30 islandusurper Exp $
 
 /**
  * @file
@@ -7,7 +6,7 @@
  */
 
 /**
- * Implement hook_views_data().
+ * Implements hook_views_data().
  */
 function uc_product_views_data() {
   $data['uc_products']['table']['group'] = t('Product');
@@ -164,6 +163,7 @@ function uc_product_views_data() {
         ),
       ),
       'handler' => 'uc_product_handler_field_addtocart',
+      'element type' => 'div',
     ),
   );
 
@@ -180,6 +180,7 @@ function uc_product_views_data() {
         ),
       ),
       'handler' => 'uc_product_handler_field_buyitnow',
+      'element type' => 'div',
     ),
   );
 
@@ -187,7 +188,7 @@ function uc_product_views_data() {
 }
 
 /**
- * Implement hook_views_tables_alter().
+ * Implements hook_views_tables_alter().
  *
  * Conditionally add editablefields support.
  */

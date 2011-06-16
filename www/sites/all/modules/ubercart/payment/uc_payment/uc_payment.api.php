@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_payment.api.php,v 1.3 2010/08/25 13:40:25 islandusurper Exp $
 
 /**
  * @file
@@ -12,7 +11,7 @@
  */
 
 /**
- * Take action when a payment is entered for an order.
+ * Takes action when a payment is entered for an order.
  *
  * @param $order
  *   The order object.
@@ -41,9 +40,9 @@ function hook_uc_payment_entered($order, $method, $amount, $account, $data, $com
 }
 
 /**
- * Register payment gateway callbacks.
+ * Registers payment gateway callbacks.
  *
- * @see @link http://www.ubercart.org/docs/api/hook_payment_gateway @endlink
+ * @see http://www.ubercart.org/docs/api/hook_payment_gateway
  *
  * @return
  *   Returns an array of payment gateways, which are arrays with the following keys:
@@ -73,9 +72,23 @@ function hook_uc_payment_gateway() {
 }
 
 /**
- * Register callbacks for payment methods.
+ * Alter payment gateways.
  *
- * Payment methods are different ways to collect payment. By default, Übercart
+ * @param $gateways
+ *   Payment gateways passed by reference.
+ */
+function hook_uc_payment_gateway_alter(&$gateways) {
+  // Change the title of all gateways.
+  foreach ($gateways as &$gateway) {
+    // $gateway was passed by reference.
+    $gateway['title'] = t('Altered gateway @original', array('@original' => $gateway['title']));
+  }
+}
+
+/**
+ * Registers callbacks for payment methods.
+ *
+ * Payment methods are different ways to collect payment. By default, Ubercart
  * comes with support for check, credit card, and generic payments. Payment
  * methods show up at checkout or on the order administration screens, and they
  * collect different sorts of information from the user that is used to process
@@ -100,4 +113,3 @@ function hook_uc_payment_method() {
 /**
  * @} End of "addtogroup hooks".
  */
-

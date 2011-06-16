@@ -1,5 +1,7 @@
-/* $Id: uc_attribute.css,v 1.7 2010/03/29 16:42:51 islandusurper Exp $ */
-
+/**
+ * @file
+ * Styles for uc_attribute module.
+ */
 .options {
   display: inline;
 }

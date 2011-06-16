@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_stock.admin.inc,v 1.18 2010/10/07 19:08:40 islandusurper Exp $
 
 /**
  * @file
@@ -45,12 +44,12 @@ function uc_stock_settings_form($form, &$form_state) {
 }
 
 /**
- * Display a stock report for products with stock tracking enabled.
+ * Displays a stock report for products with stock tracking enabled.
  */
 function uc_stock_report() {
   drupal_add_css(drupal_get_path('module', 'uc_stock') . '/uc_stock.css');
 
-  $page_size = (!is_null($_GET['nopage'])) ? UC_REPORTS_MAX_RECORDS : variable_get('uc_reports_table_size', 30);
+  $page_size = (isset($_GET['nopage'])) ? UC_REPORTS_MAX_RECORDS : variable_get('uc_reports_table_size', 30);
   $csv_rows = array();
   $rows = array();
 
@@ -84,7 +83,7 @@ function uc_stock_report() {
     $query->where('threshold >= stock');
   }
 
-  $result = pager_query($sql . tablesort_sql($header), $page_size, 0, NULL);
+  $result = $query->execute();
   foreach ($result as $stock) {
     $op = array();
     if (user_access('administer products')) {
@@ -129,7 +128,7 @@ function uc_stock_report() {
     '#suffix' => '&nbsp;&nbsp;&nbsp;',
   );
 
-  if (!is_null($_GET['nopage'])) {
+  if (isset($_GET['nopage'])) {
     $build['links']['toggle_pager'] = array(
       '#markup' => l(t('Show paged records'), 'admin/store/reports/stock'),
     );
@@ -146,8 +145,8 @@ function uc_stock_report() {
 /**
  * Form builder for stock report threshold filter.
  *
- * @ingroup forms
  * @see uc_stock_report_form_submit()
+ * @ingroup forms
  */
 function uc_stock_report_form($form, &$form_state) {
   $form['threshold'] = array(
@@ -168,6 +167,8 @@ function uc_stock_report_form($form, &$form_state) {
 }
 
 /**
+ * Form submission handler for uc_stock_report_form().
+ *
  * @see uc_stock_report_form()
  */
 function uc_stock_report_form_submit($form, &$form_state) {
@@ -182,10 +183,9 @@ function uc_stock_report_form_submit($form, &$form_state) {
 /**
  * Form builder for product stock edit form.
  *
+ * @see uc_stock_edit_form_submit()
+ * @see theme_uc_stock_edit_form()
  * @ingroup forms
- * @see
- *   theme_uc_stock_edit_form()
- *   uc_stock_edit_form_submit()
  */
 function uc_stock_edit_form($form, &$form_state, $node) {
   drupal_set_title($node->title);
@@ -253,14 +253,48 @@ function uc_stock_edit_form($form, &$form_state, $node) {
 }
 
 /**
- * @ingroup themeable
+ * Form submission handler for uc_stock_edit_form().
+ *
  * @see uc_stock_edit_form()
+ * @see theme_uc_stock_edit_form()
+ */
+function uc_stock_edit_form_submit($form, &$form_state) {
+  foreach (element_children($form_state['values']['stock']) as $id) {
+    $stock = $form_state['values']['stock'][$id];
+
+    db_merge('uc_product_stock')
+      ->key(array('sku' => $stock['sku']))
+      ->updateFields(array(
+        'active' => $stock['active'],
+        'stock' => $stock['stock'],
+        'threshold' => $stock['threshold'],
+      ))
+      ->insertFields(array(
+        'sku' => $stock['sku'],
+        'active' => $stock['active'],
+        'stock' => $stock['stock'],
+        'threshold' => $stock['threshold'],
+        'nid' => $form_state['values']['nid'],
+      ))
+      ->execute();
+  }
+
+  drupal_set_message(t('Stock settings saved.'));
+}
+
+/**
+ * Returns HTML for uc_stock_edit_form().
+ *
+ * @see uc_stock_edit_form()
+ * @see uc_stock_edit_form_submit()
+ * @ingroup themeable
  */
 function theme_uc_stock_edit_form($variables) {
   $form = $variables['form'];
+  drupal_add_js('misc/tableselect.js');
 
   $header = array(
-    array('data' => '&nbsp;&nbsp;' . t('Active')) + theme('table_select_header_cell'),
+    array('data' => '&nbsp;&nbsp;' . t('Active'), 'class' => array('select-all')),
     array('data' => t('SKU')),
     array('data' => t('Stock')),
     array('data' => t('Threshold')),
@@ -276,27 +310,4 @@ function theme_uc_stock_edit_form($variables) {
   }
 
   return theme('table', array('header' => $header, 'rows' => $rows)) . drupal_render_children($form);
-}
-
-/**
- * @see uc_stock_edit_form()
- */
-function uc_stock_edit_form_submit($form, &$form_state) {
-  foreach (element_children($form_state['values']['stock']) as $id) {
-    $stock = $form_state['values']['stock'][$id];
-
-    db_merge('uc_product_stock')
-      ->key(array('sku' => $stock['sku']))
-      ->fields(array(
-        'active' => $stock['active'] ? 1 : 0,
-        'stock' => $stock['stock'],
-        'threshold' => $stock['threshold'],
-      ))
-      ->insertFields(array(
-        'nid' => $form_state['values']['nid'],
-      ))
-      ->execute();
-  }
-
-  drupal_set_message(t('Stock settings saved.'));
 }

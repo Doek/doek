@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_cybersource.module,v 1.22 2010/11/24 15:20:58 islandusurper Exp $
 
 /**
  * @file
@@ -16,13 +15,13 @@
 
 
 /**
- * Implement hook_menu().
+ * Implements hook_menu().
  */
 function uc_cybersource_menu() {
   $items['cybersource/hop-post'] = array(
     'title' => 'Payment received',
     'page callback' => 'uc_cybersource_hop_post',
-    'access callback' => 'uc_cybersource_hop_post_access',
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   // Callback functions for Website Payments Standard.
@@ -44,12 +43,8 @@ function uc_cybersource_menu() {
   return $items;
 }
 
-function uc_cybersource_hop_post_access() {
-  return TRUE;
-}
-
 /**
- * Implement hook_page_alter().
+ * Implements hook_page_alter().
  */
 function uc_cybersource_page_alter(&$page) {
   $block = block_load('system', 'main');
@@ -64,12 +59,10 @@ function uc_cybersource_page_alter(&$page) {
 }
 
 /**
- * Implement hook_form_alter().
+ * Implements hook_form_FORM_ID_alter() for uc_payment_gateways_form().
  */
-function uc_cybersource_form_alter(&$form, &$form_state, $form_id) {
-  if ($form_id == 'uc_payment_gateways_form') {
-    $form['#submit'][] = 'uc_cybersource_payment_gateway_settings_submit';
-  }
+function uc_cybersource_form_uc_payment_gateways_form_alter(&$form, &$form_state) {
+  $form['#submit'][] = 'uc_cybersource_payment_gateway_settings_submit';
 }
 
 /**
@@ -99,7 +92,7 @@ function uc_cybersource_payment_gateway_settings_submit($form, &$form_state) {
  ******************************************************************************/
 
 /**
- * Implement hook_uc_payment_gateway().
+ * Implements hook_uc_payment_gateway().
  */
 function uc_cybersource_uc_payment_gateway() {
   // CyberSource APIs other than HOP require uc_credit to be enabled.
@@ -118,11 +111,13 @@ function uc_cybersource_uc_payment_gateway() {
   return $gateways;
 }
 
-// Processes a payment POST from the Cybersource Hosted Order Page API.
+/**
+ * Processes a payment POST from the CyberSource Hosted Order Page API.
+ */
 function uc_cybersource_hop_post() {
   if (!uc_cybersource_hop_include()) {
     watchdog('uc_cybersource_hop', 'Unable to receive HOP POST due to missing or unreadable HOP.php file.', array(), 'error');
-    drupal_set_header('HTTP/1.1 503 Service unavailable');
+    drupal_add_http_header('Status', '503 Service unavailable');
     drupal_set_title(t('Unable to receive HOP POST.'));
     print t('The site was unable to receive a HOP post because of a missing or unreadble HOP.php');
     exit();
@@ -157,7 +152,7 @@ function uc_cybersource_hop_post() {
 
   switch ($decision) {
     case 'ACCEPT':
-      watchdog('uc_cybersource_hop', 'Cybersource verified successful payment.');
+      watchdog('uc_cybersource_hop', 'CyberSource verified successful payment.');
       $duplicate = db_query("SELECT COUNT(*) FROM {uc_payment_cybersource_hop_post} WHERE order_id = :order_id AND decision = :decision", array(':order_id' => $order_id, ':decision' => 'ACCEPT'))->fetchField();
         if ($duplicate > 0) {
         watchdog('uc_cybersource_hop', 'CS HOP transaction for order @order-id has been processed before.', array('@order_id' => $order_id), WATCHDOG_NOTICE);
@@ -180,7 +175,7 @@ function uc_cybersource_hop_post() {
       $comment = t('CyberSource request ID: @txn_id', array('@txn_id' => $request_id));
       uc_payment_enter($order_id, 'cybersource_hop', $payment_amount, $order->uid, NULL, $comment);
       uc_cart_complete_sale($order);
-      uc_order_comment_save($order_id, 0, t('Payment of @amount @currency submitted through Cybersource with request ID @rid.', array('@amount' => $payment_amount, '@currency' => $payment_currency, '@rid' => $request_id)), 'order', 'payment_received');
+      uc_order_comment_save($order_id, 0, t('Payment of @amount @currency submitted through CyberSource with request ID @rid.', array('@amount' => $payment_amount, '@currency' => $payment_currency, '@rid' => $request_id)), 'order', 'payment_received');
       break;
     case 'ERROR':
       uc_order_comment_save($order_id, 0, t("Payment error:@reason with request ID @rid", array('@reason' => $reason, '@rid' => '@request_id')), 'admin');
@@ -202,7 +197,7 @@ function uc_cybersource_hop_include() {
   $hop_paths[0] = 'sites/all/libraries/uc_cybersource/HOP.php';
   $hop_paths[1] = drupal_get_path('module', 'uc_cybersource') . '/HOP.php';
   // Loop through possible paths, include and return TRUE when HOP.php is located.
-  foreach($hop_paths as $key => $path) {
+  foreach ($hop_paths as $key => $path) {
     if (file_exists($path)) {
       require_once($path);
       return TRUE;
@@ -212,7 +207,9 @@ function uc_cybersource_hop_include() {
   return FALSE;
 }
 
-// Adds the CyberSource fields to the payment gateway settings form.
+/**
+ * Adds the CyberSource fields to the payment gateway settings form.
+ */
 function uc_cybersource_settings_form($form, &$form_state) {
   // Check for the HOP.php for Silent Order POST.
   if (variable_get('uc_cybersource_method', 'post') == 'post' &&
@@ -341,7 +338,7 @@ function uc_cybersource_settings_form($form, &$form_state) {
  * Defines payment method properties.
  *
  * @return
- *  Returnes an array with properity and value pairs of CyberSource payment method.
+ *   An array with property and value pairs of CyberSource payment method.
  */
 function uc_cybersource_payment_method() {
   $methods[] = array(
@@ -359,11 +356,14 @@ function uc_cybersource_payment_method() {
   return $methods;
 }
 
+/**
+ * Payment method callback.
+ */
 function uc_payment_method_cybersource_hop($op, $arg1) {
   if ($op == 'settings') {
     $form['uc_cybersource_hop_server'] = array(
       '#type' => 'select',
-      '#title' => t('Cybersource HOP server'),
+      '#title' => t('CyberSource HOP server'),
       '#description' => t('Select between production/live or test mode.'),
       '#options' => array(
         'https://orderpagetest.ic3.com/hop/orderform.jsp' => t('Test Center'),
@@ -384,12 +384,15 @@ function uc_payment_method_cybersource_hop($op, $arg1) {
       '#type' => 'textfield',
       '#title' => t('CyberSource "Buy button" text'),
       '#description' => t('This text appears on the button users press to process their payment on the Hosted Order Page.'),
-      '#default_value' => variable_get('uc_cybersource_cs_hop_button_text', 'Process payment'),
+      '#default_value' => variable_get('uc_cybersource_cs_hop_button_text', t('Process payment')),
     );
     return $form;
   }
 }
 
+/**
+ * Finalizes CyberSource transaction.
+ */
 function uc_cybersource_hop_complete($order) {
   // If the order ID specified in the return URL is not the same as the one in
   // the user's session, we need to assume this is either a spoof or that the
@@ -404,12 +407,12 @@ function uc_cybersource_hop_complete($order) {
   $_SESSION['do_complete'] = TRUE;
   drupal_goto('cart/checkout/complete');
 }
+
 /**
- * Define values to be posted to CyberSource.
+ * Defines values to be posted to CyberSource.
  *
- * @retun
- *  Transaction data arrays are returned as hidden form values.
- *
+ * @return
+ *   Transaction data arrays are returned as hidden form values.
  */
 function uc_cybersource_hop_form($form, $form_state, $order) {
   if (!uc_cybersource_hop_include()) {
@@ -482,10 +485,10 @@ function uc_cybersource_hop_form($form, $form_state, $order) {
   // CyberSource posts payment confirmation to this URL.
   $data['orderPage_merchantURLPostAddress']= url('cybersource/hop-post', array('absolute' => TRUE));
   $data['orderPage_buyButtonText'] = t('Checkout');
-  $receipt_url = url('cybersource/hop-complete/'. $order->order_id, array('absolute' => TRUE));
+  $receipt_url = url('cybersource/hop-complete/' . $order->order_id, array('absolute' => TRUE));
   $data['orderPage_receiptResponseURL'] = $receipt_url;
-  $data['orderPage_buyButtonText'] = t(variable_get('uc_cybersource_cs_hop_button_text', 'Process payment'));
-  $comments = t('Order @order-id at @store-name', array('@order-id' => $order->order_id, '@store-name' => variable_get('uc_store_name', 'Our store')));
+  $data['orderPage_buyButtonText'] = variable_get('uc_cybersource_cs_hop_button_text', t('Process payment'));
+  $comments = t('Order @order-id at @store-name', array('@order-id' => $order->order_id, '@store-name' => variable_get('uc_store_name', t('Our store'))));
   $alter_data['order'] = $order;
   $alter_data['comments'] = $comments;
   $alter_data['merchant_fields'] = array();
@@ -513,6 +516,9 @@ function uc_cybersource_hop_form($form, $form_state, $order) {
   return $form;
 }
 
+/**
+ * Charges card.
+ */
 function uc_cybersource_charge($order_id, $amount, $data) {
   global $user;
 
@@ -588,6 +594,9 @@ function uc_cybersource_charge($order_id, $amount, $data) {
   }
 }
 
+/**
+ * POSTs transaction to CyberSource.
+ */
 function _uc_cybersource_post_charge($order, $amount, $data, $cc_type, $country) {
   // Include the HOP.php per the module instructions.
   if (!uc_cybersource_hop_include()) {
@@ -707,7 +716,9 @@ function _uc_cybersource_post_charge($order, $amount, $data, $cc_type, $country)
   return $result;
 }
 
-// Handles the SOAP charge request and Ubercart order save.
+/**
+ * Handles the SOAP charge request and Ubercart order save.
+ */
 function _uc_cybersource_soap_charge($order, $amount, $data, $cc_type, $country) {
   // Include the SOAP helper file.
   module_load_include('inc', 'uc_cybersource', 'uc_cybersource.soap');
@@ -970,7 +981,9 @@ function _uc_cybersource_soap_charge($order, $amount, $data, $cc_type, $country)
   return $result;
 }
 
-// Displays the taxes for an order.
+/**
+ * Displays the taxes for an order.
+ */
 function uc_cybersource_tax_test($order) {
   // Fetch the taxes for the order.
   $data = uc_cybersource_uc_calculate_tax($order);
@@ -993,15 +1006,16 @@ function uc_cybersource_tax_test($order) {
 }
 
 /**
- * Implement hook_uc_calculate_tax().
+ * Implements hook_uc_calculate_tax().
  *
  * Calculates taxes for an order using CyberSource's tax service.
  *
  * @param $order
  *   An order object with address and product information.
+ *
  * @return
  *   An array of associative arrays representing tax information with the keys
- *     'id', 'name', and 'amount'.
+ *   'id', 'name', and 'amount'.
  */
 function uc_cybersource_uc_calculate_tax($order) {
   // Kick out if the tax service is not enabled.
@@ -1236,7 +1250,9 @@ function uc_cybersource_uc_calculate_tax($order) {
   return $result;
 }
 
-// Returns an array with the SOAP Merchant ID and Transaction key.
+/**
+ * Returns an array with the SOAP Merchant ID and Transaction key.
+ */
 function _uc_cybersource_soap_login_data() {
   static $data;
 
@@ -1272,7 +1288,9 @@ function _uc_cybersource_soap_login_data() {
   return $data;
 }
 
-// Returns the code for the credit card type.
+/**
+ * Returns the code for the credit card type.
+ */
 function _uc_cybersource_card_type($cc_number) {
   switch (substr(strval($cc_number), 0, 1)) {
     case '3':
@@ -1296,7 +1314,9 @@ function _uc_cybersource_card_type($cc_number) {
   return FALSE;
 }
 
-// Returns the meaning of the reason code given by CyberSource.
+/**
+ * Returns the meaning of the reason code given by CyberSource.
+ */
 function _uc_cybersource_parse_reason_code($code) {
   switch ($code) {
     case '100':
@@ -1358,7 +1378,9 @@ function _uc_cybersource_parse_reason_code($code) {
   }
 }
 
-// Returns the meaning of the code for Address Verification.
+/**
+ * Returns the meaning of the code for Address Verification.
+ */
 function _uc_cybersource_parse_avs_code($code) {
   switch ($code) {
     case 'A':
@@ -1412,7 +1434,9 @@ function _uc_cybersource_parse_avs_code($code) {
   }
 }
 
-// Returns the meaning of the code sent back for CVV verification.
+/**
+ * Returns the meaning of the code sent back for CVV verification.
+ */
 function _uc_cybersoure_parse_cvv_code($code) {
   switch ($code) {
     case 'D':

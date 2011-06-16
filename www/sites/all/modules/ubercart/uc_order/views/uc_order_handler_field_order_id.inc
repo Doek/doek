@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_order_handler_field_order_id.inc,v 1.1 2010/11/24 15:18:30 islandusurper Exp $
 
 /**
  * @file
@@ -7,7 +6,8 @@
  */
 
 /**
- * Field handler to provide simple renderer that allows linking to the order adminstration page.
+ * Field handler to provide simple renderer that allows linking to
+ * the order adminstration page.
  */
 class uc_order_handler_field_order_id extends views_handler_field {
 
@@ -21,6 +21,9 @@ class uc_order_handler_field_order_id extends views_handler_field {
     }
   }
 
+  /**
+   *
+   */
   function option_definition() {
     $options = parent::option_definition();
     $options['link_to_order'] = array('default' => FALSE);
@@ -57,6 +60,9 @@ class uc_order_handler_field_order_id extends views_handler_field {
     return $data;
   }
 
+  /**
+   *
+   */
   function render($values) {
     return $this->render_link(check_plain($values->{$this->field_alias}), $values);
   }

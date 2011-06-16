@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_product_handler_field_buyitnow.inc,v 1.5 2010/04/14 13:37:56 islandusurper Exp $
 
 /**
  * @file
@@ -7,19 +6,12 @@
  */
 
 /**
- * Display the simpler Add to cart form like the catalog.
+ * Displays the simpler Add to cart form like the catalog.
  */
 class uc_product_handler_field_buyitnow extends views_handler_field {
   function query() {
     $this->ensure_my_table();
     $this->add_additional_fields();
-  }
-
-  function element_type() {
-    if (isset($this->definition['element type'])) {
-      return $this->definition['element type'];
-    }
-    return 'div';
   }
 
   function render($values) {

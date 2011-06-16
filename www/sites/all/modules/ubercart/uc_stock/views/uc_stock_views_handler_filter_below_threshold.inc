@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_stock_views_handler_filter_below_threshold.inc,v 1.2 2010/01/25 16:05:33 islandusurper Exp $
 
 /**
  * @file

@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_file.api.php,v 1.5 2010/08/06 12:30:48 islandusurper Exp $
 
 /**
  * @file
@@ -33,7 +32,7 @@
  */
 function hook_uc_download_authorize($user, $file_download) {
   if (!$user->status) {
-    drupal_set_message(t("This account has been banned and can't download files anymore. "),'error');
+    drupal_set_message(t("This account has been banned and can't download files anymore."), 'error');
     return FALSE;
   }
   else {
@@ -123,7 +122,7 @@ function hook_uc_file_action($op, $args) {
     case 'insert':
       // Automatically adds watermarks to any new files that are uploaded to
       // the file download directory.
-      _add_watermark($args['file_object']->filepath);
+      _add_watermark($args['file_object']->uri);
     break;
     case 'form':
       if ($args['action'] == 'uc_image_watermark_add_mark') {
@@ -139,18 +138,18 @@ function hook_uc_file_action($op, $args) {
       }
     return $form;
     case 'upload':
-      _add_watermark($args['file_object']->filepath);
+      _add_watermark($args['file_object']->uri);
       break;
     case 'upload_validate':
       // Given a file path, function checks if file is valid JPEG.
-      if(!_check_image($args['file_object']->filepath)) {
-        form_set_error('upload',t('Uploaded file is not a valid JPEG'));
+      if (!_check_image($args['file_object']->uri)) {
+        form_set_error('upload', t('Uploaded file is not a valid JPEG'));
       }
     break;
     case 'validate':
       if ($args['form_values']['action'] == 'uc_image_watermark_add_mark') {
         if (empty($args['form_values']['watermark_text'])) {
-          form_set_error('watermar_text',t('Must fill in text'));
+          form_set_error('watermar_text', t('Must fill in text'));
         }
       }
     break;
@@ -167,36 +166,38 @@ function hook_uc_file_action($op, $args) {
 }
 
 /**
- * Make changes to a file before it is downloaded by the customer.
+ * Makes changes to a file before it is downloaded by the customer.
  *
- * Stores, either for customization, copy protection or other reasons, might want
- * to send customized downloads to customers. This hook will allow this to happen.
- * Before a file is opened to be transfered to a customer, this hook will be called
- * to make any altercations to the file that will be used to transfer the download
- * to the customer. This, in effect, will allow a developer to create a new,
- * personalized, file that will get transfered to a customer.
+ * Stores, either for customization, copy protection or other reasons, might
+ * want to send customized downloads to customers. This hook will allow this
+ * to happen.  Before a file is opened to be transfered to a customer, this
+ * hook will be called to make any altercations to the file that will be used
+ * to transfer the download to the customer. This, in effect, will allow a
+ * developer to create a new, personalized, file that will get transfered to
+ * a customer.
  *
  * @param $file_user
- *   The file_user object (i.e. an object containing a row from the uc_file_users
- *   table) that corresponds with the user download being accessed.
+ *   The file_user object (i.e. an object containing a row from the
+ *   uc_file_users table) that corresponds with the user download being
+ *   accessed.
  * @param $ip
- *   The IP address from which the customer is downloading the file
+ *   The IP address from which the customer is downloading the file.
  * @param $fid
- *   The file id of the file being transfered
+ *   The file id of the file being transfered.
  * @param $file
- *   The file path of the file to be transfered
+ *   The file path of the file to be transfered.
+ *
  * @return
  *   The path of the new file to transfer to customer.
  */
 function hook_uc_file_transfer_alter($file_user, $ip, $fid, $file) {
   // For large files this might be too memory intensive.
-  $file_data = file_get_contents($file)." [insert personalized data]";
-  $new_file = tempnam(file_directory_temp(),'tmp');
-  file_put_contents($new_file,$file_data);
+  $file_data = file_get_contents($file) . " [insert personalized data]";
+  $new_file = tempnam(file_directory_temp(), 'tmp');
+  file_put_contents($new_file, $file_data);
   return $new_file;
 }
 
 /**
  * @} End of "addtogroup hooks".
  */
-

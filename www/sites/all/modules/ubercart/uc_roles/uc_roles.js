@@ -1,12 +1,10 @@
-// $Id: uc_roles.js,v 1.4 2010/04/06 14:43:54 islandusurper Exp $
-
 /**
  * @file
- * Enable and disable expiration fields to prevent invalid configurations.
+ * Enables and disables expiration fields to prevent invalid configurations.
  */
 
 /**
- * Disable duration amount when its type is "never".
+ * Disables duration amount when its type is "never".
  */
 function _uc_role_expiration_disable_check(granularity, quantity) {
   // 'never' means there's no point in setting a duration.
@@ -20,7 +18,7 @@ function _uc_role_expiration_disable_check(granularity, quantity) {
 }
 
 /**
- * Switch between relative and absolute expiration durations.
+ * Switches between relative and absolute expiration durations.
  */
 function expiration_switcher() {
   if (jQuery('#edit-expiration').val() == 'abs') {
@@ -38,7 +36,7 @@ function expiration_switcher() {
 }
 
 /**
- * Set the default state for expiration duration.
+ * Sets the default state for expiration duration.
  */
 function expiration_switcher_default() {
   if (jQuery('#edit-uc-roles-default-end-expiration').val() == 'abs') {
@@ -56,7 +54,7 @@ function expiration_switcher_default() {
 }
 
 /**
- * Override the expiration duration default state.
+ * Overrides the expiration duration default state.
  */
 function uc_roles_expiration_default_override() {
   if (jQuery('#edit-end-override').length == 0) {
@@ -166,4 +164,3 @@ Drupal.behaviors.ucRoleExpirationEndOverride = {
     );
   }
 }
-

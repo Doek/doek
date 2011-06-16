@@ -1,5 +1,4 @@
 <?php
-// $Id: cyprus_196_1.cif,v 1.2 2010/09/14 13:46:57 islandusurper Exp $
 
 function cyprus_install() {
   db_insert('uc_countries')

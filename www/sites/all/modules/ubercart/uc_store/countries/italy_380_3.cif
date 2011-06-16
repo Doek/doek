@@ -1,6 +1,4 @@
 <?php
-// $Id: italy_380_3.cif,v 1.2 2010/09/14 13:50:22 islandusurper Exp $
-
 
 /**
 * Implements hook_install() using the name of the country as the base of
@@ -25,7 +23,7 @@ function italy_install() {
     array(380, 'AN', 'Ancona'),
     array(380, 'AO', 'Aosta'),
     array(380, 'AP', 'Ascoli Piceno'),
-    array(380, 'AQ', 'L\'Aquila'),
+    array(380, 'AQ', "L'Aquila"),
     array(380, 'AR', 'Arezzo'),
     array(380, 'AT', 'Asti'),
     array(380, 'AV', 'Avellino'),
@@ -201,6 +199,7 @@ function italy_update($version) {
         db_update('uc_zones')
           ->fields(array('zone_name' => $zone[2]))
           ->condition('zone_code', $zone[1])
+          ->condition('zone_country_id', 380)
           ->execute();
       }
 

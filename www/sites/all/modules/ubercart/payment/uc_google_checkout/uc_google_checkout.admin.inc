@@ -1,12 +1,15 @@
 <?php
-// $Id: uc_google_checkout.admin.inc,v 1.15 2010/08/25 13:41:20 islandusurper Exp $
 
 /**
  * @file
  * Google Checkout administration menu items.
- *
  */
 
+/**
+ * Form builder for administrative settings form.
+ *
+ * @ingroup forms
+ */
 function uc_google_checkout_settings($form, &$form_state) {
   $form['authentication'] = array(
     '#type' => 'fieldset',
@@ -93,107 +96,38 @@ function uc_google_checkout_settings($form, &$form_state) {
   return system_settings_form($form);
 }
 
+/**
+ * Form builder for shipping settings form.
+ *
+ * @ingroup forms
+ */
 function uc_google_checkout_shipping_settings($form, &$form_state) {
-  $form['#tree'] = TRUE;
-
-  $services = uc_google_checkout_shipping_services();
-
-  foreach ($services as $key => $title) {
-    $shipping_settings = variable_get('uc_google_checkout_shipping_' . $key, array());
-    $form['services'][$key]['enable'] = array(
-      '#type' => 'checkbox',
-      '#default_value' => $shipping_settings['enable'],
-    );
-    $form['services'][$key]['title'] = array(
-      '#markup' => $title,
-    );
-    $form['services'][$key]['default'] = array(
-      '#type' => 'textfield',
-      '#default_value' => $shipping_settings['default'],
-      '#size' => 10,
-      '#field_prefix' => '$',
-    );
-    $form['services'][$key]['pickup'] = array(
-      '#type' => 'select',
-      '#default_value' => $shipping_settings['pickup'],
-      '#options' => array(
-        'REGULAR_PICKUP' => t('Regular pickup'),
-        'SPECIAL_PICKUP' => t('Special pickup'),
-        'DROP_OFF' => t('Drop off'),
-      ),
-    );
-    $form['services'][$key]['fixed_charge'] = array(
-      '#type' => 'textfield',
-      '#default_value' => $shipping_settings['fixed_charge'],
-      '#size' => 10,
-      '#field_prefix' => '$',
-    );
-    $form['services'][$key]['percent_adjustment'] = array(
-      '#type' => 'textfield',
-      '#default_value' => $shipping_settings['percent_adjustment'],
-      '#size' => 5,
-      '#field_suffix' => t('%'),
-    );
-  }
-
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save configuration'),
+  $form['help'] = array(
+    '#value' => t("For merchant-calculated shipping, Google Checkout requires a fallback price in case it can't get a calculated shipping rate in time. When the cart request is sent to Google Checkout, Ubercart pre-calculates the shipping rates using this default address. Choose a location that will cause an average shipping cost to be returned."),
   );
 
-  return $form;
+  $form['address'] = array(
+    '#type' => 'uc_address',
+    '#default_value' => array(
+      'uc_google_checkout_delivery_city' => variable_get('uc_google_checkout_delivery_city', ''),
+      'uc_google_checkout_delivery_zone' => variable_get('uc_google_checkout_delivery_zone', ''),
+      'uc_google_checkout_delivery_country' => isset($form_state['values']['uc_google_checkout_delivery_country']) ? $form_state['values']['uc_google_checkout_delivery_country'] : variable_get('uc_google_checkout_delivery_country', ''),
+      'uc_google_checkout_delivery_postal_code' => variable_get('uc_google_checkout_delivery_postal_code', ''),
+    ),
+    '#required' => FALSE,
+    '#key_prefix' => 'uc_google_checkout_delivery',
+  );
+
+  return system_settings_form($form);
 }
 
-function theme_uc_google_checkout_shipping_settings($variables) {
-  $form = $variables['form'];
-
-  $header = array(t('Enable'), t('Service'), t('Default price'), t('Pickup type'), t('Handling charge'), t('Percentage markup/discount'));
-
-  $companies = uc_google_checkout_shipping_companies();
-  $company = '';
-  $rows = array();
-  foreach (element_children($form['services']) as $key) {
-    $row = array();
-    $temp = explode('_', $key, 2);
-    if ($company != $temp[0]) {
-      $company = $temp[0];
-      $rows[] = array(array('data' => '<strong>' . $companies[$company] . '</strong>', 'colspan' => 6));
-    }
-    foreach (array('enable', 'title', 'default', 'pickup', 'fixed_charge', 'percent_adjustment') as $field) {
-      $row[] = drupal_render($form['services'][$key][$field]);
-    }
-    $rows[] = $row;
-  }
-  $output = theme('table', array('header' => $header, 'rows' => $rows)) . drupal_render_children($form);
-
-  return $output;
-}
-
-function uc_google_checkout_shipping_settings_validate($form, &$form_state) {
-  foreach ($form_state['values']['services'] as $key => $service) {
-    if ($service['enable'] && empty($service['default'])) {
-      form_set_error('services][' . $key . '][default', t('A default shipping cost is required.'));
-    }
-    if (!empty($service['default']) && (!is_numeric($service['default']) || $service['default'] < 0)) {
-      form_set_error('services][' . $key . '][default', t('The default shipping cost should be a positive number.'));
-    }
-    if (!empty($service['fixed_charge']) && !is_numeric($service['fixed_charge'])) {
-      form_set_error('services][' . $key . '][fixed_charge', t('The fixed charge should be a number.'));
-    }
-    if (!empty($service['percent_adjustment']) && !is_numeric($service['percent_adjustment'])) {
-      form_set_error('services][' . $key . '][percent_adjustment', t('The percent adjustment should be a number.'));
-    }
-  }
-}
-
-function uc_google_checkout_shipping_settings_submit($form, &$form_state) {
-  foreach ($form_state['values']['services'] as $key => $service) {
-    variable_set('uc_google_checkout_shipping_' . $key, $service);
-  }
-  drupal_set_message(t('The configuration options have been saved.'));
-}
-
+/**
+ * Form builder for tax settings form.
+ *
+ * @see uc_google_checkout_taxes_settings_submit()
+ * @see theme_uc_google_checkout_taxes_settings()
+ * @ingroup forms
+ */
 function uc_google_checkout_taxes_settings($form, &$form_state) {
   $form['#tree'] = TRUE;
 
@@ -242,6 +176,12 @@ function uc_google_checkout_taxes_settings($form, &$form_state) {
   return $form;
 }
 
+/**
+ * Themes tax settings form.
+ *
+ * @see uc_google_checkout_taxes_settings()
+ * @ingroup themeable
+ */
 function theme_uc_google_checkout_taxes_settings($variables) {
   $form = $variables['form'];
 
@@ -268,6 +208,11 @@ function theme_uc_google_checkout_taxes_settings($variables) {
   return $output;
 }
 
+/**
+ * Form submission handler for tax settings form.
+ *
+ * @see uc_google_checkout_taxes_settings()
+ */
 function uc_google_checkout_taxes_settings_submit($form, &$form_state) {
   foreach ($form_state['values']['taxes'] as $zone => $tax_values) {
     if ($zone == 'new' && $tax_values['zone'] && $tax_values['rate']) {
@@ -296,6 +241,9 @@ function uc_google_checkout_taxes_settings_submit($form, &$form_state) {
   }
 }
 
+/**
+ * Menu callback function that presents payment terminal form to adminstrator.
+ */
 function uc_google_checkout_terminal($order) {
   $order_id = $order->order_id;
 
@@ -361,6 +309,13 @@ function uc_google_checkout_terminal($order) {
   return $build;
 }
 
+/**
+ * Form builder for virtual terminal form.
+ *
+ * @see uc_google_checkout_terminal_form_validate()
+ * @see uc_google_checkout_terminal_form_submit()
+ * @ingroup forms
+ */
 function uc_google_checkout_terminal_form($form, &$form_state, $order, $amount = 0) {
   if ($order->financial_state == 'CHARGED') {
     $form['action'] = array(
@@ -421,6 +376,12 @@ function uc_google_checkout_terminal_form($form, &$form_state, $order, $amount =
   return $form;
 }
 
+/**
+ * Form validation for virtual terminal form.
+ *
+ * @see uc_google_checkout_terminal_form()
+ * @see uc_google_checkout_terminal_form_submit()
+ */
 function uc_google_checkout_terminal_form_validate($form, &$form_state) {
   if (!is_numeric($form_state['values']['amount']) || $form_state['values']['amount'] == 0) {
     form_set_error('amount', t('You must enter a number for the amount.'));
@@ -441,6 +402,12 @@ function uc_google_checkout_terminal_form_validate($form, &$form_state) {
   }
 }
 
+/**
+ * Form submission handler for virtual terminal form.
+ *
+ * @see uc_google_checkout_terminal_form()
+ * @see uc_google_checkout_terminal_form_validate()
+ */
 function uc_google_checkout_terminal_form_submit($form, &$form_state) {
   if ($form_state['values']['action'] == 'charge') {
     $form_state['redirect'] = uc_google_checkout_charge($form_state['values']['order_id'], $form_state['values']['amount']);

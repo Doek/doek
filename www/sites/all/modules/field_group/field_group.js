@@ -1,4 +1,3 @@
-// $Id: field_group.js,v 1.5.2.12 2011/01/07 09:52:30 stalski Exp $
 
 (function($) {
 
@@ -7,16 +6,56 @@
  */
 Drupal.FieldGroup = Drupal.FieldGroup || {};
 Drupal.FieldGroup.Effects = Drupal.FieldGroup.Effects || {};
+Drupal.FieldGroup.groupWithfocus = null;
+
+Drupal.FieldGroup.setGroupWithfocus = function(element) {
+  element.css({display: 'block'});
+  Drupal.FieldGroup.groupWithfocus = element;
+}
+
+/**
+ * Implements Drupal.FieldGroup.processHook().
+ */
+Drupal.FieldGroup.Effects.processFieldset = {
+  execute: function (context, settings, type) {
+    if (type == 'form') {
+      // Add required fields mark to any fieldsets containing required fields
+      $('fieldset.fieldset').each(function(i){
+        if ($(this).is('.required-fields') && $(this).find('.form-required').length > 0) {
+          $('legend span.fieldset-legend', $(this)).eq(0).append('&nbsp;').append($('.form-required').eq(0).clone());
+        }
+        if ($('.error', $(this)).length) {
+          $('legend span.fieldset-legend', $(this)).eq(0).addClass('error');
+          Drupal.FieldGroup.setGroupWithfocus($(this));
+        }
+      });
+    }
+  }
+}
 
 /**
  * Implements Drupal.FieldGroup.processHook().
  */
 Drupal.FieldGroup.Effects.processAccordion = {
-  execute: function (context, settings) {
-    $('div.field-group-accordion-wrapper', context).accordion({
+  execute: function (context, settings, type) {
+    var accordions = $('div.field-group-accordion-wrapper', context).accordion({
       autoHeight: false,
-      active: '.field-group-accordion-active'
+      active: 0,
+      collapsible: true
     });
+    if (type == 'form') {
+      // Add required fields mark to any element containing required fields
+      $('div.accordion-item').each(function(i){
+        if ($(this).is('.required-fields') && $(this).find('.form-required').length > 0) {
+          $('h3.ui-accordion-header').eq(i).append('&nbsp;').append($('.form-required').eq(0).clone());
+        }
+        if ($('.error', $(this)).length) {
+          $('h3.ui-accordion-header').eq(i).addClass('error');
+          var activeOne = $(this).parent().accordion("activate" , i);
+          $('.ui-accordion-content-active', activeOne).css({height: 'auto', width: 'auto', display: 'block'});
+        }
+      });
+    }
   }
 }
 
@@ -24,7 +63,41 @@ Drupal.FieldGroup.Effects.processAccordion = {
  * Implements Drupal.FieldGroup.processHook().
  */
 Drupal.FieldGroup.Effects.processHtabs = {
-  execute: function (context, settings) {
+  execute: function (context, settings, type) {
+    if (type == 'form') {
+      // Add required fields mark to any element containing required fields
+      $('fieldset.horizontal-tabs-pane').each(function(i){
+        if ($(this).is('.required-fields') && $(this).find('.form-required').length > 0) {
+          $(this).data('horizontalTab').link.find('strong:first').after($('.form-required').eq(0).clone()).after('&nbsp;');
+        }
+        if ($('.error', $(this)).length) {
+          $(this).data('horizontalTab').link.parent().addClass('error');
+          Drupal.FieldGroup.setGroupWithfocus($(this));
+          $(this).data('horizontalTab').focus();
+        }
+      });
+    }
+  }
+}
+
+/**
+ * Implements Drupal.FieldGroup.processHook().
+ */
+Drupal.FieldGroup.Effects.processTabs = {
+  execute: function (context, settings, type) {
+    if (type == 'form') {
+      // Add required fields mark to any fieldsets containing required fields
+      $('fieldset.vertical-tabs-pane').each(function(i){
+        if ($(this).is('.required-fields') && $(this).find('.form-required').length > 0) {
+          $(this).data('verticalTab').link.find('strong:first').after($('.form-required').eq(0).clone()).after('&nbsp;');
+        }
+        if ($('.error', $(this)).length) {
+          $(this).data('verticalTab').link.parent().addClass('error');
+          Drupal.FieldGroup.setGroupWithfocus($(this));
+          $(this).data('verticalTab').focus();
+        }
+      });
+    }
   }
 }
 
@@ -35,7 +108,7 @@ Drupal.FieldGroup.Effects.processHtabs = {
  *      necessary.
  */
 Drupal.FieldGroup.Effects.processDiv = {
-  execute: function (context, settings) {
+  execute: function (context, settings, type) {
 
     $('div.collapsible', context).each(function() {
       var $wrapper = $(this);
@@ -84,8 +157,9 @@ Drupal.behaviors.fieldGroup = {
       $.each(Drupal.FieldGroup.Effects, function (func) {
         // We check for a wrapper function in Drupal.field_group as 
         // alternative for dynamic string function calls.
-        if (settings.field_group[func.toLowerCase().replace("process", "")] != undefined && $.isFunction(this.execute)) {
-          this.execute(context, settings);
+        var type = func.toLowerCase().replace("process", "");
+        if (settings.field_group[type] != undefined && $.isFunction(this.execute)) {
+          this.execute(context, settings, settings.field_group[type]);
         }
       });
     });

@@ -1,13 +1,12 @@
 <?php
-// $Id: uc_product.install,v 1.25 2010/12/09 18:52:30 islandusurper Exp $
 
 /**
  * @file
- * Database installation, uninstallation, and updates for the product module.
+ * Install, update and uninstall functions for the uc_product module.
  */
 
 /**
- * Implement hook_schema().
+ * Implements hook_schema().
  */
 function uc_product_schema() {
   $schema = array();
@@ -213,18 +212,26 @@ function uc_product_schema() {
 }
 
 /**
- * Implement hook_install().
+ * Implements hook_enable().
+ *
+ * Sets up the body and a default image field for products.
  */
-function uc_product_install() {
+function uc_product_enable() {
   $body_label = t('Description');
 
   node_types_rebuild();
   $types = node_type_get_types();
-  node_add_body_field($types['product'], $body_label);
+  foreach ($types as $type) {
+    if ($type->module == 'uc_product') {
+      node_add_body_field($type, $body_label);
+    }
+  }
+
+  uc_product_add_default_image_field();
 }
 
 /**
- * Implement hook_uninstall().
+ * Implements hook_uninstall().
  */
 function uc_product_uninstall() {
   db_delete('variable')
@@ -243,7 +250,14 @@ function uc_product_uninstall() {
 }
 
 /**
- * Rename node permissions for the Product type.
+ * Implements hook_update_last_removed().
+ */
+function uc_product_update_last_removed() {
+  return 6009;
+}
+
+/**
+ * Renames node permissions for the Product type.
  */
 function uc_product_update_7000() {
   db_update('role_permission')
@@ -319,7 +333,7 @@ function uc_product_update_7001() {
 }
 
 /**
- * Make sure Image is enabled.
+ * Makes sure Image is enabled.
  */
 function uc_product_update_7002() {
   if (module_exists('uc_product') && !module_exists('image')) {

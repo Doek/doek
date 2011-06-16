@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_googleanalytics.api.php,v 1.2 2010/03/17 17:51:58 islandusurper Exp $
 
 /**
  * @file
