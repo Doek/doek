@@ -1,0 +1,105 @@
+body
+{
+	margin: 0px;
+	padding: 0px;
+	background-color: #EEE;
+	background: url(http://kurtn-nyhedsbrev.dk/intro2011/templates/ja_events/images/bg.jpg) no-repeat 50% 0%;
+}
+
+#wrapper
+{
+	width: 960px;
+	margin: auto;
+}
+
+#logo
+{
+	float: left;
+}
+
+#container
+{
+	background-color: #5697CC;
+}
+#container-inner
+{
+	padding-left: 15px;
+	padding-right: 15px;
+	padding-bottom: 15px;
+}
+
+#mainbody
+{
+	width: 74%;
+	background-color: white;
+}
+
+#sidebar
+{
+	float: right;
+	width: 26%;
+	padding-left: 15px;
+	padding-right: 15px;
+}
+
+#mainnav
+{
+	position: relative;
+	background: url(http://kurtn-nyhedsbrev.dk/intro2011/templates/ja_events/images/mainnav-bg.png) no-repeat 100% 0%;
+}
+
+#mainnav-inner
+{
+	padding-top: 15px;
+	padding-right: 15px;
+	padding-left: 15px;
+}
+
+#megamenu
+{
+	position: relative;
+	width: 74%;
+	min-height: 26px;
+	padding-top: 15px;
+	background: url(http://kurtn-nyhedsbrev.dk/intro2011/templates/ja_events/images/trans1.png);
+}
+
+.mainnav-mask {
+	background: url(http://kurtn-nyhedsbrev.dk/intro2011/templates/ja_events/images/white-angle.png) no-repeat 100% 0%;
+	height: 26px;
+	position: absolute;
+	right: 0px;
+	top: 0px;
+	width: 26px;
+}
+h1#logo {
+	position: relative;
+	float: left;
+	height: 199px;
+	margin-left: -87px;
+	margin-top: -7px;
+	width: 534px;
+}
+
+h1#logo a {
+	background: url(http://kurtn-nyhedsbrev.dk/intro2011/templates/ja_events/images/logo.png) no-repeat 0% 50%;
+	display: block;
+	height: 199px;
+	margin-top: -8px;
+	width: 534px;
+}
+#header {
+	position: relative;
+	height: 139px;
+	padding-top: 18px;
+	padding-right: 0px;
+	padding-bottom: 18px;
+	padding-left: 0px;
+	margin-bottom: 30px;
+}
+
+#search {
+	position: absolute;
+	bottom: -12px;
+	right: 26px;
+}

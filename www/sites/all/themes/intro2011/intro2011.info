@@ -1,6 +1,7 @@
 name        = DØK Intro 2011
 description = Theme for Intro 2011
 core        = 7.x
+engine	    = phptemplate
 
 stylesheets[all][]   = css/intro2011.css
 stylesheets[all][]   = css/custom.css

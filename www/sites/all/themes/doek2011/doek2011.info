@@ -1,0 +1,17 @@
+name        = DØK Intro 2011
+description = Intro 4 evah!
+version     = VERSION
+core        = 7.x
+engine      = phptemplate
+
+features[] = logo
+features[] = name
+features[] = favicon
+
+stylesheets[all][]   = css/site.css
+
+regions[header]    	= Header
+regions[navbar]		= navbar
+regions[content]        = Content
+regions[sidebar]  	= Sidebar
+regions[footer]    	= Footer
