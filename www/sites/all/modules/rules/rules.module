@@ -84,7 +84,8 @@ function rules_condition($name, $settings = array()) {
  *      in particular useful for defining variables which can be provided to the
  *      caller (see $provides argument) but need not be passed in as parameter.
  * @param $provides
- *   An array of the names of variables, which should be provided to the caller.
+ *   The names of variables which should be provided to the caller. Only
+ *   variables contained in $variables may be specified.
  * @return Rule
  */
 function rule($variables = NULL, $provides = array()) {
@@ -144,7 +145,7 @@ function rules_loop($settings = array(), $variables = NULL) {
  * @param $variables
  *   An array as for rule().
  * @param $provides
- *   An array of the names of variables, which should be provided to the caller.
+ *   The names of variables which should be provided to the caller. See rule().
  * @return RulesRuleSet
  */
 function rules_rule_set($variables, $provides = array()) {
@@ -157,7 +158,7 @@ function rules_rule_set($variables, $provides = array()) {
  * @param $variables
  *   An array as for rule().
  * @param $provides
- *   An array of the names of variables, which should be provided to the caller.
+ *   The names of variables which should be provided to the caller. See rule().
  * @return RulesActionSet
  */
 function rules_action_set($variables, $provides = array()) {
@@ -220,7 +221,7 @@ function &rules_get_cache($cid = 'data') {
 
   if (!isset($cache[$cid])) {
     // The main 'data' cache includes translated strings, so each language is
-    // ached separately.
+    // cached separately.
     $cid_suffix = $cid == 'data' ? ':' . $GLOBALS['language']->language : '';
 
     if ($get = cache_get($cid . $cid_suffix, 'cache_rules')) {
@@ -260,6 +261,22 @@ function _rules_rebuild_cache(&$cache) {
   }
   $cid_suffix = ':' . $GLOBALS['language']->language;
   cache_set('data' . $cid_suffix, $cache, 'cache_rules');
+}
+
+/**
+ * Sets a rules cache item.
+ *
+ * In addition to calling cache_set(), this function makes sure the cache item
+ * is immediately available via rules_get_cache() by keeping all cache items
+ * in memory. That way we can garantuee rules_get_cache() is able to retrieve
+ * any cache item, even if all cache gets fail.
+ *
+ * @see rules_get_cache()
+ */
+function rules_set_cache($cid, $data) {
+  $cache = &drupal_static('rules_get_cache', array());
+  $cache[$cid] = $data;
+  cache_set($cid, $data, 'cache_rules');
 }
 
 /**
@@ -584,7 +601,7 @@ function rules_hook_info() {
  *   An array of rule configurations indexed by their ids.
  */
 function rules_config_load_multiple($names = array(), $conditions = array()) {
-  return entity_get_controller('rules_config')->load($names, $conditions);
+  return entity_load_multiple_by_name('rules_config', $names, $conditions);
 }
 
 /**
@@ -595,8 +612,7 @@ function rules_config_load_multiple($names = array(), $conditions = array()) {
  * @return RulesPlugin
  */
 function rules_config_load($name) {
-  $result = entity_get_controller('rules_config')->load(array($name));
-  return reset($result);
+  return entity_load_single('rules_config', $name);
 }
 
 /**
@@ -870,6 +886,14 @@ function rules_extract_property($arrays, $key) {
 }
 
 /**
+ * Returns the first key of the array.
+ */
+function rules_array_key($array) {
+  reset($array);
+  return key($array);
+}
+
+/**
  * Implements hook_theme().
  */
 function rules_theme() {
@@ -886,7 +910,7 @@ function rules_theme() {
       'render element' => 'element',
       'file' => 'ui/ui.theme.inc',
     ),
-    'rules_provides_variable_view' => array(
+    'rules_variable_view' => array(
       'render element' => 'element',
       'file' => 'ui/ui.theme.inc',
     ),
@@ -1045,14 +1069,14 @@ function rules_element_info() {
     '#tree' => TRUE,
     '#default_value' => 0,
     '#value_callback' => 'rules_ui_element_duration_value',
-    '#process' => array('rules_ui_element_duration_process'),
+    '#process' => array('rules_ui_element_duration_process', 'ajax_process_form'),
     '#after_build' => array('rules_ui_element_duration_after_build'),
     '#pre_render' => array('form_pre_render_conditional_form_element'),
   );
   $types['rules_data_selection'] = array(
     '#input' => TRUE,
     '#pre_render' => array('form_pre_render_conditional_form_element'),
-    '#process' => array('rules_data_selection_process'),
+    '#process' => array('rules_data_selection_process', 'ajax_process_form'),
     '#theme' => 'rules_autocomplete',
   );
   return $types;

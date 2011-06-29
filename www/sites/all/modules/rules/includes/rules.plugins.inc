@@ -32,8 +32,10 @@ class RulesAction extends RulesAbstractPlugin implements RulesActionInterface {
             throw new RulesException('Unable to update the argument for parameter %name: %error', array('%name' => $name, '%error' => $e->getMessage()), $this);
           }
         }
-        elseif (isset($args[$name])) {
-          $state->variables[$name] = $data;
+        elseif (array_key_exists($name, $args)) {
+          // Map back to the source variable name and update it.
+          $var_name = !empty($this->settings[$name . ':select']) ? str_replace('-', '_', $this->settings[$name . ':select']) : $name;
+          $state->variables[$var_name] = $data;
         }
         // Add provided variables.
         elseif (!$state->varInfo($name) && isset($this->info['provides'][$name])) {
@@ -110,7 +112,7 @@ class RulesCondition extends RulesAbstractPlugin implements RulesConditionInterf
   }
 
   public function import(array $export) {
-    $this->elementName = key($export);
+    $this->elementName = rules_array_key($export);
     if (strpos($this->elementName, 'NOT ') === 0) {
       $this->elementName = substr($this->elementName, 4);
       $this->negate = TRUE;
@@ -542,7 +544,7 @@ class RulesLoop extends RulesActionContainer {
     $this->checkVarName($this->settings['item:var']);
   }
 
-  protected function listItemInfo() {
+  public function listItemInfo() {
     if (!isset($this->listItemInfo)) {
       if ($info = $this->getArgumentInfo('list')) {
         // Pass through the variable info keys like property info.
@@ -597,6 +599,20 @@ class RulesLoop extends RulesActionContainer {
 
   protected function importChildren($export, $key = 'DO') {
     parent::importChildren($export, $key);
+  }
+
+  protected function exportSettings() {
+    $export = parent::exportSettings();
+    $export['ITEM'][$this->settings['item:var']] = $this->settings['item:label'];
+    return $export;
+  }
+
+  protected function importSettings($export) {
+    parent::importSettings($export);
+    if (isset($export['ITEM'])) {
+      $this->settings['item:var'] = rules_array_key($export['ITEM']);
+      $this->settings['item:label'] = reset($export['ITEM']);
+    }
   }
 }
 
@@ -678,8 +694,7 @@ class RulesEventSet extends RulesRuleSet {
         $event->optimize();
         // Allow modules to alter the cached event set.
         drupal_alter('rules_event_set', $name, $event);
-        cache_set('event_' . $name, $event, 'cache_rules');
-        $event->destroy();
+        rules_set_cache('event_' . $name, $event);
       }
       else {
         $empty[] = $name;

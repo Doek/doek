@@ -72,21 +72,27 @@ function rules_rules_core_data_info() {
       'ui class' => 'RulesDataUIURI',
     ),
    'list' => array(
-      'label' => t('list'),
+      'label' => t('list', array(), array('context' => 'data_types')),
       'wrap' => TRUE,
-      'group' => t('List'),
+      'group' => t('List', array(), array('context' => 'data_types')),
     ),
    'list<text>' => array(
       'label' => t('list of text'),
       'ui class' => 'RulesDataUIListText',
       'wrap' => TRUE,
-      'group' => t('List'),
+      'group' => t('List', array(), array('context' => 'data_types')),
     ),
    'list<integer>' => array(
       'label' => t('list of integer'),
       'ui class' => 'RulesDataUIListInteger',
       'wrap' => TRUE,
-      'group' => t('List'),
+      'group' => t('List', array(), array('context' => 'data_types')),
+    ),
+    'list<token>' => array(
+      'label' => t('list of text tokens'),
+      'ui class' => 'RulesDataUIListToken',
+      'wrap' => TRUE,
+      'group' => t('List', array(), array('context' => 'data_types')),
     ),
    'entity' => array(
       'label' => t('any entity'),
@@ -128,8 +134,11 @@ function rules_rules_core_data_info_alter(&$data_info) {
         $data_info[$list_type] = array(
           'label' => t('list of @type_label items', array('@type_label' => $info['label'])),
           'wrap' => TRUE,
-          'group' => t('List'),
+          'group' => t('List', array(), array('context' => 'data_types')),
         );
+        if (isset($info['parent']) && $info['parent'] == 'entity') {
+          $data_info[$list_type]['ui class'] = 'RulesDataUIListEntity';
+        }
       }
     }
   }
@@ -169,6 +178,11 @@ function rules_rules_core_data_processor_info() {
     'date_offset' => array(
       'class' => 'RulesDateOffsetProcessor',
       'type' => 'date',
+      'weight' => -2,
+     ),
+    'num_offset' => array(
+      'class' => 'RulesNumericOffsetProcessor',
+      'type' => array('integer', 'decimal'),
       'weight' => -2,
      ),
   );

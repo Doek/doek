@@ -25,13 +25,15 @@ abstract class EntityMetadataWrapper {
    * @param $info
    *   Optional. Used internally to pass info about properties down the tree.
    */
-  public function __construct($type, &$data = NULL, $info = array()) {
+  public function __construct($type, $data = NULL, $info = array()) {
     $this->type = $type;
-    $this->data = &$data;
     $this->info = $info + array(
       'langcode' => NULL,
     );
     $this->info['type'] = $type;
+    if (isset($data)) {
+      $this->set($data);
+    }
   }
 
   /**
@@ -278,7 +280,7 @@ class EntityStructureWrapper extends EntityMetadataWrapper implements IteratorAg
    *     data structure. It has to contain an array of property info in the same
    *     structure as used by hook_entity_property_info().
    */
-  public function __construct($type, &$data = NULL, $info = NULL) {
+  public function __construct($type, $data = NULL, $info = array()) {
     parent::__construct($type, $data, $info);
     $this->info += array('property defaults' => array());
     $info += array('property info' => array());
@@ -563,9 +565,8 @@ class EntityDrupalWrapper extends EntityStructureWrapper {
    * @param $info
    *   Optional. Used internally to pass info about properties down the tree.
    */
-  public function __construct($type, $data = NULL, $info = NULL) {
+  public function __construct($type, $data = NULL, $info = array()) {
     parent::__construct($type, $data, $info);
-    $this->setEntity($data);
     $this->setUp();
   }
 
@@ -826,8 +827,6 @@ class EntityDrupalWrapper extends EntityStructureWrapper {
  */
 class EntityListWrapper extends EntityMetadataWrapper implements IteratorAggregate, ArrayAccess, Countable {
 
-  protected $data = NULL;
-
   protected function itemType() {
     $type = entity_property_list_extract_type($this->type);
     return $type ? $type : 'unknown';
@@ -895,7 +894,10 @@ class EntityListWrapper extends EntityMetadataWrapper implements IteratorAggrega
       $entities = entity_load($this->get(0)->type, $list);
       // Make sure to keep the array keys as present in the list.
       foreach ($list as $key => $id) {
-        $list[$key] = isset($entities[$id]) ? $entities[$id] : NULL;
+        if (!isset($entities[$id])) {
+          throw new EntityMetadataWrapperException('Unable to load the ' . check_plain($this->itemType()) . ' with the id ' . check_plain($id) . '.');
+        }
+        $list[$key] = $entities[$id];
       }
       return $list;
     }

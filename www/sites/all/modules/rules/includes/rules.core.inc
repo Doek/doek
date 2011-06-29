@@ -8,7 +8,7 @@
 /**
  * Make sure loaded rule configs are instantiated right.
  */
-class RulesEntityController extends EntityAPIController {
+class RulesEntityController extends EntityAPIControllerExportable {
 
   /**
    * Overriden.
@@ -24,7 +24,7 @@ class RulesEntityController extends EntityAPIController {
         $entity->$field = $record->$field;
       }
       unset($entity->data, $entity->plugin);
-      $entities[$entity->name] = $entity;
+      $entities[$entity->id] = $entity;
     }
     $queried_entities = $entities;
     parent::attachLoad($queried_entities, $revision_id);
@@ -446,7 +446,7 @@ abstract class RulesPlugin extends RulesExtendable {
     $state = new RulesState();
     $vars = $this->setUpVariables();
     // Fix numerically indexed args to start with 0.
-    if (!isset($args[key($vars)])) {
+    if (!isset($args[rules_array_key($vars)])) {
       $args = array_values($args);
     }
     $offset = 0;
@@ -533,6 +533,7 @@ abstract class RulesPlugin extends RulesExtendable {
           return FALSE;
         }
       }
+      // Incorporate access checks for data processors and input evaluators.
       if (isset($this->settings[$name . ':process']) && $this->settings[$name . ':process'] instanceof RulesDataProcessor && !$this->settings[$name . ':process']->editAccess()) {
         return FALSE;
       }
@@ -547,11 +548,8 @@ abstract class RulesPlugin extends RulesExtendable {
    * has been altered manually after element construction, it needs to be
    * invoked explicitly with $force set to TRUE.
    *
-   * @param $access_check
-   *   Whether only input evaluators accessible to the current user should be
-   *   taken into account.
    */
-  public function processSettings($force = FALSE, $access_check = FALSE) {
+  public function processSettings($force = FALSE) {
     // Process if not done yet.
     if ($force || !empty($this->settings['#_needs_processing'])) {
       $var_info = $this->availableVariables();
@@ -559,11 +557,11 @@ abstract class RulesPlugin extends RulesExtendable {
         // Prepare input evaluators.
         if (isset($this->settings[$name])) {
           $this->settings[$name . ':process'] = $this->settings[$name];
-          RulesDataInputEvaluator::prepareSetting($this->settings[$name . ':process'], $info, $var_info, $access_check);
+          RulesDataInputEvaluator::prepareSetting($this->settings[$name . ':process'], $info, $var_info);
         }
         // Prepare data processors.
         elseif (isset($this->settings[$name . ':select']) && !empty($this->settings[$name . ':process'])) {
-          RulesDataProcessor::prepareSetting($this->settings[$name . ':process'], $info, $var_info, $access_check);
+          RulesDataProcessor::prepareSetting($this->settings[$name . ':process'], $info, $var_info);
         }
         // Clean up.
         if (empty($this->settings[$name . ':process'])) {
@@ -653,7 +651,7 @@ abstract class RulesPlugin extends RulesExtendable {
       throw new RulesException('Required parameter %name is missing.', array('%name' => $name), $this);
     }
     else {
-      $arg = !empty($info['default value']) ? $info['default value'] : NULL;
+      $arg = isset($info['default value']) ? $info['default value'] : NULL;
       $skip_sanitize = TRUE;
       $info['allow null'] = TRUE;
     }
@@ -724,7 +722,7 @@ abstract class RulesPlugin extends RulesExtendable {
       if ($wrapper = $this->applyDataSelector($this->settings[$name . ':select'])) {
         return $wrapper->info();
       }
-      throw new RulesException('%plugin: Invalid data selector %selector specified.', array('%plugin' => $this->getPluginName(), '%selector' => $this->settings[$name . ':select']), array($this, 'parameter', $name, 'settings', $name . ':select'));
+      return;
     }
     elseif (isset($this->settings[$name . ':type'])) {
       return array('type' => $this->settings[$name . ':type']);
@@ -744,6 +742,9 @@ abstract class RulesPlugin extends RulesExtendable {
       return $this->parent->save($name, $module);
     }
     else {
+      // Make sure all element settings are processed before we save.
+      $this->processSettings();
+
       $this->plugin = $this->itemName;
       $this->name = isset($name) ? $name : $this->name;
       $this->module = !isset($this->module) || $module != 'rules' ? $module : $this->module;
@@ -928,7 +929,7 @@ abstract class RulesPlugin extends RulesExtendable {
     }
     foreach ($export['PROVIDE'] as $name => $var_export) {
       // The key of $var_export is the variable name, the value the label.
-      $this->settings[$name . ':var'] = key($var_export);
+      $this->settings[$name . ':var'] = rules_array_key($var_export);
       $this->settings[$name . ':label'] = reset($var_export);
     }
   }
@@ -995,7 +996,7 @@ abstract class RulesPlugin extends RulesExtendable {
   }
 
   protected function exportParameterSetting($name, $info) {
-    if (isset($this->settings[$name]) && (!isset($info['default value']) || $this->settings[$name] != $info['default value'])) {
+    if (isset($this->settings[$name]) && (empty($info['optional']) || !isset($info['default value']) || $this->settings[$name] != $info['default value'])) {
       // In case of an array-value wrap the value into another array, such that
       // the value cannot be confused with an exported data selector.
       return is_array($this->settings[$name]) ? array('value' => $this->settings[$name]) : $this->settings[$name];
@@ -1054,8 +1055,7 @@ abstract class RulesPlugin extends RulesExtendable {
         $component->optimize();
         // Allow modules to alter the cached component.
         drupal_alter('rules_component', $this->itemName, $component);
-        cache_set('comp_' . $component->name, $component, 'cache_rules');
-        $component->destroy();
+        rules_set_cache('comp_' . $component->name, $component);
       }
     }
   }
@@ -1144,19 +1144,19 @@ abstract class RulesAbstractPlugin extends RulesPlugin {
     return $this;
   }
 
-  public function processSettings($force = FALSE, $access_check = FALSE) {
+  public function processSettings($force = FALSE) {
     // Process if not done yet.
     if ($force || !empty($this->settings['#_needs_processing'])) {
-      // In case the element implements the info alteration callback, re-setup
-      // the element so that any settings depending info alterations are
+      // In case the element implements the info alteration callback, (re-)run
+      // the alteration so that any settings depending info alterations are
       // applied.
       if ($this->facesMethods && $this->facesMethods['info_alter'] != $this->itemInfo['faces_cache'][0]['info_alter']) {
-        $this->setUp();
+        $this->__call('info_alter', array(&$this->info));
       }
       // First let the plugin implementation do processing, so data types of the
       // parameters are fixed when we process the settings.
       $this->process();
-      parent::processSettings($force, $access_check);
+      parent::processSettings($force);
     }
   }
 
@@ -1191,7 +1191,7 @@ abstract class RulesAbstractPlugin extends RulesPlugin {
 
   public function import(array $export) {
     // The key is the element name and the value the actual export.
-    $this->elementName = key($export);
+    $this->elementName = rules_array_key($export);
     $export = reset($export);
 
     // After setting the element name, setup the element again so the right
@@ -1836,7 +1836,7 @@ abstract class RulesContainerPlugin extends RulesPlugin implements IteratorAggre
   protected function importChildren($export, $key = NULL) {
     $key = isset($key) ? $key : strtoupper($this->plugin());
     foreach ($export[$key] as $child_export) {
-      $plugin = _rules_import_get_plugin(key($child_export), $this instanceof RulesActionInterface ? 'action' : 'condition');
+      $plugin = _rules_import_get_plugin(rules_array_key($child_export), $this instanceof RulesActionInterface ? 'action' : 'condition');
       $child = rules_plugin_factory($plugin);
       $child->setParent($this);
       $child->import($child_export);
@@ -1851,6 +1851,8 @@ abstract class RulesActionContainer extends RulesContainerPlugin implements Rule
 
   public function __construct($variables = array(), $providesVars = array()) {
     parent::__construct($variables);
+    // The provided vars of a component are the names of variables, which should
+    // be provided to the caller. See rule().
     if ($providesVars) {
       $this->info['provides'] = $providesVars;
     }
@@ -1884,10 +1886,9 @@ abstract class RulesActionContainer extends RulesContainerPlugin implements Rule
 
   public function providesVariables() {
     $provides = parent::providesVariables();
-    if (isset($this->info['provides'])) {
-      // Collect provided vars of the actions.
-      $vars = $this->stateVariables(TRUE);
-      // Pass only the variables specified through.
+    if (isset($this->info['provides']) && $vars = $this->componentVariables()) {
+      // Determine the full variable info for the provided variables. Note that
+      // we only support providing variables list in the component vars.
       $provides += array_intersect_key($vars, array_flip($this->info['provides']));
     }
     return $provides;

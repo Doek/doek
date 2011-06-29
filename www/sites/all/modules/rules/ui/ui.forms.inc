@@ -626,8 +626,8 @@ function rules_ui_form_data_selection_auto_completion($parameter, $form_build_id
  */
 function rules_ui_element_integer_validate($element, &$form_state) {;
   $value = $element['#value'];
-  if ($value !== '' && (!is_numeric($value) || intval($value) != $value)) {
-    form_error($element, t('%name must be an integer.', array('%name' => isset($element['#title']) ? $element['#title'] : t('Element'))));
+  if (isset($value) && $value !== '' && (!is_numeric($value) || intval($value) != $value)) {
+    form_error($element, t('%name must be an integer value.', array('%name' => isset($element['#title']) ? $element['#title'] : t('Element'))));
   }
 }
 
@@ -689,13 +689,15 @@ function rules_ui_element_duration_process($element, &$form_state) {
   $element['multiplier']['#suffix'] = '</div>';
 
   // Set an appropriate multiplier.
-  foreach (array_keys(rules_ui_element_duration_multipliers()) as $m) {
-    if ($element['value']['#default_value'] % $m == 0) {
-      $element['multiplier']['#default_value'] = $m;
+  if (!empty($element['value']['#default_value'])) {
+    foreach (array_keys(rules_ui_element_duration_multipliers()) as $m) {
+      if ($element['value']['#default_value'] % $m == 0) {
+        $element['multiplier']['#default_value'] = $m;
+      }
     }
+    // Divide value by the multiplier, so the display is correct.
+    $element['value']['#default_value'] /= $element['multiplier']['#default_value'];
   }
-  // Divide value by the multiplier, so the display is correct.
-  $element['value']['#default_value'] /= $element['multiplier']['#default_value'];
   return $element;
 }
 
@@ -730,26 +732,53 @@ function rules_ui_element_duration_value($element, $input = FALSE) {
  * Fixes up the form value by applying the multiplier.
  */
 function rules_ui_element_duration_after_build($element, &$form_state) {
-  $element['#value'] = $element['value']['#value'] * $element['multiplier']['#value'];
-  form_set_value($element, $element['#value'], $form_state);
+  if ($element['value']['#value'] !== '') {
+    $element['#value'] = $element['value']['#value'] * $element['multiplier']['#value'];
+    form_set_value($element, $element['#value'], $form_state);
+  }
+  else {
+    $element['#value'] = NULL;
+    form_set_value($element, NULL, $form_state);
+  }
   return $element;
 }
 
 /**
- * FAPI after build callback for specifying a list of values. Turns the textual
- * value in an array.
+ * FAPI after build callback to ensure empty form elements result in no value.
+ */
+function rules_ui_element_fix_empty_after_build($element, &$form_state) {
+  if (isset($element['#value']) && $element['#value'] === '') {
+    $element['#value'] = NULL;
+    form_set_value($element, NULL, $form_state);
+  }
+  // Work-a-round for the text_format element.
+  elseif ($element['#type'] == 'text_format' && !isset($element['value']['#value'])) {
+    form_set_value($element, NULL, $form_state);
+  }
+  return $element;
+}
+
+
+/**
+ * FAPI after build callback for specifying a list of values.
+ *
+ * Turns the textual value in an array by splitting the text in chunks using the
+ * delimiter set at $element['#delimiter'].
  */
 function rules_ui_list_textarea_after_build($element, &$form_state) {
-  $element['#value'] = explode("\n", $element['#value']);
+  $element['#value'] = $element['#value'] ? explode($element['#delimiter'], $element['#value']) : array();
+  $element['#value'] = array_map('trim', $element['#value']);
   form_set_value($element, $element['#value'], $form_state);
   return $element;
 }
 
 /**
  * FAPI pre render callback. Turns the value back to a string for rendering.
+ *
+ * @see rules_ui_list_textarea_after_build()
  */
 function rules_ui_list_textarea_pre_render($element) {
-  $element['#value'] = implode("\n", $element['#value']);
+  $element['#value'] = implode($element['#delimiter'], $element['#value']);
   return $element;
 }
 
@@ -759,7 +788,28 @@ function rules_ui_list_textarea_pre_render($element) {
 function rules_ui_element_integer_list_validate($element, &$form_state) {
   foreach ($element['#value'] as $value) {
     if ($value !== '' && (!is_numeric($value) || intval($value) != $value)) {
-      form_error($element, t('Each line of %name must be an integer.', array('%name' => $element['#title'])));
+      form_error($element, t('Each value must be an integer.'));
+    }
+  }
+}
+
+/**
+ * FAPI callback to validate a token.
+ */
+function rules_ui_element_token_validate($element) {
+  $value = $element['#value'];
+  if (isset($value) && $value !== '' && !entity_property_verify_data_type($value, 'token')) {
+    form_error($element, t('%name may only contain lowercase letters, numbers, and underscores and has to start with a letter.', array('%name' => isset($element['#title']) ? $element['#title'] : t('Element'))));
+  }
+}
+
+/**
+ * FAPI callback to validate a list of tokens.
+ */
+function rules_ui_element_token_list_validate($element, &$form_state) {
+  foreach ($element['#value'] as $value) {
+    if ($value !== '' && !entity_property_verify_data_type($value, 'token')) {
+      form_error($element, t('Each value may only contain lowercase letters, numbers, and underscores and has to start with a letter.'));
     }
   }
 }

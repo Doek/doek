@@ -105,13 +105,13 @@ class RulesURIInputEvaluator extends RulesDataInputEvaluator {
 
   public function evaluate($uri, $options, RulesState $state) {
     if (!url_is_external($uri)) {
-      // Extract the path so URL aliases are applied properly.
-      $query = '';
-      if (($pos = strpos($uri, '?')) !== FALSE) {
-        $query = substr($uri, $pos);
-        $uri = substr($uri, 0, $pos);
-      }
-      return url($uri, array('absolute' => TRUE) + $options) . $query;
+      // Extract the path and build the URL using the url() function, so URL
+      // aliases are applied and query parameters and fragments get handled.
+      $url = drupal_parse_url($uri);
+      $url_options = array('absolute' => TRUE);
+      $url_options['query'] = $url['query'];
+      $url_options['fragment'] = $url['fragment'];
+      return url($url['path'], $url_options);
     }
     elseif (valid_url($uri)) {
       return $uri;
@@ -151,6 +151,38 @@ class RulesDateOffsetProcessor extends RulesDataProcessor {
 }
 
 /**
+ * A data processor for applying numerical offsets.
+ */
+class RulesNumericOffsetProcessor extends RulesDataProcessor {
+
+  protected static function form($settings, $var_info) {
+    $settings += array('value' => '');
+    $form = array(
+      '#type' => 'fieldset',
+      '#title' => t('Add offset'),
+      '#collapsible' => TRUE,
+      '#collapsed' => empty($settings['value']),
+      '#description' => t('Add an offset to the selected number. E.g. an offset of "1" adds 1 to the number before it is passed on as argument.'),
+    );
+    $form['value'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Offset'),
+      '#description' => t('Note that you can also specify negative numbers.'),
+      '#default_value' => $settings['value'],
+      '#element_validate' => array('rules_ui_element_integer_validate'),
+      '#weight' => 5,
+    );
+    return $form;
+  }
+
+  public function process($value, $info, RulesState $state, RulesPlugin $element) {
+    $value = isset($this->processor) ? $this->processor->process($value, $info, $state, $element) : $value;
+    return $value + $this->setting['value'];
+  }
+}
+
+
+/**
  * A custom wrapper class for vocabularies that is capable of loading vocabularies by machine name.
  */
 class RulesTaxonomyVocabularyWrapper extends EntityDrupalWrapper {
@@ -166,5 +198,15 @@ class RulesTaxonomyVocabularyWrapper extends EntityDrupalWrapper {
     else {
       parent::setEntity($data);
     }
+  }
+
+  /**
+   * Overriden to permit machine names as values.
+   */
+  public function validate($value) {
+    if (isset($value) && is_string($value)) {
+      return TRUE;
+    }
+    return parent::validate($value);
   }
 }

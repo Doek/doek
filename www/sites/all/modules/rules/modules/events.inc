@@ -43,7 +43,6 @@ function rules_node_update($node) {
 }
 
 function rules_node_insert($node) {
-  unset($node->is_new);
   rules_invoke_event('node_insert', $node);
 }
 
@@ -61,9 +60,13 @@ function rules_user_view($account, $view_mode) {
   rules_invoke_event('user_view', $account, $view_mode);
 }
 
-function rules_user_presave(&$edit, $account, $category) {
-  if ($category == 'account') {
-    rules_invoke_event('user_presave', $account);
+/**
+ * We don't want to use hook_user_presave() here as it would requires us
+ * to mess with the $edit array to get an updated $account.
+ */
+function rules_entity_presave($entity, $entity_type) {
+  if ($entity_type == 'user') {
+    rules_invoke_event('user_presave', $entity);
   }
 }
 
@@ -163,27 +166,6 @@ function rules_cron() {
 
 function rules_watchdog($log_entry) {
   rules_invoke_event('watchdog', $log_entry);
-}
-
-/**
- * Data actions access callback.
- * Returns TRUE if at least one type is available for configuring the action.
- */
-function rules_data_action_access($type, $name) {
-  if ($name == 'entity_fetch' || $name == 'entity_create' || $name == 'entity_query') {
-    $types = array_keys(rules_data_action_type_options($name));
-    $op = $name == 'entity_create' ? 'create' : 'view';
-  }
-  elseif ($name == 'entity_save' || $name == 'entity_delete') {
-    $types = array_keys(entity_get_info());
-    $op = $name == 'entity_save' ? 'save' : 'delete';
-  }
-  foreach ($types as $key => $type) {
-    if (!entity_access($op, $type)) {
-      unset($types[$key]);
-    }
-  }
-  return !empty($types);
 }
 
 /**

@@ -53,7 +53,7 @@ class RulesDataUI {
       }
       // If there is only one match, use it by default.
       elseif (count($matches = RulesData::matchingDataSelector($vars, $info, '', 1, FALSE)) == 1) {
-        $settings[$name . ':select'] = key($matches);
+        $settings[$name . ':select'] = rules_array_key($matches);
       }
     }
     $form[$name . ':select'] = array(
@@ -139,11 +139,13 @@ class RulesDataUIText extends RulesDataUI implements RulesDataDirectInputFormInt
       );
       RulesDataInputEvaluator::attachForm($form, $settings, $info, $element->availableVariables());
     }
-    $settings += array($name => isset($info['default value']) ? $info['default value'] : '');
+    $settings += array($name => isset($info['default value']) ? $info['default value'] : NULL);
     $form[$name] += array(
       '#title' => t('Value'),
       '#default_value' => $settings[$name],
       '#required' => empty($info['optional']),
+      '#after_build' => array('rules_ui_element_fix_empty_after_build'),
+      '#rows' => 3,
     );
     return $form;
   }
@@ -163,7 +165,9 @@ class RulesDataUITextToken extends RulesDataUIText {
 
   public static function inputForm($name, $info, $settings, RulesPlugin $element) {
     $form = parent::inputForm($name, $info, $settings, $element);
-    $form['#description'] = t('May only contain only lowercase letters, numbers, and underscores.');
+    $form[$name]['#element_validate'][] = 'rules_ui_element_token_validate';
+    $form[$name]['#description'] = t('May only contain lowercase letters, numbers, and underscores and has to start with a letter.');
+    $form[$name]['#rows'] = 1;
     return $form;
   }
 }
@@ -175,7 +179,7 @@ class RulesDataUITextFormatted extends RulesDataUIText {
 
   public static function inputForm($name, $info, $settings, RulesPlugin $element) {
     $form = parent::inputForm($name, $info, $settings, $element);
-    $settings += array($name => isset($info['default value']) ? $info['default value'] : array('value' => '', 'format' => NULL));
+    $settings += array($name => isset($info['default value']) ? $info['default value'] : array('value' => NULL, 'format' => NULL));
 
     $form[$name]['#type'] = 'text_format';
     $form[$name]['#base_type'] = 'textarea';
@@ -205,6 +209,7 @@ class RulesDataUIDecimal extends RulesDataUIText {
       $form[$name]['#type'] = 'textfield';
     }
     $form[$name]['#element_validate'][] = 'rules_ui_element_decimal_validate';
+    $form[$name]['#rows'] = 1;
     return $form;
   }
 }
@@ -234,11 +239,12 @@ class RulesDataUIBoolean extends RulesDataUI implements RulesDataDirectInputForm
   }
 
   public static function inputForm($name, $info, $settings, RulesPlugin $element) {
-    $settings += array($name => isset($info['default value']) ? $info['default value'] : '');
+    $settings += array($name => isset($info['default value']) ? $info['default value'] : NULL);
+    // Note: Due to the checkbox even optional parameter always receive a value.
     $form[$name] = array(
       '#type' => 'checkbox',
       '#title' => check_plain($info['label']),
-      '#default_value' => !empty($settings[$name]),
+      '#default_value' => $settings[$name],
     );
     return $form;
   }
@@ -257,7 +263,8 @@ class RulesDataUIBoolean extends RulesDataUI implements RulesDataDirectInputForm
 class RulesDataUIDate extends RulesDataUIText {
 
   public static function inputForm($name, $info, $settings, RulesPlugin $element) {
-    $settings += array($name => gmdate('Y-m-d H:i:s', time()));
+    $settings += array($name => isset($info['default value']) ? $info['default value'] : (empty($info['optional']) ? gmdate('Y-m-d H:i:s', time()) : NULL));
+
     // Convert any configured timestamp into a readable format.
     if (is_numeric($settings[$name])) {
       $settings[$name] = gmdate('Y-m-d H:i:s', $settings[$name]);
@@ -291,6 +298,7 @@ class RulesDataUIDuration extends RulesDataUIText {
   public static function inputForm($name, $info, $settings, RulesPlugin $element) {
     $form = parent::inputForm($name, $info, $settings, $element);
     $form[$name]['#type'] = 'rules_duration';
+    $form[$name]['#after_build'][] = 'rules_ui_element_duration_after_build';
     return $form;
   }
 
@@ -310,7 +318,8 @@ class RulesDataUIURI extends RulesDataUIText {
 
   public static function inputForm($name, $info, $settings, RulesPlugin $element) {
     $form = parent::inputForm($name, $info, $settings, $element);
-    $form[$name]['#rows'] = 2;
+    $form[$name]['#rows'] = 1;
+    $form[$name]['#description'] = t('You may enter relative URLs like %url as well as absolute URLs like %absolute-url.', array('%url' => 'user/login?destination=node', '%absolute-url' => 'http://drupal.org'));
     return $form;
   }
 }
@@ -324,9 +333,13 @@ class RulesDataUIListText extends RulesDataUIText {
     return 'input';
   }
 
+  /**
+   * @todo This does not work for inputting textual values including "\n".
+   */
   public static function inputForm($name, $info, $settings, RulesPlugin $element) {
-    $settings += array($name => isset($info['default value']) ? $info['default value'] : array());
+    $settings += array($name => isset($info['default value']) ? $info['default value'] : NULL);
     $form = parent::inputForm($name, $info, $settings, $element);
+
     if ($form[$name]['#type'] == 'textarea') {
       // Fix up the value to be an array during after build.
       $form[$name]['#after_build'][] = 'rules_ui_list_textarea_after_build';
@@ -354,8 +367,32 @@ class RulesDataUIListText extends RulesDataUIText {
 class RulesDataUIListInteger extends RulesDataUIListText {
 
   public static function inputForm($name, $info, $settings, RulesPlugin $element) {
+    $settings += array($name => isset($info['default value']) ? $info['default value'] : NULL);
     $form = parent::inputForm($name, $info, $settings, $element);
-    $form[$name]['#element_validate'][] = 'rules_ui_element_integer_list_validate';
+
+    if ($form[$name]['#type'] == 'textarea') {
+      $form[$name]['#description'] = t('A list of integers, separated by commas. E.g. enter "1, 2, 3".');
+      $form[$name]['#delimiter'] = ',';
+      $form[$name]['#default_value'] = implode(", ", $settings[$name]);
+      $form[$name]['#element_validate'][] = 'rules_ui_element_integer_list_validate';
+      $form[$name]['#rows'] = 1;
+    }
+    return $form;
+  }
+}
+
+/**
+ * UI for lists of tokens.
+ */
+class RulesDataUIListToken extends RulesDataUIListInteger {
+
+  public static function inputForm($name, $info, $settings, RulesPlugin $element) {
+    $form = parent::inputForm($name, $info, $settings, $element);
+
+    if ($form[$name]['#type'] == 'textarea') {
+      $form[$name]['#description'] = t('A list of text tokens, separated by commas. E.g. enter "one, two, three".');
+      $form[$name]['#element_validate'] = array('rules_ui_element_token_list_validate');
+    }
     return $form;
   }
 }
@@ -380,7 +417,7 @@ class RulesDataUIEntity extends RulesDataUIText {
       }
       $form[$name]['#title'] = t('@entity identifier', array('@entity' => $entity_info['label']));
       $entity_label = strtolower($entity_info['label'][0]) . substr($entity_info['label'], 1);
-      $form[$name]['#description'] = t('Specify the identfier of the @entity that should be used.', array('@entity' => $entity_label));
+      $form[$name]['#description'] = t('Specify an identfier of a @entity.', array('@entity' => $entity_label));
     }
     return $form;
   }
@@ -395,3 +432,25 @@ class RulesDataUIEntityExportable extends RulesDataUIEntity {
     return 'input';
   }
 }
+
+/**
+ * UI for lists of entity-based data types.
+ */
+class RulesDataUIListEntity extends RulesDataUIListInteger {
+
+  public static function inputForm($name, $info, $settings, RulesPlugin $element) {
+    $form = parent::inputForm($name, $info, $settings, $element);
+    if (empty($info['options list'])) {
+
+      $entity_info = entity_get_info(entity_property_list_extract_type($info['type']));
+      if (!empty($entity_info['entity keys']['name'])) {
+        $form[$name]['#element_validate'] = array('rules_ui_element_token_list_validate');
+      }
+      $form[$name]['#title'] = t('@entity identifiers', array('@entity' => $entity_info['label']));
+      $entity_label = strtolower($entity_info['label'][0]) . substr($entity_info['label'], 1);
+      $form[$name]['#description'] = t('Specify a comma-separated list of identfiers of @entity entities.', array('@entity' => $entity_label));
+    }
+    return $form;
+  }
+}
+
