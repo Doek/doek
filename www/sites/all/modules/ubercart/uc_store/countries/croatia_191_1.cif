@@ -1,5 +1,4 @@
 <?php
-// $Id: croatia_191_1.cif,v 1.6 2010/04/14 14:20:56 islandusurper Exp $
 
 function croatia_install() {
   // Make the entry in the country table.

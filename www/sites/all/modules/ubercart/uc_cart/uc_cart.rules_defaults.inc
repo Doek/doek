@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_cart.rules_defaults.inc,v 1.2 2010/10/18 18:25:10 islandusurper Exp $
 
 /**
  * @file
@@ -7,7 +6,7 @@
  */
 
 /**
- * Implement hook_default_rules_configuration().
+ * Implements hook_default_rules_configuration().
  */
 function uc_cart_default_rules_configuration() {
   // Setup a default configuration for customer checkout notifications.
@@ -44,4 +43,3 @@ function uc_cart_default_rules_configuration() {
 
   return $configs;
 }
-

@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_product_handler_filter_product.inc,v 1.4 2010/11/24 15:17:32 islandusurper Exp $
 
 /**
  * @file
@@ -7,7 +6,7 @@
  */
 
 /**
- * Filter nodes based on whether they have an entry in the uc_products table.
+ * Filters nodes based on whether they have an entry in the uc_products table.
  */
 class uc_product_handler_filter_product extends views_handler_filter_boolean_operator {
   function query() {

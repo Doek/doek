@@ -1,5 +1,4 @@
 <?php
-// $Id: chile_152_1.cif,v 1.8 2010/04/14 14:20:56 islandusurper Exp $
 
 function chile_install() {
   // Make the entry in the country table.

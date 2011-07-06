@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_file.admin.inc,v 1.16 2010/10/18 18:25:10 islandusurper Exp $
 
 /**
  * @file
@@ -15,45 +14,38 @@ define('UC_FILE_FORM_ACTION', 1   );
 /**
  * Form builder for file products admin.
  *
+ * @see uc_file_admin_files_form_show_files()
+ * @see uc_file_admin_files_form_action()
  * @ingroup forms
- * @see
- *   uc_file_admin_files_form_show_files()
- *   uc_file_admin_files_form_action()
  */
 function uc_file_admin_files_form($form, &$form_state) {
 
-  switch ($form_state['storage']['step']) {
-
-    case UC_FILE_FORM_FILES:
-
-      // Refresh our file list before display.
-      uc_file_refresh();
-
-      return array(
-        '#theme'  => 'uc_file_admin_files_form_show',
-        '#validate' => array('uc_file_admin_files_form_show_validate'),
-        '#submit' => array('uc_file_admin_files_form_show_submit'),
-      ) + $form + uc_file_admin_files_form_show_files($form, $form_state);
-
-    case UC_FILE_FORM_ACTION:
-
+  if (isset($form_state['storage']['step']) && $form_state['storage']['step'] == UC_FILE_FORM_ACTION) {
       return array(
         '#validate' => array('uc_file_admin_files_form_action_validate'),
         '#submit'   => array('uc_file_admin_files_form_action_submit'),
       ) + $form + uc_file_admin_files_form_action($form, $form_state);
+  }
+  else {
+    // Refresh our file list before display.
+    uc_file_refresh();
 
+    return array(
+      '#theme'  => 'uc_file_admin_files_form_show',
+      '#validate' => array('uc_file_admin_files_form_show_validate'),
+      '#submit' => array('uc_file_admin_files_form_show_submit'),
+    ) + $form + uc_file_admin_files_form_show_files($form, $form_state);
   }
 }
 
 /**
- * Display all files that may be purchased and downloaded for administration.
+ * Displays all files that may be purchased and downloaded for administration.
  *
+ * @see uc_file_admin_files_form()
+ * @see uc_file_admin_files_form_show_validate()
+ * @see uc_file_admin_files_form_show_submit()
+ * @see theme_uc_file_admin_files_form_show()
  * @ingroup forms
- * @see
- *   uc_file_admin_files_form()
- *   uc_file_admin_files_form_show_validate()
- *   uc_file_admin_files_form_show_submit()
- *   theme_uc_file_admin_files_form_show()
  */
 function uc_file_admin_files_form_show_files($form, &$form_state) {
   $form['#tree'] = TRUE;
@@ -148,9 +140,10 @@ function uc_file_admin_files_form_show_files($form, &$form_state) {
 }
 
 /**
- * Ensure at least one file is selected when deleting.
+ * Ensures at least one file is selected when deleting.
  *
  * @see uc_file_admin_files_form_show_files()
+ * @see uc_file_admin_files_form_show_submit()
  */
 function uc_file_admin_files_form_show_validate($form, &$form_state) {
 
@@ -176,9 +169,10 @@ function uc_file_admin_files_form_show_validate($form, &$form_state) {
 }
 
 /**
- * Move to the next step of the administration form.
+ * Moves to the next step of the administration form.
  *
  * @see uc_file_admin_files_form_show_files()
+ * @see uc_file_admin_files_form_show_validate()
  */
 function uc_file_admin_files_form_show_submit($form, &$form_state) {
   // Increment the form step.
@@ -187,8 +181,10 @@ function uc_file_admin_files_form_show_submit($form, &$form_state) {
 }
 
 /**
- * @ingroup themeable
+ * Returns HTML for uc_file_admin_files_form_show().
+ *
  * @see uc_file_admin_files_form_show_files()
+ * @ingroup themeable
  */
 function theme_uc_file_admin_files_form_show($variables) {
   $form = $variables['form'];
@@ -235,20 +231,21 @@ function theme_uc_file_admin_files_form_show($variables) {
 }
 
 /**
- * Perform file action (upload, delete, hooked in actions).
+ * Performs file action (upload, delete, hooked in actions).
  *
+ * @see uc_file_admin_files_form()
+ * @see uc_file_admin_files_form_action_validate()
+ * @see uc_file_admin_files_form_action_submit()
  * @ingroup forms
- * @see
- *   uc_file_admin_files_form()
- *   uc_file_admin_files_form_action_validate()
- *   uc_file_admin_files_form_action_submit()
  */
 function uc_file_admin_files_form_action($form, &$form_state) {
   $file_ids = array();
-  foreach ((array)$form_state['values']['file_select'] as $fid => $value) {
-    $value = $value['check'];
-    if ($value) {
-      $file_ids[] = $fid;
+  if (isset($form_state['values']['file_select'])) {
+    foreach ((array)$form_state['values']['file_select'] as $fid => $value) {
+      $value = $value['check'];
+      if ($value) {
+        $file_ids[] = $fid;
+      }
     }
   }
 
@@ -300,9 +297,9 @@ function uc_file_admin_files_form_action($form, &$form_state) {
           '#title' => t('Delete selected directories and their sub directories'),
         );
 
-        // Default to FALSE... although we have the JS behavior to update with the state
-        // of the checkbox on load, this should improve the experience of users who
-        // don't have JS enabled over not defaulting to any info.
+        // Default to FALSE. Although we have the JS behavior to update with the
+        // state of the checkbox on load, this should improve the experience of
+        // users who don't have JS enabled over not defaulting to any info.
         $form['affected_files'] = array(
           '#theme' => 'item_list',
           '#items' => $affected_list[FALSE],
@@ -366,7 +363,8 @@ function uc_file_admin_files_form_action($form, &$form_state) {
 
     default:
 
-      // This action isn't handled by us, so check if any hook_uc_file_action('form', $args) are implemented.
+      // This action isn't handled by us, so check if any
+      // hook_uc_file_action('form', $args) are implemented.
       foreach (module_implements('uc_file_action') as $module) {
         $name = $module . '_uc_file_action';
         $result = $name('form', array('action' => $form_state['values']['uc_file_action']['action'], 'file_ids' => $file_ids));
@@ -380,6 +378,8 @@ function uc_file_admin_files_form_action($form, &$form_state) {
 }
 
 /**
+ * Validation handler for uc_file_admin_files_form().
+ *
  * @see uc_file_admin_files_form_action()
  */
 function uc_file_admin_files_form_action_validate($form, &$form_state) {
@@ -391,7 +391,8 @@ function uc_file_admin_files_form_action_validate($form, &$form_state) {
       // Upload the file and get its object.
       if ($temp_file = file_save_upload('upload', array())) {
 
-        // Check if any hook_uc_file_action('upload_validate', $args) are implemented.
+        // Check if any hook_uc_file_action('upload_validate', $args)
+        // are implemented.
         foreach (module_implements('uc_file_action') as $module) {
           $name = $module . '_uc_file_action';
           $result = $name('upload_validate', array('file_object' => $temp_file, 'form_id' => $form_id, 'form_state' => $form_state));
@@ -408,7 +409,8 @@ function uc_file_admin_files_form_action_validate($form, &$form_state) {
 
     default:
 
-      // This action isn't handled by us, so check if any hook_uc_file_action('validate', $args) are implemented
+      // This action isn't handled by us, so check if any
+      // hook_uc_file_action('validate', $args) are implemented
       foreach (module_implements('uc_file_action') as $module) {
         $name = $module . '_uc_file_action';
         $result = $name('validate', array('form_id' => $form_id, 'form_state' => $form_state));
@@ -419,6 +421,8 @@ function uc_file_admin_files_form_action_validate($form, &$form_state) {
 }
 
 /**
+ * Submit handler for uc_file_admin_files_form().
+ *
  * @see uc_file_admin_files_action()
  */
 function uc_file_admin_files_form_action_submit($form, &$form_state) {
@@ -444,8 +448,8 @@ function uc_file_admin_files_form_action_submit($form, &$form_state) {
 
     case 'uc_file_upload':
 
-      // Build the destination location. We start with the base directory, then add any
-      // directory which was explicitly selected.
+      // Build the destination location. We start with the base directory,
+      // then add any directory which was explicitly selected.
       $dir = variable_get('uc_file_base_dir', NULL) . '/';
       $dir = (is_null($form_state['values']['upload_dir'])) ? $dir : $dir . $form_state['values']['upload_dir'];
       if (is_dir($dir)) {
@@ -454,7 +458,7 @@ function uc_file_admin_files_form_action_submit($form, &$form_state) {
         $file_object = $form_state['storage']['temp_file'];
 
         // Copy the file to its final location.
-        if (copy($file_object->filepath, $dir . '/' . $file_object->filename)) {
+        if (copy($file_object->uri, $dir . '/' . $file_object->filename)) {
 
           // Check if any hook_uc_file_action('upload', $args) are implemented
           foreach (module_implements('uc_file_action') as $module) {
@@ -479,7 +483,8 @@ function uc_file_admin_files_form_action_submit($form, &$form_state) {
 
     default:
 
-      // This action isn't handled by us, so check if any hook_uc_file_action('submit', $args) are implemented
+      // This action isn't handled by us, so check if any
+      // hook_uc_file_action('submit', $args) are implemented
       foreach (module_implements('uc_file_action') as $module) {
         $name = $module . '_uc_file_action';
         $result = $name('submit', array('form_id' => $form_id, 'form_state' => $form_state));
@@ -513,20 +518,20 @@ function _uc_file_display_arrays_equivalent($recur, $no_recur) {
 }
 
 /**
- * Show all possible files in selectable list.
+ * Shows all possible files in selectable list.
  */
 function _uc_file_build_js_file_display($file_ids) {
 
-  // Gather the files if recursion is selected. Get 'em all ready to be punched into
-  // the file list.
+  // Gather the files if recursion IS selected.
+  // Get 'em all ready to be punched into the file list.
   $recursion_file_ids = _uc_file_sort_names(_uc_file_get_dir_file_ids($file_ids, TRUE));
   foreach ($recursion_file_ids as $file_id) {
     $file = uc_file_get_by_id($file_id);
     $recursion[] = '<li>' . $file->filename . '</li>';
   }
 
-  // Gather the files if recursion isn't selected. Get 'em all ready to be punched into
-  // the file list.
+  // Gather the files if recursion ISN'T selected.
+  // Get 'em all ready to be punched into the file list.
   $no_recursion_file_ids = $file_ids;
   foreach ($no_recursion_file_ids as $file_id) {
     $file = uc_file_get_by_id($file_id);

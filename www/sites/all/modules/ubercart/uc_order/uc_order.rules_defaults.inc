@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_order.rules_defaults.inc,v 1.1 2010/07/16 12:57:37 islandusurper Exp $
 
 /**
  * @file
@@ -7,7 +6,7 @@
  */
 
 /**
- * Implement hook_default_rules_configuration().
+ * Implements hook_default_rules_configuration().
  */
 function uc_order_default_rules_configuration() {
   $rule = rules_reaction_rule();
@@ -28,4 +27,3 @@ function uc_order_default_rules_configuration() {
 
   return $configs;
 }
-

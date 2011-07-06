@@ -1,13 +1,12 @@
 <?php
-// $Id: uc_store.install,v 1.21 2010/12/09 18:52:30 islandusurper Exp $
 
 /**
  * @file
- * Install hooks for uc_store.module.
+ * Install, update, and uninstall functions for the uc_store module.
  */
 
 /**
- * Implement hook_requirements().
+ * Implements hook_requirements().
  */
 function uc_store_requirements($phase) {
   $requirements = array();
@@ -33,7 +32,7 @@ function uc_store_requirements($phase) {
 }
 
 /**
- * Implement hook_schema().
+ * Implements hook_schema().
  */
 function uc_store_schema() {
   $schema = array();
@@ -123,41 +122,41 @@ function uc_store_schema() {
     ),
   );
 
-  $schema['uc_store_footers'] = array(
-    'description' => 'Maps Drupal paths to Ubercart footer messages.',
-    'fields' => array(
-      'path_hash' => array(
-        'description' => 'MD5 hash of the Drupal path.',
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'message' => array(
-        'description' => 'The message displayed in the page footer.',
-        'type' => 'text',
-      ),
-    ),
-    'primary key' => array('path_hash'),
-  );
-
   return $schema;
 }
 
 /**
- * Implement hook_install().
+ * Implements hook_install().
  */
 function uc_store_install() {
+  // Set mail handler for all Ubercart modules
+  variable_set('mail_system',
+    array_merge(
+      variable_get('mail_system', array('default-system' => 'DefaultMailSystem')),
+      array(
+        'uc_cart'  => 'UbercartMailSystem',
+        'uc_order' => 'UbercartMailSystem',
+        'uc_file'  => 'UbercartMailSystem',
+        'uc_roles' => 'UbercartMailSystem',
+        'uc_stock' => 'UbercartMailSystem',
+        'uc_store' => 'UbercartMailSystem',
+      )
+    )
+  );
+
+  // Set the default store date format.
+  variable_set('date_format_uc_store', 'm/d/Y');
+
   // Install United States and Canada by default.
   $path = drupal_get_path('module', 'uc_store');
   require_once($path . '/countries/united_states_840_1.cif');
-  require_once($path . '/countries/canada_124_1.cif');
+  require_once($path . '/countries/canada_124_2.cif');
   united_states_install();
   canada_install();
 }
 
 /**
- * Implement hook_uninstall().
+ * Implements hook_uninstall().
  */
 function uc_store_uninstall() {
   db_delete('variable')
@@ -174,19 +173,77 @@ function uc_store_uninstall() {
 
   variable_del('uc_customer_list_address');
   variable_del('uc_sign_after_amount');
-  variable_del('uc_date_format_default');
+  variable_del('date_format_uc_store');
   variable_del('uc_address_fields');
   variable_del('uc_address_fields_required');
   variable_del('uc_footer_message');
+
+  // Unset mail Ubercart hander in variable mail_system
+  $mail_system = variable_get('mail_system', array('default-system' => 'DefaultMailSystem'));
+  unset($mail_system['uc_cart']);
+  unset($mail_system['uc_order']);
+  unset($mail_system['uc_file']);
+  unset($mail_system['uc_roles']);
+  unset($mail_system['uc_stock']);
+  unset($mail_system['uc_store']);
+  variable_set('mail_system', $mail_system);
 }
 
+/**
+ * Implements hook_update_last_removed().
+ */
+function uc_store_update_last_removed() {
+  return 6005;
+}
 /*
  * Removed update 7000.
  */
 
 /**
- * Remove uc_price cache table.
+ * Removes uc_price cache table.
  */
 function uc_store_update_7001() {
   db_drop_table('cache_uc_price');
+}
+
+/**
+ * Removes unused variable.
+ */
+function uc_store_update_7002() {
+  variable_del('uc_store_admin_page_display');
+}
+
+/**
+ * Removes store footer message hash table.
+ */
+function uc_store_update_7003() {
+  db_drop_table('uc_store_footers');
+}
+
+/**
+ * Installs HTML Mail System for Ubercart.
+ */
+function uc_store_update_7004() {
+  // Set mail handler for all Ubercart modules
+  variable_set('mail_system',
+    array_merge(
+      variable_get('mail_system', array('default-system' => 'DefaultMailSystem')),
+      array(
+        'uc_cart'  => 'UbercartMailSystem',
+        'uc_order' => 'UbercartMailSystem',
+        'uc_file'  => 'UbercartMailSystem',
+        'uc_roles' => 'UbercartMailSystem',
+        'uc_stock' => 'UbercartMailSystem',
+        'uc_store' => 'UbercartMailSystem',
+      )
+    )
+  );
+}
+
+/**
+ * Change date formatting to use D7 API.
+ */
+function uc_store_update_7005() {
+  variable_set('date_format_uc_store', variable_get('uc_date_format_default', 'm/d/Y'));
+  variable_del('uc_date_format_default');
 }

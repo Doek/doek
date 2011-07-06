@@ -1,5 +1,4 @@
 <?php
-// $Id: uc-packing-slip.tpl.php,v 1.3 2010/03/17 17:51:58 islandusurper Exp $
 
 /**
  * @file

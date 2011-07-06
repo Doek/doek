@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_order_plugin_row_invoice_view.inc,v 1.1 2010/11/24 15:18:30 islandusurper Exp $
 
 /**
  * @file

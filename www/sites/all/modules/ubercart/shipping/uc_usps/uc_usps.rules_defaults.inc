@@ -1,8 +1,12 @@
 <?php
-// $Id: uc_usps.rules_defaults.inc,v 1.1 2010/07/16 12:57:37 islandusurper Exp $
 
 /**
- * Implement hook_default_rules_configuration_alter().
+ * @file
+ * Rules configurations for uc_usps module.
+ */
+
+/**
+ * Implements hook_default_rules_configuration_alter().
  */
 function uc_usps_default_rules_configuration_alter(&$configs) {
   // Domestic areas include U.S., American Samoa, Guam, Puerto Rico, and the Virgin Islands
@@ -39,4 +43,3 @@ function uc_usps_default_rules_configuration_alter(&$configs) {
   $configs['get_quote_from_usps_intl']->condition($foreign);
   $configs['get_quote_from_usps_intl_env']->condition($foreign_env);
 }
-

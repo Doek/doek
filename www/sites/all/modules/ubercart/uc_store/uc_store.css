@@ -1,36 +1,9 @@
-/* $Id: uc_store.css,v 1.10 2010/01/25 15:38:19 islandusurper Exp $ */
-
+/**
+ * @file
+ * Styles for uc_store module.
+ */
 .uc-price {
   white-space: nowrap;
-}
-
-.uc-store-admin-table {
-  margin: 1em auto;
-  border: 1px dashed #bbb;
-}
-
-.uc-store-admin-table tbody {
-  border-top: 0px;
-}
-
-.uc-store-admin-panel {
-  margin: 1em;
-  padding: 1em;
-}
-
-.uc-store-admin-panel .uc-store-icon {
-  float: left;
-  margin-right: 1em;
-}
-
-.uc-store-admin-panel .panel-title {
-  padding-top: 4px;
-  font-size: 1.5em;
-  width: 100%;
-}
-
-.uc-store-admin-panel .panel-show-link a {
-  cursor: pointer;
 }
 
 .uc-customer-table .uc-store-icon {
@@ -52,18 +25,10 @@
 }
 
 #store-footer {
-  width: 100%;
-  text-align: center;
-  font-size: x-small;
   clear: both;
-}
-
-table.section-items {
-  width: auto;
-}
-
-table.section-items td {
-  padding: .25em;
+  font-size: x-small;
+  text-align: center;
+  width: 100%;
 }
 
 #uc-country-import-form .form-item, #uc-country-import-form .form-item label {
@@ -82,13 +47,34 @@ table.section-items td {
 }
 
 /**
- * CSS enhancements for Ubercart summary overviews.
+ * CSS rules for address fields.
  */
 
+.uc-store-address-field .form-item {
+  clear: left;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  padding: 2px;
+}
+
+.uc-store-address-field .form-item label {
+  float: left;
+  padding-right: 4px;
+  text-align: right;
+  width: 15em;
+}
+
+.vertical-tabs .uc-store-address-field .form-item input {
+  width: auto;
+}
+
+/**
+ * CSS enhancements for Ubercart summary overviews.
+ */
 .summary-overview {
-  padding: .5em;
   border: 1px dashed #bbb;
   margin-bottom: -1px;
+  padding: .5em;
 }
 
 .summary-title {
@@ -120,8 +106,8 @@ table.section-items td {
 
 .ubercart-throbber {
   background-image: url(images/throbber.gif);
-  background-repeat: no-repeat;
   background-position: 100% -20px;
+  background-repeat: no-repeat;
 }
 
 /* Add icon support for admin (http://drupal.org/project/admin). */
@@ -143,9 +129,24 @@ table.section-items td {
 .path-admin-store-reports span.icon {
   background: transparent url('images/menu_reports.gif') no-repeat !important;
 }
-.path-admin-store-ca span.icon {
-  background: transparent url('images/menu_store_settings.gif') no-repeat !important;
-}
 .path-admin-store-help span.icon {
   background: transparent url('images/menu_help.gif') no-repeat !important;
+}
+
+/**
+ * Vertical tabs missing legend workaround. To be removed when
+ * http://drupal.org/node/1015798 gets into Drupal core.
+ */
+.vertical-tabs fieldset fieldset legend {
+  display: inline-block;
+}
+
+div.vertical-tabs .vertical-tabs-panes fieldset fieldset {
+  border: 1px solid #ccc;
+  margin: 1em 0;
+  padding: 2.5em 0 0;
+}
+
+div.vertical-tabs .vertical-tabs-panes fieldset fieldset legend {
+  display: inline-block;
 }

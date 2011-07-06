@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_tax_report.module,v 1.17 2010/10/07 19:10:46 islandusurper Exp $
 
 /**
  * @file
@@ -7,7 +6,7 @@
  */
 
 /**
- * Implement hook_menu().
+ * Implements hook_menu().
  */
 function uc_tax_report_menu() {
   $items = array();
@@ -23,17 +22,13 @@ function uc_tax_report_menu() {
 }
 
 /**
- * Display the sales tax report form and table.
+ * Displays the sales tax report form and table.
  */
 function uc_tax_report_report_page($start_date = NULL, $end_date = NULL, $status = NULL) {
-  $timezone = _uc_reports_timezone_offset();
-  $timezone_offset = REQUEST_TIME + $timezone;
-  $format = variable_get('uc_date_format_default', 'm/d/Y');
-
   // Use default report parameters if we don't detect values in the URL.
   if ($start_date == '') {
     $args = array(
-      'start_date' => gmmktime(0, 0, 0, gmdate('n', $timezone_offset), 1, gmdate('Y', $timezone_offset) - 1),
+      'start_date' => mktime(0, 0, 0, date('n'), 1, date('Y') - 1),
       'end_date' => REQUEST_TIME,
       'status' => FALSE,
     );
@@ -125,13 +120,13 @@ function uc_tax_report_report_page($start_date = NULL, $end_date = NULL, $status
       $line['name'],
       $line['jurisdiction'],
       number_format($line['rate'] * 100, 3) . '%',
-      array('#theme' => 'uc_price', '#price' => $line['taxable_amount']),
-      array('#theme' => 'uc_price', '#price' => $line['amount']),
+      theme('uc_price', array('price' => $line['taxable_amount'])),
+      theme('uc_price', array('price' => $line['amount'])),
     );
     $rows[] = $row;
     // Remove HTML for CSV files.
-    $row[3] = uc_currency_format($line['taxable_amount']);
-    $row[4] = uc_currency_format($line['amount']);
+    $row[3] = $line['taxable_amount'];
+    $row[4] = $line['amount'];
     $csv_rows[] = $row;
     $taxable_amount += $line['taxable_amount'];
     $amount += $line['amount'];
@@ -143,11 +138,11 @@ function uc_tax_report_report_page($start_date = NULL, $end_date = NULL, $status
       '*',
       '*',
       '*',
-      array('#theme' => 'uc_price', '#price' => $line['amount']),
+      theme('uc_price', array('price' => $line['amount'])),
     );
     $rows[] = $row;
     // Remove HTML for CSV files.
-    $row[4] = uc_currency_format($line['amount']);
+    $row[4] = $line['amount'];
     $csv_rows[] = $row;
     $amount += $line['amount'];
     // We have at least one no-meta-data line. Explain why.
@@ -159,13 +154,13 @@ function uc_tax_report_report_page($start_date = NULL, $end_date = NULL, $status
     t('Total'),
     '',
     '',
-    array('#theme' => 'uc_price', '#price' => $taxable_amount),
-    array('#theme' => 'uc_price', '#price' => $amount),
+    theme('uc_price', array('price' => $taxable_amount)),
+    theme('uc_price', array('price' => $amount)),
   );
   $rows[] = $row;
   // Removes HTML for CSV files.
-  $row[3] = uc_currency_format($taxable_amount);
-  $row[4] = uc_currency_format($amount);
+  $row[3] = $taxable_amount;
+  $row[4] = $amount;
   $csv_rows[] = $row;
 
   // Cache the CSV export.
@@ -200,10 +195,9 @@ function uc_tax_report_report_page($start_date = NULL, $end_date = NULL, $status
 /**
  * Form for parameters on the tax report.
  *
+ * @see uc_tax_report_params_form_validate()
+ * @see uc_tax_report_params_form_submit()
  * @ingroup forms
- * @see
- *   uc_tax_report_params_form_validate()
- *   uc_tax_report_params_form_submit()
  */
 function uc_tax_report_params_form($form, &$form_state, $values) {
   $form['params'] = array(
@@ -218,18 +212,18 @@ function uc_tax_report_params_form($form, &$form_state, $values) {
     '#type' => 'date',
     '#title' => t('Start date'),
     '#default_value' => array(
-      'month' => format_date($values['start_date'], 'custom', 'n', 0),
-      'day' => format_date($values['start_date'], 'custom', 'j', 0),
-      'year' => format_date($values['start_date'], 'custom', 'Y', 0),
+      'month' => format_date($values['start_date'], 'custom', 'n'),
+      'day' => format_date($values['start_date'], 'custom', 'j'),
+      'year' => format_date($values['start_date'], 'custom', 'Y'),
     ),
   );
   $form['params']['end_date'] = array(
     '#type' => 'date',
     '#title' => t('End date'),
     '#default_value' => array(
-      'month' => format_date($values['end_date'], 'custom', 'n', 0),
-      'day' => format_date($values['end_date'], 'custom', 'j', 0),
-      'year' => format_date($values['end_date'], 'custom', 'Y', 0),
+      'month' => format_date($values['end_date'], 'custom', 'n'),
+      'day' => format_date($values['end_date'], 'custom', 'j'),
+      'year' => format_date($values['end_date'], 'custom', 'Y'),
     ),
   );
 
@@ -263,9 +257,10 @@ function uc_tax_report_params_form($form, &$form_state, $values) {
 }
 
 /**
- * Ensure an order status is selected.
+ * Ensures an order status is selected.
  *
  * @see uc_tax_report_params_form()
+ * @see uc_tax_report_params_form_submit()
  */
 function uc_tax_report_params_form_validate($form, &$form_state) {
   if (empty($form_state['values']['status'])) {
@@ -274,14 +269,15 @@ function uc_tax_report_params_form_validate($form, &$form_state) {
 }
 
 /**
+ * Form submission handler for uc_tax_report_params_form().
+ *
  * @see uc_tax_report_params_form()
+ * @see uc_tax_report_params_form_validate()
  */
 function uc_tax_report_params_form_submit($form, &$form_state) {
-  $timezone_offset = _uc_reports_timezone_offset();
-
   // Build the start and end dates from the form.
-  $start_date = gmmktime(0, 0, 0, $form_state['values']['start_date']['month'], $form_state['values']['start_date']['day'], $form_state['values']['start_date']['year']);
-  $end_date = gmmktime(23, 59, 59, $form_state['values']['end_date']['month'], $form_state['values']['end_date']['day'], $form_state['values']['end_date']['year']);
+  $start_date = mktime(0, 0, 0, $form_state['values']['start_date']['month'], $form_state['values']['start_date']['day'], $form_state['values']['start_date']['year']);
+  $end_date = mktime(23, 59, 59, $form_state['values']['end_date']['month'], $form_state['values']['end_date']['day'], $form_state['values']['end_date']['year']);
 
   $args = array(
     $start_date,

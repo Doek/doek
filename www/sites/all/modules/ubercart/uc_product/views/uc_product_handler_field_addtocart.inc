@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_product_handler_field_addtocart.inc,v 1.5 2010/03/17 17:51:57 islandusurper Exp $
 
 /**
  * @file
@@ -7,19 +6,12 @@
  */
 
 /**
- * Display the "Add to cart" form like the product page.
+ * Displays the "Add to cart" form like the product page.
  */
 class uc_product_handler_field_addtocart extends views_handler_field {
   function query() {
     $this->ensure_my_table();
     $this->add_additional_fields();
-  }
-
-  function element_type() {
-    if (isset($this->definition['element type'])) {
-      return $this->definition['element type'];
-    }
-    return 'div';
   }
 
   function render($values) {

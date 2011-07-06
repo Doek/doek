@@ -1,6 +1,8 @@
-// $Id: uc_payment.js,v 1.11 2010/07/15 20:32:39 islandusurper Exp $
+/**
+ * @file
+ * Timestamps for last time line items or payment details were updated.
+ */
 
-// Timestamps for last time line items or payment details were updated.
 var payment_update = 0;
 
 var do_payment_details = true;
@@ -85,14 +87,14 @@ function get_payment_details(path) {
 }
 
 /**
- * Pop-up an info box for the credit card CVV.
+ * Pops up an info box for the credit card CVV.
  */
 function cvv_info_popup() {
   var popup = window.open(Drupal.settings.ucURL.creditCardCVVInfo, 'CVV_Info', 'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=480,height=460,left=282,top=122');
 }
 
 /**
- * Toggle the payment fields on and off on the receive check form.
+ * Toggles the payment fields on and off on the receive check form.
  */
 function receive_check_toggle(checked) {
   if (!checked) {
@@ -104,4 +106,3 @@ function receive_check_toggle(checked) {
     jQuery('#edit-comment').attr('disabled', 'true').val('-');
   }
 }
-

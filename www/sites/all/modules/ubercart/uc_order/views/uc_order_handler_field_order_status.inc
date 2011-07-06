@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_order_handler_field_order_status.inc,v 1.1 2010/11/24 15:18:30 islandusurper Exp $
 
 /**
  * @file
@@ -11,6 +10,9 @@
  */
 class uc_order_handler_field_order_status extends views_handler_field {
 
+  /**
+   *
+   */
   function render($values) {
     return check_plain($values->{$this->aliases['title']});
   }

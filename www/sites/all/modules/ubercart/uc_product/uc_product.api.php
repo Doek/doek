@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_product.api.php,v 1.4 2010/03/29 17:42:41 islandusurper Exp $
 
 /**
  * @file
@@ -12,18 +11,18 @@
  */
 
 /**
- * Perform actions on product classes.
+ * Performs actions on product classes.
  *
  * @param $type
  *   The node type of the product class.
  * @param $op
  *   The action being performed on the product class:
- *   - "insert": A new node type is created, or an existing node type is being
- *       converted into a product type.
- *   - "update": A product class has been updated.
- *   - "delete": A product class has been deleted. Modules that have attached
- *       additional information to the node type because it is a product type
- *       should delete this information.
+ *   - insert: A new node type is created, or an existing node type is being
+ *     converted into a product type.
+ *   - update: A product class has been updated.
+ *   - delete: A product class has been deleted. Modules that have attached
+ *     additional information to the node type because it is a product type
+ *     should delete this information.
  */
 function hook_uc_product_class($type, $op) {
   switch ($op) {
@@ -109,7 +108,7 @@ function hook_uc_product_description_alter(&$description, $product) {
 }
 
 /**
- * Notify core of any SKUs your module adds to a given node.
+ * Notifies core of any SKUs your module adds to a given node.
  *
  * NOTE: DO NOT map the array keys, as the possibility for numeric SKUs exists, and
  * this will conflict with the behavior of module_invoke_all(), specifically
@@ -125,11 +124,11 @@ function hook_uc_product_models($node) {
 }
 
 /**
- * List node types which should be considered products.
+ * Lists node types which should be considered products.
  *
  * Trusts the duck philosophy of object identification: if it walks like a duck,
  * quacks like a duck, and has feathers like a duck, it's probably a duck.
- * Products are nodes with prices, SKUs, and everything else Übercart expects
+ * Products are nodes with prices, SKUs, and everything else Ubercart expects
  * them to have.
  *
  * @return
@@ -142,4 +141,3 @@ function hook_uc_product_types() {
 /**
  * @} End of "addtogroup hooks".
  */
-

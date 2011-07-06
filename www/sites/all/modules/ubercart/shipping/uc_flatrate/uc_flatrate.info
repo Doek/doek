@@ -1,16 +1,12 @@
-; $Id: uc_flatrate.info,v 1.6 2010/02/03 14:19:06 islandusurper Exp $
 name = Flatrate
-description = Assigns a flat shipping rate to products.
+description = Assigns a flat shipping rate to an order, plus an optional amount per product.
 dependencies[] = uc_quote
 package = Ubercart - fulfillment
 core = 7.x
-files[] = uc_flatrate.module
-files[] = uc_flatrate.install
-files[] = uc_flatrate.admin.inc
 
-; Information added by drupal.org packaging script on 2010-12-09
-version = "7.x-3.0-beta1"
+; Information added by drupal.org packaging script on 2011-05-26
+version = "7.x-3.0-beta3"
 core = "7.x"
 project = "ubercart"
-datestamp = "1291922443"
+datestamp = "1306429923"
 

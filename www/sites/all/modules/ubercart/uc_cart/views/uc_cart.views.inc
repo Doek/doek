@@ -1,8 +1,12 @@
 <?php
-// $Id: uc_cart.views.inc,v 1.1 2010/11/24 15:18:30 islandusurper Exp $
 
 /**
- * Implement hook_views_data().
+ * @file
+ * Views hooks.
+ */
+
+/**
+ * Implements hook_views_data().
  */
 function uc_cart_views_data() {
   //Make the uc_cart_products table visible for Views module

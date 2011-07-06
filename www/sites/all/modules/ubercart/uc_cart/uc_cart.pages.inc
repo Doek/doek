@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_cart.pages.inc,v 1.25 2010/11/24 15:15:43 islandusurper Exp $
 
 /**
  * @file
@@ -7,7 +6,7 @@
  */
 
 /**
- * Display the cart view page.
+ * Displays the cart view page.
  *
  * Show the products in the cart with a form to adjust cart contents or go to
  * checkout.
@@ -54,7 +53,7 @@ function uc_cart_view() {
 }
 
 /**
- * Display the cart checkout page built of checkout panes from enabled modules.
+ * Displays the cart checkout page built of checkout panes from enabled modules.
  */
 function uc_cart_checkout() {
   global $user;
@@ -85,13 +84,9 @@ function uc_cart_checkout() {
   if (!$user->uid && !variable_get('uc_checkout_anonymous', TRUE)) {
     drupal_set_message(t('You must login before you can proceed to checkout.'));
     if (variable_get('user_register', 1) != 0) {
-      drupal_set_message(t('If you do not have an account yet, you should <a href="!url">register now</a>.', array('!url' => url('user/register'))));
+      drupal_set_message(t('If you do not have an account yet, you should <a href="!url">register now</a>.', array('!url' => url('user/register', array('query' => drupal_get_destination())))));
     }
-    $_SESSION['checkout-redirect'] = TRUE;
-    drupal_goto('user');
-  }
-  else {
-    unset($_SESSION['checkout-redirect']);
+    drupal_goto('user', array('query' => drupal_get_destination()));
   }
 
   $list = _uc_line_item_list();
@@ -110,12 +105,11 @@ function uc_cart_checkout() {
 /**
  * The checkout form built up from the enabled checkout panes.
  *
+ * @see uc_cart_checkout_form_validate()
+ * @see uc_cart_checkout_form_review()
+ * @see uc_cart_checkout_review()
+ * @see theme_uc_cart_checkout_form()
  * @ingroup forms
- * @see
- *   theme_uc_cart_checkout_form()
- *   uc_cart_checkout_form_validate()
- *   uc_cart_checkout_form_review()
- *   uc_cart_checkout_review()
  */
 function uc_cart_checkout_form($form, &$form_state) {
   global $user;
@@ -160,7 +154,7 @@ function uc_cart_checkout_form($form, &$form_state) {
   }
 
   foreach ($panes as $pane) {
-    if (variable_get('uc_pane_' . $pane['id'] . '_enabled', $pane['enabled'])) {
+    if ($pane['enabled']) {
       $pane['prev'] = _uc_cart_checkout_prev_pane($panes, $pane['id']);
       $pane['next'] = _uc_cart_checkout_next_pane($panes, $pane['id']);
 
@@ -201,9 +195,9 @@ function uc_cart_checkout_form($form, &$form_state) {
           $form['panes'][$pane['id']]['next'] = array(
             '#type' => 'button',
             '#value' => t('Next'),
-            '#weight' => variable_get("uc_pane_{$pane_id}_field_button_weight", 20),
+            '#weight' => 20,
             '#attributes' => array('onclick' => "return uc_cart_next_button_click(this, '" . $pane['next'] . "', '" . $opt . "');"),
-            '#prefix' => '<div class="next-button show-onload">',
+            '#prefix' => '<div class="next-button">',
             '#suffix' => '</div>',
           );
         }
@@ -239,17 +233,17 @@ function uc_cart_checkout_form($form, &$form_state) {
 }
 
 /**
- * Add markup and styling to the checkout panes.
+ * Adds markup and styling to the checkout panes.
  *
- * @ingroup themeable
  * @see uc_cart_checkout_form()
+ * @ingroup themeable
  */
 function theme_uc_cart_checkout_form($variables) {
   $form = $variables['form'];
 
   drupal_add_css(drupal_get_path('module', 'uc_cart') . '/uc_cart.css');
 
-  $output = '<div id="checkout-instructions">' . check_markup(variable_get('uc_checkout_instructions', ''), variable_get('uc_checkout_instructions_format', filter_default_format())) . '</div>';
+  $output = '<div id="checkout-instructions">' . filter_xss_admin(variable_get('uc_checkout_instructions', '')) . '</div>';
 
   foreach (element_children($form['panes']) as $pane_id) {
     if (function_exists(($func = _uc_checkout_pane_data($pane_id, 'callback')))) {
@@ -273,7 +267,10 @@ function theme_uc_cart_checkout_form($variables) {
 }
 
 /**
+ * Form validation for uc_cart_checkout_form().
+ *
  * @see uc_cart_checkout_form()
+ * @see uc_cart_checkout_form_submit()
  */
 function uc_cart_checkout_form_validate($form, &$form_state) {
   global $user;
@@ -317,7 +314,10 @@ function uc_cart_checkout_form_validate($form, &$form_state) {
 }
 
 /**
+ * Form submission handler for uc_cart_checkout_form().
+ *
  * @see uc_cart_checkout_form()
+ * @see uc_cart_checkout_form_validate()
  */
 function uc_cart_checkout_form_submit($form, &$form_state) {
   if ($form_state['checkout_valid'] === FALSE) {
@@ -337,7 +337,7 @@ function uc_cart_checkout_form_submit($form, &$form_state) {
  * @see uc_checkout_form()
  */
 function uc_cart_checkout_form_cancel($form, &$form_state) {
-  if (intval($_SESSION['cart_order']) > 0) {
+  if (isset($_SESSION['cart_order']) && intval($_SESSION['cart_order']) > 0) {
     uc_order_comment_save($_SESSION['cart_order'], 0, t('Customer cancelled this order from the checkout form.'));
     unset($_SESSION['cart_order']);
   }
@@ -346,7 +346,7 @@ function uc_cart_checkout_form_cancel($form, &$form_state) {
 }
 
 /**
- * Allow a customer to review their order before finally submitting it.
+ * Allows a customer to review their order before finally submitting it.
  *
  * @see uc_cart_checkout_form()
  */
@@ -374,7 +374,7 @@ function uc_cart_checkout_review() {
   }
 
   foreach ($panes as $pane) {
-    if (variable_get('uc_pane_' . $pane['id'] . '_enabled', TRUE)) {
+    if ($pane['enabled']) {
       $func = $pane['callback'];
       if (function_exists($func)) {
         $return = $func('review', $order, NULL);
@@ -395,7 +395,7 @@ function uc_cart_checkout_review() {
 }
 
 /**
- * Theme the checkout review order page.
+ * Themes the checkout review order page.
  *
  * @param $panes
  *   An associative array for each checkout pane that has information to add to
@@ -404,8 +404,10 @@ function uc_cart_checkout_review() {
  * @param $form
  *   The HTML version of the form that by default includes the 'Back' and
  *   'Submit order' buttons at the bottom of the review page.
+ *
  * @return
  *   A string of HTML for the page contents.
+ *
  * @ingroup themeable
  */
 function theme_uc_cart_checkout_review($variables) {
@@ -414,8 +416,9 @@ function theme_uc_cart_checkout_review($variables) {
 
   drupal_add_css(drupal_get_path('module', 'uc_cart') . '/uc_cart.css');
 
-  $output = check_markup(variable_get('uc_checkout_review_instructions', uc_get_message('review_instructions')), variable_get('uc_checkout_review_instructions_format', filter_default_format()))
-           . '<table class="order-review-table">';
+  $output = '<div id="review-instructions">' . filter_xss_admin(variable_get('uc_checkout_review_instructions', uc_get_message('review_instructions'))) . '</div>';
+
+  $output .= '<table class="order-review-table">';
 
   foreach ($panes as $title => $data) {
     $output .= '<tr class="pane-title-row"><td colspan="2">' . $title
@@ -450,12 +453,11 @@ function theme_uc_cart_checkout_review($variables) {
 }
 
 /**
- * Give customers the option to finish checkout or go revise their information.
+ * Gives customers the option to finish checkout or go revise their information.
  *
+ * @see uc_cart_checkout_review_form_back()
+ * @see uc_cart_checkout_review_form_submit()
  * @ingroup forms
- * @see
- *   uc_cart_checkout_review_form_back()
- *   uc-cart_checkout_review_form_submit()
  */
 function uc_cart_checkout_review_form($form, &$form_state) {
   // Set the session variable to pass the redirect check on the pageload.

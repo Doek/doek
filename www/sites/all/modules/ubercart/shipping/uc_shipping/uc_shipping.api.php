@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_shipping.api.php,v 1.3 2010/03/17 17:51:58 islandusurper Exp $
 
 /**
  * @file
@@ -12,7 +11,7 @@
  */
 
 /**
- * Handle additional data for shipments.
+ * Handles additional data for shipments.
  *
  * @param $op
  *   The action being taken on the shipment. One of the following values:
@@ -22,6 +21,7 @@
  *     for reshipment.
  * @param &$shipment
  *   The shipment object.
+ *
  * @return
  *   Only given when $op is "load" . An array of extra data to be added to the
  *   shipment object.
@@ -36,7 +36,7 @@ function hook_uc_shipment($op, &$shipment) {
           if ($package->tracking_number) {
             $tracking_number = $package->tracking_number;
           }
-          else if ($shipment->tracking_number) {
+          elseif ($shipment->tracking_number) {
             $tracking_number = $shipment->tracking_number;
           }
           if ($tracking_number) {
@@ -95,4 +95,3 @@ function hook_uc_shipment($op, &$shipment) {
 /**
  * @} End of "addtogroup hooks".
  */
-

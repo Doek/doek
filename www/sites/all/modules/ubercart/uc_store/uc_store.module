@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_store.module,v 1.59 2010/12/09 19:02:21 islandusurper Exp $
 
 /**
  * @file
@@ -56,39 +55,22 @@ define('MM_TO_IN', 0.03937007874);
 define('MM_TO_FT', 0.003280839895);
 define('MM_TO_CM', 0.1);
 
-class UcAddress {
-
-  public $first_name = '';
-  public $last_name = '';
-  public $company = '';
-  public $street1 = '';
-  public $street2 = '';
-  public $city = '';
-  public $zone = 0;
-  public $postal_code = '';
-  public $country = 0;
-  public $phone = '';
-  public $email = '';
-
-  function __construct() { }
-
-}
-
 /*******************************************************************************
  * Hook Functions (Drupal)
  ******************************************************************************/
 
 /**
- * Implement hook_menu().
+ * Implements hook_menu().
  */
 function uc_store_menu() {
   $items = array();
 
   $items['admin/store'] = array(
-    'title' => 'Store administration',
-    'description' => 'Administer store settings, products, orders, and more.',
+    'title' => 'Store',
+    'description' => 'Administer orders, products, customers, store settings, etc.',
     'page callback' => 'uc_store_admin',
-    'access arguments' => array('access administration pages'),
+    'access callback' => 'uc_store_admin_access',
+    'weight' => -12,
     'file' => 'uc_store.admin.inc',
   );
   $items['admin/store/customers'] = array(
@@ -148,40 +130,23 @@ function uc_store_menu() {
   );
   $items['admin/store/settings/countries'] = array(
     'title' => 'Country settings',
-    'description' => 'Configure country specific settings.',
-    'page callback' => 'uc_country_settings_overview',
-    'access arguments' => array('administer store'),
-    'file' => 'uc_store.admin.inc',
-  );
-  $items['admin/store/settings/countries/overview'] = array(
-    'title' => 'Overview',
-    'description' => 'View the country settings.',
-    'access arguments' => array('administer store'),
-    'weight' => -10,
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'file' => 'uc_store.admin.inc',
-  );
-  $items['admin/store/settings/countries/edit'] = array(
-    'title' => 'Edit',
-    'description' => 'Edit the country settings.',
+    'description' => 'Configure countries and address formats.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('uc_country_import_form'),
     'access arguments' => array('administer store'),
-    'weight' => -5,
-    'type' => MENU_LOCAL_TASK,
     'file' => 'uc_store.admin.inc',
   );
-  $items['admin/store/settings/countries/edit/import'] = array(
-    'title' => 'Import countries',
+  $items['admin/store/settings/countries/import'] = array(
+    'title' => 'Countries',
     'description' => 'Import and manage countries.',
     'access arguments' => array('administer store'),
     'weight' => -10,
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'file' => 'uc_store.admin.inc',
   );
-  $items['admin/store/settings/countries/edit/formats'] = array(
-    'title' => 'Country formats',
-    'description' => 'Edit the country specific format settings.',
+  $items['admin/store/settings/countries/formats'] = array(
+    'title' => 'Address formats',
+    'description' => 'Edit country specific address format settings.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('uc_country_formats_form'),
     'access arguments' => array('administer store'),
@@ -193,57 +158,11 @@ function uc_store_menu() {
   $items['admin/store/settings/store'] = array(
     'title' => 'Store settings',
     'description' => 'Configure the main store settings.',
-    'page callback' => 'uc_store_store_settings_overview',
-    'access arguments' => array('administer store'),
-    'file' => 'uc_store.admin.inc',
-  );
-  $items['admin/store/settings/store/overview'] = array(
-    'title' => 'Overview',
-    'description' => 'View the store settings.',
-    'access arguments' => array('administer store'),
-    'weight' => -10,
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'file' => 'uc_store.admin.inc',
-  );
-  $items['admin/store/settings/store/edit'] = array(
-    'title' => 'Edit',
-    'description' => 'Edit the store settings.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('uc_store_store_settings_form'),
+    'page arguments' => array('uc_store_settings_form'),
     'access arguments' => array('administer store'),
-    'weight' => -5,
-    'type' => MENU_LOCAL_TASK,
     'file' => 'uc_store.admin.inc',
   );
-  $items['admin/store/settings/store/edit/contact'] = array(
-    'title' => 'Contact settings',
-    'description' => 'Edit the contact settings.',
-    'access arguments' => array('administer store'),
-    'weight' => -10,
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'file' => 'uc_store.admin.inc',
-  );
-  $items['admin/store/settings/store/edit/display'] = array(
-    'title' => 'Display settings',
-    'description' => 'Edit the display settings.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('uc_store_display_settings_form'),
-    'access arguments' => array('administer store'),
-    'weight' => -5,
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'uc_store.admin.inc',
-  );
-  $items['admin/store/settings/store/edit/format'] = array(
-    'title' => 'Format settings',
-    'description' => 'Edit the format settings.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('uc_store_format_settings_form'),
-    'access arguments' => array('administer store'),
-    'weight' => 0,
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'uc_store.admin.inc',
-  );
-
   $items['admin/store/settings/store/initials'] = array(
     'title' => 'User initials',
     'description' => 'Assign initials to user accounts.',
@@ -253,13 +172,6 @@ function uc_store_menu() {
     'file' => 'uc_store.admin.inc',
   );
 
-  $items['uc_js_util/%'] = array(
-    'title' => 'JS utilities',
-    'page callback' => 'uc_store_js_util',
-    'page arguments' => array(1),
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK,
-  );
   $items['admin/store/customers/orders/%'] = array(
     'title' => 'Customer orders',
     'description' => 'View a list of orders placed by this customer.',
@@ -310,7 +222,18 @@ function uc_store_menu() {
 }
 
 /**
- * Implement hook_init().
+ * Access callback for top-level store administration menu item.
+ */
+function uc_store_admin_access() {
+  return user_access('administer_store')
+    || user_access('view all orders')
+    || user_access('view customers')
+    || user_access('administer products')
+    || user_access('view store reports');
+}
+
+/**
+ * Implements hook_init().
  */
 function uc_store_init() {
   module_load_include('inc', 'uc_store', 'includes/summaries');
@@ -336,7 +259,7 @@ function uc_store_init() {
 }
 
 /**
- * Implement hook_element_info().
+ * Implements hook_element_info().
  */
 function uc_store_element_info() {
   $types = array();
@@ -351,17 +274,163 @@ function uc_store_element_info() {
     '#process' => array('ajax_process_form'),
   );
 
+  $types['uc_address'] = array(
+    '#input' => TRUE,
+    '#required' => TRUE,
+    '#process' => array('uc_store_process_address_field'),
+    '#attributes' => array('class' => array('uc-store-address-field')),
+    '#theme_wrappers' => array('container'),
+    '#key_prefix' => '',
+    '#hidden' => FALSE,
+  );
+
   return $types;
 }
 
 /**
- * Implement hook_theme().
+ * Element process hook for address fields.
+ */
+function uc_store_process_address_field($element, $form_state) {
+  $prefix = $element['#key_prefix'] ? ($element['#key_prefix'] . '_') : '';
+
+  // Ensure the value is an array.
+  if (is_array($element['#value']) || is_object($element['#value'])) {
+    $value = (array) $element['#value'];
+  }
+  else {
+    $value = array();
+  }
+
+  // Base fields on the UcAddress object.
+  $address = (array) new UcAddress();
+  $fields = array_keys($address);
+
+  foreach (array_keys($address) as $field) {
+    if (!isset($value[$prefix . $field])) {
+      continue;
+    }
+
+    $default = $value[$prefix . $field];
+
+    switch ($field) {
+      case 'country':
+        $countries = db_query("SELECT country_id, country_name FROM {uc_countries} WHERE version > :version", array(':version' => 0))->fetchAllKeyed();
+        natcasesort($countries);
+
+        $subelement = array(
+          '#type' => 'select',
+          '#options' => $countries,
+          '#ajax' => array(
+            'callback' => 'uc_store_update_address_field_zones',
+            'wrapper' => 'uc-store-address-' . str_replace('_', '-', $prefix) . 'zone-wrapper',
+            'progress' => array(
+              'type' => 'throbber',
+            ),
+          ),
+        );
+        break;
+
+      case 'zone':
+        $subelement = array(
+          '#prefix' => '<div id="uc-store-address-' . str_replace('_', '-', $prefix) . 'zone-wrapper">',
+          '#suffix' => '</div>',
+          '#empty_value' => 0,
+        );
+
+        $zones = db_query("SELECT zone_id, zone_name FROM {uc_zones} WHERE zone_country_id = :country", array(':country' => $value[$prefix . 'country']))->fetchAllKeyed();
+        if (!empty($zones)) {
+          natcasesort($zones);
+          $subelement += array(
+            '#type' => 'select',
+            '#options' => $zones,
+          );
+        }
+        else {
+          $subelement += array(
+            '#type' => 'hidden',
+            '#required' => FALSE,
+          );
+        }
+
+        // Avoid "illegal choice detected" errors when country field is changed.
+        if ($form_state['process_input'] && !$form_state['submitted'] && isset($value[$prefix . 'zone']) && !isset($subelement['#options'][$value[$prefix . 'zone']])) {
+          $subelement['#value'] = 0;
+        }
+        break;
+
+      case 'postal_code':
+        $subelement = array(
+          '#type' => 'textfield',
+          '#size' => 10,
+          '#maxlength' => 10,
+        );
+        break;
+
+      case 'phone':
+        $subelement = array(
+          '#type' => 'textfield',
+          '#size' => 16,
+          '#maxlength' => 32,
+        );
+        break;
+
+      default:
+        $subelement = array(
+          '#type' => 'textfield',
+          '#size' => 32,
+        );
+    }
+
+    // Copy JavaScript states from the parent element.
+    if (isset($element['#states'])) {
+      $subelement['#states'] = $element['#states'];
+    }
+
+    // Set common values for all address fields.
+    $element[$prefix . $field] = $subelement + array(
+      '#title' => uc_get_field_name($field),
+      '#default_value' => $default,
+      '#pre_render' => array('uc_store_pre_render_address_field'),
+      '#access' => $element['#hidden'] ? FALSE : uc_address_field_enabled($field),
+      '#required' => $element['#required'] ? uc_address_field_required($field) : FALSE,
+      '#needs_validation' => TRUE,
+    );
+
+    if ($element[$prefix . $field]['#required'] && !$default) {
+      unset($element[$prefix . $field]['#default_value']);
+    }
+  }
+  return $element;
+}
+
+/**
+ * Ajax callback: updates the zone select box when the country is changed.
+ */
+function uc_store_update_address_field_zones($form, &$form_state) {
+  $element = &$form;
+  foreach (array_slice($form_state['triggering_element']['#array_parents'], 0, -1) as $field) {
+    $element = &$element[$field];
+  }
+  $prefix = empty($element['#key_prefix']) ? '' : ($element['#key_prefix'] . '_');
+  return $element[$prefix . 'zone'];
+}
+
+/**
+ * Prerenders address field elements to move the required marker when needed.
+ */
+function uc_store_pre_render_address_field($element) {
+  if (!empty($element['#required'])) {
+    $element['#title'] = theme('form_required_marker', $element) . ' ' . $element['#title'];
+    unset($element['#required']);
+  }
+  return $element;
+}
+
+/**
+ * Implements hook_theme().
  */
 function uc_store_theme() {
   return array(
-    'uc_admin_dashboard' => array(
-      'variables' => array('type' => NULL, 'menus' => NULL),
-    ),
     'uc_store_footer' => array(
       'variables' => array('message' => ''),
     ),
@@ -384,12 +453,10 @@ function uc_store_theme() {
 }
 
 /**
- * Implement hook_help().
+ * Implements hook_help().
  */
 function uc_store_help($path, $arg) {
   switch ($path) {
-    case 'admin/store/settings/store/edit/report':
-      return t("Reporting to Ubercart.org happens once a week during a normal cron run and is logged in your site's watchdog. Reporting lets Ubercart.org calculate the total number of Ubercart installations and aggregate version information for use in development. Your site's data is never shared with anyone, and aggregate statistics displayed through Ubercart.org will be in the form of anonymous group statistics. Reporting will also allow Ubercart.org to report security notices back to your site if needed.");
     case 'admin/store/customers':
       return t('This table lists out all users on your site who have placed orders.');
     case 'admin/store/customers/search':
@@ -398,7 +465,7 @@ function uc_store_help($path, $arg) {
 }
 
 /**
- * Implement hook_permission().
+ * Implements hook_permission().
  */
 function uc_store_permission() {
   return array(
@@ -415,11 +482,53 @@ function uc_store_permission() {
 }
 
 /**
- * Implement hook_page_alter().
+ * Implements hook_date_formats().
+ */
+function uc_store_date_formats() {
+  return array(
+    array(
+      'type' => 'uc_store',
+      'format' => 'Y-m-d',
+      'locales' => array(),
+    ),
+    array(
+      'type' => 'uc_store',
+      'format' => 'm/d/Y',
+      'locales' => array('en-us'),
+    ),
+    array(
+      'type' => 'uc_store',
+      'format' => 'd/m/Y',
+      'locales' => array('en-gb', 'en-hk', 'en-ie', 'el-gr', 'es-es', 'fr-be', 'fr-fr', 'fr-lu', 'it-it', 'nl-be', 'pt-pt'),
+    ),
+    array(
+      'type' => 'uc_store',
+      'format' => 'Y/m/d',
+      'locales' => array('en-ca', 'fr-ca', 'no-no', 'sv-se'),
+    ),
+    array(
+      'type' => 'uc_store',
+      'format' => 'd.m.Y',
+      'locales' => array('de-ch', 'de-de', 'de-lu', 'fi-fi', 'fr-ch', 'is-is', 'pl-pl', 'ro-ro', 'ru-ru'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_date_format_types().
+ */
+function uc_store_date_format_types() {
+  return array('uc_store' => t('Ubercart'));
+}
+
+/**
+ * Implements hook_page_alter().
  */
 function uc_store_page_alter(&$page) {
+  $id = variable_get('uc_footer_message', 0);
+
   // Exit if the store footer is turned off.
-  if (variable_get('uc_footer_message', 0) === 'none') {
+  if ($id === 'none') {
     return;
   }
 
@@ -427,59 +536,62 @@ function uc_store_page_alter(&$page) {
   $path = drupal_get_normal_path($_GET['q']);
   $parts = explode('/', $path);
 
-  // Break out of the switch if the page isn't governed by Ubercart.
+  // Exit if the page isn't governed by Ubercart.
   switch ($parts[0]) {
     case 'admin':
       // No footer on /admin or /admin/*.
       // But add a footer on /admin/store and /admin/store/*
       if (!isset($parts[1]) || $parts[1] != 'store') {
-        break;
+        return;
       }
+      break;
+
     case 'node':
       // No footer on /node or /node/[type]/add.
       // Only add a footer on /node/[nid] if that node is a product.
       if (count($parts) != 2 || intval($parts[1]) == 0) {
-        break;
+        return;
       }
       else {
         $node = node_load($parts[1]);
         if ($node == FALSE || !function_exists('uc_product_node_info') || !uc_product_is_product($node->type)) {
-          break;
+          return;
         }
       }
-    // Add a footer to the following pages.
+      break;
+
     case 'catalog':
     case 'cart':
-    case 'manufacturer':
-      $messages = _uc_store_footer_options();
-      if (($message = variable_get('uc_footer_message', 0)) > 0) {
-        $message = $messages[$message];
-      }
-      else {
-        $message = db_query("SELECT message FROM {uc_store_footers} WHERE path_hash = :hash", array(':hash' => md5($path)))->fetchField();
-        if (!$message) {
-          unset($messages['none']);
-          $message = $messages[array_rand($messages)];
-          db_insert('uc_store_footers')
-            ->fields(array(
-              'path_hash' => md5($path),
-              'message' => $message,
-            ))
-            ->execute();
-        }
-      }
+      break;
 
-      $page['page_bottom']['ubercart_footer']= array(
-        '#theme' => 'uc_store_footer',
-        '#message' => $message,
-      );
+    default:
+      return;
   }
+
+  $messages = _uc_store_footer_options();
+
+  if ($id == 0) {
+    // Pseudorandom number based on the hash of the path and the site's private
+    // key, so messages are consistent between pages on the same site, but
+    // different on the same pages on different sites.
+    $id = (hexdec(substr(md5($path . drupal_get_private_key()), 0, 2)) % count($messages)) + 1;
+  }
+
+  $page['page_bottom']['ubercart_footer'] = array(
+    '#theme' => 'uc_store_footer',
+    '#message' => $messages[$id],
+  );
 }
 
 /**
- * Implement hook_exit().
+ * Implements hook_exit().
  */
 function uc_store_exit() {
+  // Don't save anything to the session if this is the first request of a session
+  if (empty($_COOKIE[session_name()])) {
+    return;
+  }
+
   // Save the current request for tracking paths on subsequent page requests.
   // When HTTP_REFERER is set, the session version is not; and vice versa.
   if ($_SERVER['HTTP_REFERER'] == '') {
@@ -498,16 +610,9 @@ function uc_store_exit() {
 }
 
 /**
- * Implement hook_form_alter().
- */
-function uc_store_form_uc_product_table_alter(&$form, &$form_state, $form_id) {
-  unset($form['table']['#value']['columns']['list_price']);
-}
-
-/**
- * Implement hook_reviews().
+ * Implements hook_reviews().
  *
- * Provide code reviews for coder_review.module.
+ * Provides code reviews for coder_review.module.
  */
 function uc_store_reviews() {
   $coder_reviews = array();
@@ -533,72 +638,16 @@ function uc_store_reviews() {
  ******************************************************************************/
 
 /**
- * Display a price in the standard format and with consistent markup.
+ * Displays a price in the standard format and with consistent markup.
+ *
+ * @ingroup themeable
  */
 function theme_uc_price($variables) {
   return '<span class="uc-price">' . uc_currency_format($variables['price']) . '</span>';
 }
 
 /**
- * Theme the dashboard on the admin/store page.
- *
- * @ingroup themeable
- */
-function theme_uc_admin_dashboard($variables) {
-  $type = $variables['type'];
-  $menus = $variables['menus'];
-
-  if ($type == 1) {
-    drupal_add_js(drupal_get_path('module', 'uc_store') . '/uc_store.js');
-    drupal_add_js(array('ucTextShow' => t('- Show links -'), 'ucTextHide' => t('- Hide links -')), 'setting');
-  }
-
-  $output = '<table class="uc-store-admin-table" align="center"><tr valign="top">';
-
-  $panel = 0;
-  if (is_array($menus)) {
-    foreach ($menus as $menu) {
-      $panel++;
-      if ($panel % 4 == 0) {
-        $output .= '</tr><tr valign="top">';
-      }
-      $panel_title = $menu['title'];
-      if ($type == 3) {
-        $panel_links = '';
-      }
-      else {
-        $panel_links = theme('admin_block_content', array('content' => system_admin_menu_block(menu_get_item($menu['href']))));
-      }
-      $panel_table = '<table width="100%"><tr>'
-                    . '<td>' . l(uc_store_get_icon($menu['href']), $menu['href'],
-                               array('html' => TRUE)) . '</td>'
-                    . '<td class="panel-title">' . l($menu['title'], $menu['href'])
-                    . '</td></tr>';
-      if (strlen($panel_links) > 0) {
-        if ($type == 1) {
-          $disp = 'display: none;';
-        }
-        $panel_table .= '<tr><td nowrap colspan="2" class="panel-links" '
-                       . 'style="' . $disp . '">' . $panel_links . '</td></tr>';
-        if ($type == 1) {
-          $panel_table .= '<tr><td align="center" colspan="2" '
-                         . 'class="panel-show-link" id="show-links-' . $panel
-                         . '"><a>' . t('- Show links -') . '</a></td></tr>';
-        }
-      }
-      $panel_table .= '</table>';
-      $output .= '<td class="uc-store-admin-panel" id="panel-' . $panel . '">'
-               . $panel_table . '</td>';
-    }
-  }
-
-  $output .= '</tr></table>';
-
-  return $output;
-}
-
-/**
- * Return the default store footer options.
+ * Returns the default store footer options.
  */
 function _uc_store_footer_options() {
   $url = array('!url' => 'http://www.ubercart.org/');
@@ -607,12 +656,11 @@ function _uc_store_footer_options() {
     2 => t('<a href="!url">Drupal e-commerce</a> provided by Ubercart.', $url),
     3 => t('Supported by Ubercart, an <a href="!url">open source e-commerce suite</a>.', $url),
     4 => t('Powered by Ubercart, the <a href="!url">free shopping cart software</a>.', $url),
-    'none' => t('(Do not display a message in the footer.)'),
   );
 }
 
 /**
- * Wrap the footer in a div so it can be re-styled.
+ * Wraps the footer in a div so it can be re-styled.
  *
  * @ingroup themeable
  */
@@ -628,12 +676,12 @@ function theme_uc_store_footer($variables) {
  */
 function uc_address_property_info() {
   return array(
-    'first-name' => array(
+    'first_name' => array(
       'type' => 'text',
       'label' => t('First name'),
       'description' => t('First name of the addressee.'),
     ),
-    'last-name' => array(
+    'last_name' => array(
       'type' => 'text',
       'label' => t('Last name'),
       'description' => t('Last name of the addressee.'),
@@ -664,7 +712,7 @@ function uc_address_property_info() {
       'description' => t('Address state/province/zone.'),
       'options list' => 'uc_zone_option_list',
     ),
-    'postal-code' => array(
+    'postal_code' => array(
       'type' => 'text',
       'label' => t('Postal code'),
       'description' => t('Address post code.'),
@@ -692,10 +740,9 @@ function uc_address_property_info() {
  * Form to configure address fields.
  *
  * @ingroup forms
- * @see
- *   theme_uc_store_address_fields_form()
- *   uc_store_address_fields_form_submit()
- *   uc_store_address_fields_form_reset()
+ * @see uc_store_address_fields_form_submit()
+ * @see uc_store_address_fields_form_reset()
+ * @see theme_uc_store_address_fields_form()
  */
 function uc_store_address_fields_form($form, &$form_state) {
   $form['fields'] = array(
@@ -733,6 +780,7 @@ function uc_store_address_fields_form($form, &$form_state) {
       );
       $form['fields'][$field]['required'] = array(
         '#type' => 'checkbox',
+        '#summary callback' => 'uc_summarize_null',
         '#default_value' => isset($required[$field]) ? TRUE : FALSE,
       );
     }
@@ -767,8 +815,10 @@ function uc_store_address_fields_form($form, &$form_state) {
 }
 
 /**
- * @ingroup themeable
+ * Returns HTML for uc_store_address_fields_form().
+ *
  * @see uc_store_address_fields_form()
+ * @ingroup themeable
  */
 function theme_uc_store_address_fields_form($variables) {
   $form = $variables['form'];
@@ -790,7 +840,7 @@ function theme_uc_store_address_fields_form($variables) {
 }
 
 /**
- * Save the address fields settings.
+ * Saves the address fields settings.
  *
  * @see uc_store_address_fields_form()
  */
@@ -799,10 +849,10 @@ function uc_store_address_fields_form_submit($form, &$form_state) {
   $required = array();
   foreach ($form_state['values']['fields'] as $field => $data) {
     variable_set('uc_field_' . $field, $data['title']);
-    if ($data['enabled'] == TRUE) {
+    if (isset($data['enabled']) && $data['enabled']) {
       $fields[] = $field;
     }
-    if ($data['required'] == TRUE) {
+    if (isset($data['required']) && $data['required']) {
       $required[] = $field;
     }
   }
@@ -812,7 +862,7 @@ function uc_store_address_fields_form_submit($form, &$form_state) {
 }
 
 /**
- * Reset the address fields settings to their default values.
+ * Resets the address fields settings to their default values.
  *
  * @see uc_store_address_fields_form()
  */
@@ -821,31 +871,8 @@ function uc_store_address_fields_form_reset($form_id, &$form_state) {
     variable_del('uc_field_' . $field);
   }
   variable_del('uc_address_fields');
+  variable_del('uc_address_fields_required');
   drupal_set_message(t('The configuration options have been reset to their default values.'));
-}
-
-/**
- * A handler for Javascript helper functions...
- */
-function uc_store_js_util($func) {
-  switch ($func) {
-    case 'currency_format':
-      $amount = is_numeric($_POST['amount']) ? $_POST['amount'] : 0;
-      $output = uc_currency_format($amount);
-      break;
-    case 'zone_select':
-      $country_id = intval($_POST['country_id']) > 0 ? intval($_POST['country_id']) : uc_store_default_country();
-      $title = isset($_POST['title']) ? check_plain($_POST['title']) : NULL;
-      $display = isset($_POST['display']) ? check_plain($_POST['display']) : 'name';
-      $select = uc_zone_select($title, NULL, NULL, $country_id, $display);
-      $select['#parents'] = array();
-      $match = array('`<[/]*div[^>]*>`', '`<[/]*select[^>]*>`', '`\n|\r`');
-      $replace = array('', '', '');
-      $output = preg_replace($match, $replace, theme('select', array('element' => $select)));
-  }
-
-  print $output;
-  exit();
 }
 
 /*******************************************************************************
@@ -853,7 +880,7 @@ function uc_store_js_util($func) {
  ******************************************************************************/
 
 /**
- * Return the IMG tag for a store icon.
+ * Returns the IMG tag for a store icon.
  *
  * @param $path
  *   The Drupal path of the menu item. Atlernately may specify a filename by
@@ -861,6 +888,7 @@ function uc_store_js_util($func) {
  * @param $small
  *   Pass TRUE to get a link to the small version of the icon. If specifying a
  *   filename, you should let this be FALSE.
+ *
  * @return
  *   HTML output for the image.
  */
@@ -913,7 +941,7 @@ function uc_store_get_icon($path, $small = FALSE, $class = 'uc-store-icon', $alt
 }
 
 /**
- * Format an amount for display with the store's currency settings.
+ * Formats an amount for display with the store's currency settings.
  *
  * @param $value
  *   The numeric value of the currency amount.
@@ -977,7 +1005,7 @@ function uc_currency_format($value, $sign = NULL, $thou = NULL, $dec = NULL) {
 }
 
 /**
- * Format a weight value for display.
+ * Formats a weight value for display.
  */
 function uc_weight_format($value, $unit = NULL) {
   $vars = array('!value' => $value);
@@ -1004,7 +1032,7 @@ function uc_weight_format($value, $unit = NULL) {
 }
 
 /**
- * Get the conversion ratio from one unit of weight to another.
+ * Gets the conversion ratio from one unit of weight to another.
  */
 function uc_weight_conversion($from_units, $to_units = NULL) {
   if (is_null($to_units)) {
@@ -1020,7 +1048,7 @@ function uc_weight_conversion($from_units, $to_units = NULL) {
 }
 
 /**
- * Format a length value for display.
+ * Formats a length value for display.
  */
 function uc_length_format($value, $unit = NULL) {
   $vars = array('!value' => $value);
@@ -1047,7 +1075,7 @@ function uc_length_format($value, $unit = NULL) {
 }
 
 /**
- * Get the conversion ratio from one unit of length to another.
+ * Gets the conversion ratio from one unit of length to another.
  */
 function uc_length_conversion($from_units, $to_units = NULL) {
   if (is_null($to_units)) {
@@ -1063,7 +1091,7 @@ function uc_length_conversion($from_units, $to_units = NULL) {
 }
 
 /**
- * Format a date value for display.
+ * Formats a date value for display.
  */
 function uc_date_format($month, $day, $year, $class = 'default') {
   $time = strtotime($month . '/' . $day . '/' . $year);
@@ -1077,14 +1105,14 @@ function uc_date_format($month, $day, $year, $class = 'default') {
 }
 
 /**
- * Save the address format for a country.
+ * Saves the address format for a country.
  */
 function uc_set_address_format($country_id, $format) {
   variable_set('uc_address_format_' . intval($country_id), $format);
 }
 
 /**
- * Format an address for display based on a country's address format.
+ * Formats an address for display based on a country's address format.
  */
 function uc_address_format($first_name, $last_name, $company, $street1, $street2, $city, $zone, $postal_code, $country) {
   $result = db_query("SELECT * FROM {uc_zones} WHERE zone_id = :id", array(':id' => $zone));
@@ -1142,7 +1170,7 @@ function uc_address_format($first_name, $last_name, $company, $street1, $street2
 }
 
 /**
- * Return the code abbreviation for a zone based on the zone ID or name.
+ * Returns the code abbreviation for a zone based on the zone ID or name.
  */
 function uc_get_zone_code($zone = NULL) {
   if (empty($zone)) {
@@ -1196,7 +1224,7 @@ function uc_get_country_data($match = array(), $sort = 'country_name') {
 }
 
 /**
- * Return the name of an address field.
+ * Returns the name of an address field.
  */
 function uc_get_field_name($field) {
   $fields = array(
@@ -1225,31 +1253,22 @@ function uc_get_field_name($field) {
 }
 
 /**
- * Return TRUE if the address field is enabled.
+ * Returns TRUE if the address field is enabled,
+ * or a list of enabled fields if no field is specified.
  */
-function uc_address_field_enabled($field) {
+function uc_address_field_enabled($field = NULL) {
   $fields = variable_get('uc_address_fields', drupal_map_assoc(array('first_name', 'last_name', 'phone', 'company', 'street1', 'street2', 'city', 'zone', 'postal_code', 'country')));
 
-  if (!isset($fields[$field])) {
-    return FALSE;
-  }
-  else {
-    return TRUE;
-  }
+  return $field ? isset($fields[$field]) : $fields;
 }
 
 /**
- * Return TRUE if the address field field is required.
+ * Returns TRUE if the address field is required.
  */
 function uc_address_field_required($field) {
   $fields = variable_get('uc_address_fields_required', drupal_map_assoc(array('first_name', 'last_name', 'street1', 'city', 'zone', 'postal_code', 'country')));
 
-  if (!isset($fields[$field])) {
-    return FALSE;
-  }
-  else {
-    return TRUE;
-  }
+  return isset($fields[$field]);
 }
 
 /**
@@ -1275,7 +1294,7 @@ function uc_textfield($title, $default = NULL, $required = TRUE, $description = 
 }
 
 /**
- * Retrieve a zone's name from the database, using its ID.
+ * Retrieves a zone's name from the database, using its ID.
  *
  * @param $id
  *   The zone's ID.
@@ -1285,38 +1304,62 @@ function uc_zone_get_by_id($id) {
 }
 
 /**
- * Create a zone select box for a form.
+ * Creates a zone select box for a form.
  *
- * @param $display
- *   Can be 'code' or 'name'.
+ * @param $title
+ *   The label for the field.
+ * @param $default
+ *   The default zone ID.
+ * @param $country_id
+ *   The country ID
+ * @param array $options
+ *   An associative array of additional options, with the following elements:
+ *   - 'description': The description for the field (defaults to none).
+ *   - 'display': The values to display, either 'name' (default) or 'code'.
+ *   - 'required': TRUE if the field is required (defaults to FALSE).
+ *   - 'ajax': If set, this should be the Form API reference to this element,
+ *     so it can be updated using Ajax when the country is changed.
+ *
+ * @return
+ *   A Form API select element.
  */
-function uc_zone_select($title, $default = NULL, $description = NULL, $country_id = NULL, $display = 'name', $required = FALSE) {
+function uc_zone_select($title = '', $default = NULL, $country_id = NULL, $options = array()) {
+  $options += array(
+    'description' => NULL,
+    'display' => 'name',
+    'required' => FALSE,
+    'ajax' => '',
+  );
+
   if (empty($country_id)) {
     $country_id = uc_store_default_country();
   }
 
-  $zones = db_query("SELECT * FROM {uc_zones} WHERE zone_country_id = :id ORDER BY :sort", array(':id' => $country_id, ':sort' => ($display == 'code') ? 'zone_code' : 'zone_name'));
+  $order_by = ($options['display'] == 'code') ? 'zone_code' : 'zone_name';
+  $result = db_query("SELECT * FROM {uc_zones} WHERE zone_country_id = :id ORDER BY $order_by", array(':id' => $country_id));
 
-  $options[''] = t('Please select');
-  foreach ($zones as $zone) {
-    $options[$zone->zone_id] = ($display == 'code') ? $zone->zone_code : $zone->zone_name;
+  $zones = array('' => t('Please select'));
+  foreach ($result as $zone) {
+    $zones[$zone->zone_id] = $zone->$order_by;
   }
-
-  if (count($options) == 1) {
-    $options = array(-1 => t('Not applicable'));
+  if (count($zones) == 1) {
+    $zones = array(-1 => t('Not applicable'));
   }
 
   $select = array(
     '#type' => 'select',
     '#title' => $title,
-    '#description' => $description,
-    '#options' => $options,
+    '#description' => $options['description'],
+    '#options' => $zones,
     '#default_value' => $default,
-    '#required' => $required,
-    '#disabled' => isset($options[-1]) ? TRUE : FALSE,
-    '#suffix' => '<span class="zone-throbber"></span>',
+    '#required' => $options['required'],
+    '#disabled' => isset($zones[-1]),
   );
 
+  if ($options['ajax']) {
+    $select['#prefix'] = '<div id="ajax-' . str_replace('][', '-', $options['ajax']) . '">';
+    $select['#suffix'] = '</div>';
+  }
   return $select;
 }
 
@@ -1334,58 +1377,105 @@ function uc_zone_option_list() {
 }
 
 /**
- * Retrieve a country's name from the database, using its ID.
+ * Retrieves a country's name from the database, using its ID.
  *
  * @param $id
- *   The country's ID.
+ *   The country's ISO 3166-1 numeric identifier.
  */
 function uc_country_get_by_id($id) {
   return db_query("SELECT country_name FROM {uc_countries} WHERE country_id = :id", array(':id' => $id))->fetchField();
 }
 
 /**
- * Create a country select box for a form.
- * $display can be 'name', 'code2' for the 2-digit code, or 'code3' for the 3-digit code.
+ * Creates a country select box for a form.
+ *
+ * @param $title
+ *   The label for the field.
+ * @param $default
+ *   The default country ID, or NULL to use the store default country.
+ * @param array $options
+ *   An associative array of additional options, with the following elements:
+ *   - 'description': The description for the field (defaults to none).
+ *   - 'display': The values to display, either 'name' (default), 'code2' for
+ *     the 2-character ISO code, or 'code3' for the 3-character ISO code.
+ *   - 'required': TRUE if the field is required (defaults to FALSE).
+ *   - 'ajax': If set, changing the country will update this related element
+ *     with a list of zones for this country.
+ *
+ * @return
+ *   A Form API select element.
  */
-function uc_country_select($title, $default = NULL, $description = NULL, $display = 'name', $required = FALSE) {
-  if ($display == 'code2') {
+function uc_country_select($title, $default = NULL, $options = array()) {
+  $options += array(
+    'description' => NULL,
+    'display' => 'name',
+    'required' => FALSE,
+    'ajax' => '',
+  );
+
+  if ($options['display'] == 'code2') {
     $order_by = 'country_iso_code_2';
   }
-  elseif ($display == 'code3') {
+  elseif ($options['display'] == 'code3') {
     $order_by = 'country_iso_code_3';
   }
   else {
     $order_by = 'country_name';
   }
 
-  $result = db_query("SELECT * FROM {uc_countries} WHERE version > :version ORDER BY :sort", array(':version' => 0, ':sort' => $order_by));
+  $result = db_query("SELECT * FROM {uc_countries} WHERE version > :version ORDER BY $order_by", array(':version' => 0));
 
-  $options = array();
-  while ($country = $result->fetchAssoc()) {
-    $options[$country['country_id']] = $country[$order_by];
+  $countries = array();
+  foreach ($result as $country) {
+    $countries[$country->country_id] = $country->$order_by;
   }
-  if (count($options) == 0) {
-    $options[] = t('No countries found.');
+  if (empty($countries)) {
+    $countries[] = t('No countries found.');
   }
 
-  $default = db_query("SELECT country_id FROM {uc_countries} WHERE country_id = :id AND version > :version", array(':id' => empty($default) ? 0 : intval($default), ':version' => 0))->fetchField();
+  if (!$default || !isset($countries[$default])) {
+    $default = uc_store_default_country();
+  }
 
   $select = array(
     '#type' => 'select',
     '#title' => $title,
-    '#description' => $description,
-    '#options' => $options,
-    '#default_value' => empty($default) ? uc_store_default_country() : $default,
-    '#required' => $required,
+    '#description' => $options['description'],
+    '#options' => $countries,
+    '#default_value' => $default,
+    '#required' => $options['required'],
   );
 
-  drupal_add_js(drupal_get_path('module', 'uc_store') . '/uc_country_select.js');
+  if ($options['ajax']) {
+    $select['#ajax'] = array(
+      'callback' => 'uc_country_ajax_zone',
+      'wrapper' => 'ajax-' . str_replace('][', '-', $options['ajax']),
+      'progress' => array(
+        'type' => 'throbber',
+      ),
+    );
+  }
 
   return $select;
 }
 
+/**
+ * Ajax callback to updates the zone select box when the country is changed.
+ */
+function uc_country_ajax_zone($form, &$form_state) {
+  $keys = explode('-', substr($form_state['triggering_element']['#ajax']['wrapper'], 5));
+  while ($keys) {
+    $form = $form[array_shift($keys)];
+  }
+
+  return $form;
+}
+
+/**
+ * Returns a list of available countries.
+ */
 function uc_country_option_list() {
-  $result = db_query("SELECT * FROM {uc_countries} WHERE version > :version ORDER BY :sort", array(':version' => 0, ':sort' => 'country_name'));
+  $result = db_query("SELECT * FROM {uc_countries} WHERE version > :version ORDER BY country_name", array(':version' => 0));
 
   $options = array();
   while ($country = $result->fetchAssoc()) {
@@ -1399,7 +1489,7 @@ function uc_country_option_list() {
 }
 
 /**
- * Create a day select box for a form.
+ * Creates a day select box for a form.
  */
 function uc_select_day($title = NULL, $default = NULL, $allow_empty = FALSE) {
   $options = $allow_empty ? array('' => '') : array();
@@ -1415,7 +1505,7 @@ function uc_select_day($title = NULL, $default = NULL, $allow_empty = FALSE) {
 }
 
 /**
- * Create a month select box for a form.
+ * Creates a month select box for a form.
  */
 function uc_select_month($title = NULL, $default = NULL, $allow_empty = FALSE) {
   $options = $allow_empty ? array('' => '') : array();
@@ -1438,7 +1528,7 @@ function uc_select_month($title = NULL, $default = NULL, $allow_empty = FALSE) {
 }
 
 /**
- * Create a year select box for a form.
+ * Creates a year select box for a form.
  */
 function uc_select_year($title = NULL, $default = NULL, $min = NULL, $max = NULL, $allow_empty = FALSE) {
   $min = is_null($min) ? intval(date('Y')) : $min;
@@ -1456,7 +1546,7 @@ function uc_select_year($title = NULL, $default = NULL, $min = NULL, $max = NULL
 }
 
 /**
- * Create an address select box based on a user's previous orders.
+ * Creates an address select box based on a user's previous orders.
  *
  * @param $uid
  *   The user's ID to search for in the orders table.
@@ -1493,7 +1583,38 @@ function uc_select_address($uid, $type = 'billing', $onchange = '', $title = NUL
 }
 
 /**
- * Load a customer's previously given addresses.
+ * Creates an address select box based on a user's previous orders.
+ *
+ * @param $uid
+ *   The user's ID to search for in the orders table.
+ * @param $type
+ *   Choose either 'shipping' or 'billing'.
+ */
+function uc_select_addresses($uid, $type = 'billing') {
+  $addresses = uc_get_addresses($uid, $type);
+
+  if (empty($addresses)) {
+    return array();
+  }
+
+  $options = array(-1 => t('Select one...'));
+  foreach ($addresses as $key => $address) {
+    $option = $address['street1'];
+    // Check if the address is a duplicate (i.e. same address, but sent to different person)
+    if ((isset($addresses[$key - 1]) && $option == $addresses[$key - 1]['street1']) ||
+        (isset($addresses[$key + 1]) && $option == $addresses[$key + 1]['street1'])) {
+      $option .= ' - ' . $address['first_name'] . ' ' . $address['last_name'];
+    }
+    $options[$key] = check_plain($option);
+  }
+
+  $addresses['#options'] = $options;
+
+  return $addresses;
+}
+
+/**
+ * Loads a customer's previously given addresses.
  */
 function uc_get_addresses($uid, $type = 'billing') {
   if ($uid == 0) {
@@ -1541,8 +1662,9 @@ function uc_get_addresses($uid, $type = 'billing') {
 }
 
 /**
- * Strip <form> tags and form_token and form_id hidden fields from form HTML for
- * use in an AJAX populated div. (Enables these values to be access via $_POST.)
+ * Strips <form> tags and form_token and form_id hidden fields from form HTML
+ * for use in an AJAX populated div. (Enables these values to be access via
+ * $_POST.)
  */
 function uc_strip_form($form) {
   unset($form['#type']);
@@ -1553,7 +1675,10 @@ function uc_strip_form($form) {
 }
 
 /**
- * Return the initials for a user account.
+ * Returns the initials for a user account.
+ *
+ * @param $uid
+ *   The Drupal user id number.
  */
 function uc_get_initials($uid) {
   if ($uid == 0 || $uid == NULL) {
@@ -1563,7 +1688,7 @@ function uc_get_initials($uid) {
 }
 
 /**
- * Return an array of country files in ubercart/uc_store/countries that can
+ * Returns an array of country files in ubercart/uc_store/countries that can
  * be installed or updated.
  */
 function _uc_country_import_list() {
@@ -1602,10 +1727,11 @@ function _uc_country_import_list() {
 }
 
 /**
- * Import an Ubercart country file by filename.
+ * Imports an Ubercart country file by filename.
  *
  * @param $file
  *   The filename of the country to import.
+ *
  * @return
  *   TRUE or FALSE indicating whether or not the country was imported.
  */
@@ -1629,7 +1755,7 @@ function uc_country_import($file) {
 }
 
 /**
- * Include the appropriate country file and return the base for hooks.
+ * Includes the appropriate country file and return the base for hooks.
  */
 function _uc_country_import_include($country_id, $version) {
   $dir = drupal_get_path('module', 'uc_store') . '/countries/';
@@ -1657,7 +1783,7 @@ function _uc_country_import_include($country_id, $version) {
 }
 
 /**
- * Sort an array of arrays having a weight key to determine their order.
+ * Sorts an array of arrays having a weight key to determine their order.
  */
 function uc_weight_sort($a, $b) {
   if ($a['weight'] == $b['weight']) {
@@ -1668,7 +1794,7 @@ function uc_weight_sort($a, $b) {
 }
 
 /**
- * Return the default message for a configurable message.
+ * Returns the default message for a configurable message.
  */
 function uc_get_message($message_id) {
   static $messages;
@@ -1682,7 +1808,7 @@ function uc_get_message($message_id) {
 }
 
 /**
- * Theme a pane sorting form into a table.
+ * Themes a pane sorting form into a table.
  *
  * @ingroup themeable
  */
@@ -1714,31 +1840,7 @@ function theme_uc_pane_sort_table($variables) {
 }
 
 /**
- * Return an array of values like PHP 5's range function.
- */
-function uc_range($low, $high, $step = 1) {
-  if (!is_numeric($low) || !is_numeric($high)) {
-    return array(0);
-  }
-
-  if ($low == $high || !is_numeric($step) || $step == 0) {
-    return array($low);
-  }
-
-  if ($step < 0) {
-    $step = abs($step);
-  }
-
-  $arr = array();
-  for ($i = $low; ($low < $high) ? $i <= $high : $i >= $high; ($low < $high) ? $i += $step : $i -= $step) {
-    $arr[] = $i;
-  }
-
-  return $arr;
-}
-
-/**
- * Return the user-defined store address.
+ * Returns the user-defined store address.
  */
 function uc_store_address() {
   $store_address = uc_address_format(NULL, NULL, variable_get('uc_store_name', NULL),
@@ -1750,7 +1852,7 @@ function uc_store_address() {
 }
 
 /**
- * Return store name and e-mail address in an RFC 2822 compliant string
+ * Returns store name and e-mail address in an RFC 2822 compliant string
  * for use as a "From" address when sending e-mail to customers.
  * The return string will look something like: Store Name <store@example.com>
  *
@@ -1784,6 +1886,9 @@ function uc_store_email_from() {
  * (notable printable non-valid characters include ',' and '.') needs
  * to be quoted in order to be used an an e-mail header such as the "From"
  * address. Double quotes in the original string are escaped (and nothing else).
+ *
+ * @param $name
+ *   The text string to convert to a RFC 2822 quoted string.
  */
 function uc_store_rfc2822_display_name($name) {
   // Base64 encode $name string if it contains non-ASCII characters
@@ -1798,14 +1903,15 @@ function uc_store_rfc2822_display_name($name) {
 }
 
 /**
- * Derive a valid username from an e-mail address.
+ * Derives a valid username from an e-mail address.
  *
  * @param $email
  *   An e-mail address.
+ *
  * @return
  *   A username derived from the e-mail address, using the part of the address
- *     up to the @ with integers appended to the end if needed to avoid a
- *     duplicate username.
+ *   up to the @ with integers appended to the end if needed to avoid a
+ *   duplicate username.
  */
 function uc_store_email_to_username($email) {
   // Default to the first part of the e-mail address.
@@ -1832,208 +1938,7 @@ function uc_store_email_to_username($email) {
 }
 
 /**
- * Handle credit-card encryption.
- *
- * Trimmed down version of GPL class by Tony Marston.  Details available at
- * http://www.tonymarston.co.uk/php-mysql/encryption.html
- *
- * Usage:
- * 1) Create an encryption object.
- *    ex: $crypt = new uc_encryption_class;
- * 2) To encrypt string data, use the encrypt method with the key.
- *    ex: $encrypted = $crypt->encrypt($key, $string);
- * 3) To decrypt string data, use the decrypt method with the original key.
- *    ex: $decrypted = $crypt->decrypt($key, $string);
- * 4) To check for errors, use the errors method to return an array of errors.
- *    ex: $errors = $crypt->errors();
- */
-class uc_encryption_class {
-  var $scramble1;
-  var $scramble2;
-  var $errors;
-  var $adj;
-  var $mod;
-
-  function uc_encryption_class() {
-    $this->errors = array();
-    $this->scramble1 = '! #$%&()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`"abcdefghijklmnopqrstuvwxyz{|}~';
-    $this->scramble2 = 'f^jAE]okIOzU[2&q1{3`h5w_794p@6s8?BgP>dFV=m" D<TcS%Ze|r:lGK/uCy.Jx)HiQ!#$~(;Lt-R}Ma,NvW+Ynb*0X';
-    $this->adj = 1.75;
-    $this->mod = 3;
-  }
-
-  function decrypt($key, $source) {
-    $this->errors = array();
-
-    $fudgefactor = $this->_convertKey($key);
-    if ($this->errors) {
-      return;
-    }
-
-    if (empty($source)) {
-      // Commented out to prevent errors getting logged for use cases that may
-      // have variable encryption/decryption requirements. -RS
-      // $this->errors[] = t('No value has been supplied for decryption');
-      return;
-    }
-
-    $target = NULL;
-    $factor2 = 0;
-
-    for ($i = 0; $i < strlen($source); $i++) {
-      $char2 = substr($source, $i, 1);
-
-      $num2 = strpos($this->scramble2, $char2);
-      if ($num2 === FALSE) {
-        $this->errors[] = t('Source string contains an invalid character (!char)', array('!char' => $char2));
-        return;
-      }
-
-      $adj = $this->_applyFudgeFactor($fudgefactor);
-      $factor1 = $factor2 + $adj;
-      $num1 = $num2 - round($factor1);
-      $num1 = $this->_checkRange($num1);
-      $factor2 = $factor1 + $num2;
-      $char1 = substr($this->scramble1, $num1, 1);
-      $target .= $char1;
-    }
-
-    return rtrim($target);
-  }
-
-  function encrypt($key, $source, $sourcelen = 0) {
-    $this->errors = array();
-    $fudgefactor = $this->_convertKey($key);
-
-    if ($this->errors) {
-      return;
-    }
-
-    if (empty($source)) {
-      // Commented out to prevent errors getting logged for use cases that may
-      // have variable encryption/decryption requirements. -RS
-      // $this->errors[] = t('No value has been supplied for encryption');
-      return;
-    }
-
-    while (strlen($source) < $sourcelen) {
-      $source .= ' ';
-    }
-
-    $target = NULL;
-    $factor2 = 0;
-
-    for ($i = 0; $i < strlen($source); $i++) {
-      $char1 = substr($source, $i, 1);
-
-      $num1 = strpos($this->scramble1, $char1);
-      if ($num1 === FALSE) {
-        $this->errors[] = t('Source string contains an invalid character (!char)', array('!char' => $char1));
-        return;
-      }
-
-      $adj = $this->_applyFudgeFactor($fudgefactor);
-      $factor1 = $factor2 + $adj;
-      $num2 = round($factor1) + $num1;
-      $num2 = $this->_checkRange($num2);
-      $factor2 = $factor1 + $num2;
-      $char2 = substr($this->scramble2, $num2, 1);
-      $target .= $char2;
-    }
-
-    return $target;
-  }
-
-  function getAdjustment() {
-    return $this->adj;
-  }
-
-  function getModulus() {
-    return $this->mod;
-  }
-
-  function setAdjustment($adj) {
-    $this->adj = (float) $adj;
-  }
-
-  function setModulus($mod) {
-    $this->mod = (int)abs($mod);
-  }
-
-  function _applyFudgeFactor(&$fudgefactor) {
-    static $alerted = FALSE;
-
-    if (!is_array($fudgefactor)) {
-      if (!$alerted) {
-        // Throw an error that makes sense so this stops getting reported.
-        $this->errors[] = t('No encryption key was found.');
-        drupal_set_message(t('Ubercart cannot find a necessary encryption key.  Refer to the store admin <a href="!url">dashboard</a> to isolate which one.', array('!url' => url('admin/store'))), 'error');
-
-        $alerted = TRUE;
-      }
-    }
-    else {
-      $fudge = array_shift($fudgefactor);
-    }
-
-    $fudge = $fudge + $this->adj;
-    $fudgefactor[] = $fudge;
-
-    if (!empty($this->mod)) {
-      if ($fudge % $this->mod == 0) {
-        $fudge = $fudge * -1;
-      }
-    }
-
-    return $fudge;
-  }
-
-  function _checkRange($num) {
-    $num = round($num);
-    $limit = strlen($this->scramble1);
-
-    while ($num >= $limit) {
-      $num = $num - $limit;
-    }
-    while ($num < 0) {
-      $num = $num + $limit;
-    }
-
-    return $num;
-  }
-
-  function _convertKey($key) {
-    if (empty($key)) {
-      // Commented out to prevent errors getting logged for use cases that may
-      // have variable encryption/decryption requirements. -RS
-      // $this->errors[] = 'No value has been supplied for the encryption key';
-      return;
-    }
-
-    $array[] = strlen($key);
-
-    $tot = 0;
-    for ($i = 0; $i < strlen($key); $i++) {
-      $char = substr($key, $i, 1);
-
-      $num = strpos($this->scramble1, $char);
-      if ($num === FALSE) {
-        $this->errors[] = "Key contains an invalid character ($char)";
-        return;
-      }
-
-      $array[] = $num;
-      $tot = $tot + $num;
-    }
-
-    $array[] = $tot;
-
-    return $array;
-  }
-}
-
-/**
- * Log encryption errors to watchdog.
+ * Logs encryption errors to watchdog.
  *
  * @param $crypt
  *   The object used to perform your encryption/decryption.
@@ -2050,7 +1955,7 @@ function uc_store_encryption_errors(&$crypt, $module) {
 }
 
 /**
- * Return a default store country value.
+ * Returns a default store country value.
  */
 function uc_store_default_country() {
   static $default;
@@ -2074,14 +1979,15 @@ function uc_store_default_country() {
  *
  * Deprecated! Use drupal_add_js() instead.
  */
- // @todo PORT_7  make rule for coder module to report this and remove this function
+ // @todo PORT_7  make rule for coder module to report this and remove
+ // this function
 /* function uc_add_js($data = NULL, $type = 'file', $scope = 'header', $defer = FALSE, $cache = TRUE) {
   watchdog('uc_store', 'uc_add_js() has been deprecated. Use drupal_add_js() in your code.', array(), WATCHDOG_ERROR);
   drupal_add_js($data, array('type' => $type, 'scope' => $scope, 'defer' => $defer, 'cache'=>$cache));
 } */
 
 /**
- * Check referers to see if they are in the allowed list.
+ * Checks referers to see if they are in the allowed list.
  */
 function uc_referer_check($urls) {
   $http_referer = uc_referer_uri();
@@ -2110,7 +2016,7 @@ function uc_referer_check($urls) {
 }
 
 /**
- * Provide a more reliable referrer for Ubercart.
+ * Provides a more reliable referrer for Ubercart.
  */
 function uc_referer_uri() {
   if ($_SERVER['HTTP_REFERER'] == '') {
@@ -2122,21 +2028,14 @@ function uc_referer_uri() {
 }
 
 /**
- * Returns the current version of Ubercart.
- */
-function uc_version() {
-  return '7.x-3.0-beta1';
-}
-
-/**
- * Get image widgets defined by various modules.
+ * Gets image widgets defined by various modules.
  */
 function uc_store_get_image_widgets() {
   return module_invoke_all('uc_image_widget');
 }
 
 /**
- * Implement hook_uc_image_widget().
+ * Implements hook_uc_image_widget().
  *
  * Built-in support for Colorbox, Thickbox and Lightbox2.
  */
@@ -2166,20 +2065,20 @@ function uc_store_uc_image_widget() {
 }
 
 /**
- * This function generates the Colorbox-specific HTML attributes.
+ * Generates the Colorbox-specific HTML attributes.
  */
 function uc_store_image_widget_colorbox($rel_count) {
   if (!is_null($rel_count)) {
-    $img_index = 'uc_image_'. $rel_count;
+    $img_index = 'uc_image_' . $rel_count;
   }
   else {
     $img_index = 'uc_image';
   }
-  return ' class="colorbox" rel="'. $img_index .'"';
+  return ' class="colorbox" rel="' . $img_index . '"';
 }
 
 /**
- * This function generates the Thickbox-specific HTML attributes.
+ * Generates the Thickbox-specific HTML attributes.
  */
 function uc_store_image_widget_thickbox($rel_count) {
   if (!is_null($rel_count)) {
@@ -2192,7 +2091,7 @@ function uc_store_image_widget_thickbox($rel_count) {
 }
 
 /**
- * This function generates the Lightbox2-specific HTML attributes.
+ * Generates the Lightbox2-specific HTML attributes.
  */
 function uc_store_image_widget_lightbox2($rel_count) {
   if (!is_null($rel_count)) {
@@ -2205,18 +2104,18 @@ function uc_store_image_widget_lightbox2($rel_count) {
 }
 
 /**
- * Get the preferred language for a user's email address.
+ * Gets the preferred language for a user's email address.
  *
  * @param $address
  *   The email address to check.
+ *
  * @return
  *   The language object to be used in translation, localization, etc. If a
  *   user account can not be found for $address, language_default() is
  *   returned.
  *
- * @see
- *   user_preferred_language()
- *   language_default()
+ * @see user_preferred_language()
+ * @see language_default()
  */
 function uc_store_mail_recipient_language($address) {
   // See if any user exists for this address.
@@ -2232,7 +2131,7 @@ function uc_store_mail_recipient_language($address) {
 }
 
 /**
- * Display prices in forms with a minimum number of decimal places.
+ * Displays prices in forms with a minimum number of decimal places.
  *
  * @param $price
  *   The price to display as the #default_value in a form field.

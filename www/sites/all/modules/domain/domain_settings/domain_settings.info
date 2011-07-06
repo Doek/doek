@@ -6,9 +6,9 @@ dependencies[] = domain_conf
 core = 7.x
 files[] = domain_settings.module
 
-; Information added by drupal.org packaging script on 2011-02-27
-version = "7.x-2.11"
+; Information added by drupal.org packaging script on 2011-06-06
+version = "7.x-2.13"
 core = "7.x"
 project = "domain"
-datestamp = "1298829067"
+datestamp = "1307329316"
 

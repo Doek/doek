@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_payment.rules.inc,v 1.2 2010/08/25 13:40:25 islandusurper Exp $
 
 /**
  * @file
@@ -7,7 +6,7 @@
  */
 
 /**
- * Implement hook_rules_event_info().
+ * Implements hook_rules_event_info().
  */
 function uc_payment_rules_event_info() {
   $events['uc_payment_entered'] = array(
@@ -29,7 +28,7 @@ function uc_payment_rules_event_info() {
 }
 
 /**
- * Implement hook_rules_condition_info().
+ * Implements hook_rules_condition_info().
  */
 function uc_payment_rules_condition_info() {
   $conditions['uc_payment_condition_order_balance'] = array(
@@ -72,6 +71,9 @@ function uc_payment_condition_order_balance($order, $balance_comparison) {
   }
 }
 
+/**
+ * Returns balance options.
+ */
 function uc_payment_condition_balance_options() {
   $zero = array('!zero' => uc_currency_format(0));
   $options = array(
@@ -83,4 +85,3 @@ function uc_payment_condition_balance_options() {
 
   return $options;
 }
-

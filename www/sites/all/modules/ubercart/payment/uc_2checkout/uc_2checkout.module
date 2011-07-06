@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_2checkout.module,v 1.21 2010/08/25 13:40:26 islandusurper Exp $
 
 /**
  * @file
@@ -8,7 +7,7 @@
 
 
 /**
- * Implement hook_menu().
+ * Implements hook_menu().
  */
 function uc_2checkout_menu() {
   $items = array();
@@ -16,7 +15,7 @@ function uc_2checkout_menu() {
   $items['cart/2checkout/complete'] = array(
     'title' => 'Order complete',
     'page callback' => 'uc_2checkout_complete',
-    'access callback' => 'uc_2checkout_completion_access',
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
     'file' => 'uc_2checkout.pages.inc',
   );
@@ -25,7 +24,7 @@ function uc_2checkout_menu() {
 }
 
 /**
- * Implement hook_init().
+ * Implements hook_init().
  */
 function uc_2checkout_init() {
   global $conf;
@@ -34,14 +33,7 @@ function uc_2checkout_init() {
 }
 
 /**
- * Make sure anyone can complete their 2Checkout orders.
- */
-function uc_2checkout_completion_access() {
-  return TRUE;
-}
-
-/**
- * Implement hook_ucga_display().
+ * Implements hook_ucga_display().
  */
 function uc_2checkout_ucga_display() {
   // Tell UC Google Analytics to display the e-commerce JS on the custom
@@ -52,10 +44,10 @@ function uc_2checkout_ucga_display() {
 }
 
 /**
- * Implement hook_form_alter().
+ * Implements hook_form_FORM_ID_alter() for uc_cart_checkout_review_form().
  */
-function uc_2checkout_form_alter(&$form, &$form_state, $form_id) {
-  if ($form_id == 'uc_cart_checkout_review_form' && ($order_id = intval($_SESSION['cart_order'])) > 0) {
+function uc_2checkout_form_uc_cart_checkout_review_form_alter(&$form, &$form_state) {
+  if (($order_id = intval($_SESSION['cart_order'])) > 0) {
     $order = uc_order_load($order_id);
 
     if ($order->payment_method == '2checkout') {
@@ -70,14 +62,14 @@ function uc_2checkout_form_alter(&$form, &$form_state, $form_id) {
 }
 
 /**
- * Implement hook_uc_payment_method().
+ * Implements hook_uc_payment_method().
  *
  * @see uc_payment_method_2checkout()
  */
 function uc_2checkout_uc_payment_method() {
   $path = base_path() . drupal_get_path('module', 'uc_2checkout');
   $title = variable_get('uc_2checkout_method_title', t('Credit card on a secure server:'));
-  $title .= '<br /><img src="' . $path . '/2cocc05.gif" style="position: relative; left: 2.5em;" />';
+  $title .= '<br /><img src="' . $path . '/2co_logo.jpg" style="position: relative; left: 2.5em;" />';
 
   $methods[] = array(
     'id' => '2checkout',
@@ -95,7 +87,7 @@ function uc_2checkout_uc_payment_method() {
 }
 
 /**
- * Add 2Checkout settings to the payment method settings form.
+ * Adds 2Checkout settings to the payment method settings form.
  *
  * @see uc_2checkout_uc_payment_method()
  */
@@ -251,6 +243,9 @@ function uc_2checkout_form($form, &$form_state, $order) {
   return $form;
 }
 
+/**
+ * Helper function to obtain 2Checkout URL for a transaction.
+ */
 function _uc_2checkout_post_url($type) {
   switch ($type) {
     case 'single':

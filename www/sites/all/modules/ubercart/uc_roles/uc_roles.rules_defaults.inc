@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_roles.rules_defaults.inc,v 1.1 2010/07/16 12:57:37 islandusurper Exp $
 
 /**
  * @file
@@ -7,12 +6,13 @@
  */
 
 /**
- * Implement hook_defualt_rules_configuration().
+ * Implements hook_defualt_rules_configuration().
  */
 function uc_roles_default_rules_configuration() {
   $configs = array();
 
-  // Renew all the roles on an order when the status matches what's set in the roles admin settings.
+  // Renew all the roles on an order when the status matches what's set
+  // in the roles admin settings.
   $rule = rules_reaction_rule();
   $rule->label = t('Grant or renew purchased roles');
   $rule->active = TRUE;
@@ -98,4 +98,3 @@ function uc_roles_default_rules_configuration() {
 
   return $configs;
 }
-

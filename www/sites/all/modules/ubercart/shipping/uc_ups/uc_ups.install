@@ -1,13 +1,12 @@
 <?php
-// $Id: uc_ups.install,v 1.11 2010/09/14 13:50:22 islandusurper Exp $
 
 /**
  * @file
- * Install hooks for uc_ups.module.
+ * Install, update and uninstall functions for the uc_ups module.
  */
 
 /**
- * Implement hook_requirements().
+ * Implements hook_requirements().
  */
 function uc_ups_requirements($phase) {
   $t = get_t();
@@ -26,7 +25,7 @@ function uc_ups_requirements($phase) {
 }
 
 /**
- * Implement hook_schema().
+ * Implements hook_schema().
  */
 function uc_ups_schema() {
   $schema = array();
@@ -67,7 +66,7 @@ function uc_ups_schema() {
 }
 
 /**
- * Implement hook_uninstall().
+ * Implements hook_uninstall().
  */
 function uc_ups_uninstall() {
   variable_del('uc_ups_access_license');
@@ -80,9 +79,26 @@ function uc_ups_uninstall() {
   variable_del('uc_ups_pkg_type');
   variable_del('uc_ups_classification');
   variable_del('uc_ups_negotiated_rates');
-  variable_del('uc_ups_markup');
   variable_del('uc_ups_all_in_one');
   variable_del('uc_ups_unit_system');
   variable_del('uc_ups_insurance');
+  variable_del('uc_ups_rate_markup');
+  variable_del('uc_ups_rate_markup_type');
+  variable_del('uc_ups_weight_markup');
+  variable_del('uc_ups_weight_markup_type');
 }
 
+/**
+ * Separates markup variables into rate_markup and weight_markup.
+ */
+function uc_ups_update_7300() {
+  // Rename variables while preserving previous setting values
+  variable_set('uc_ups_rate_markup',
+               variable_get('uc_ups_markup', ''));
+  variable_set('uc_ups_rate_markup_type',
+               variable_get('uc_ups_markup_type', ''));
+
+  // Remove old variables
+  variable_del('uc_ups_markup');
+  variable_del('uc_ups_markup_type');
+}

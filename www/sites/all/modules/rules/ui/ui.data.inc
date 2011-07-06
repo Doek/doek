@@ -1,5 +1,4 @@
 <?php
-// $Id: ui.data.inc,v 1.1.2.2 2011/02/14 15:08:57 fago Exp $
 
 /**
  * @file Contains data type related forms.
@@ -99,7 +98,7 @@ class RulesDataUI {
       if (!is_array($value) && isset($options[$value])) {
         $value = $options[$value];
       }
-      else {
+      elseif (is_array($value)) {
         foreach ($value as $key => $single_value) {
           if (isset($options[$single_value])) {
             $value[$key] = $options[$single_value];
@@ -358,5 +357,41 @@ class RulesDataUIListInteger extends RulesDataUIListText {
     $form = parent::inputForm($name, $info, $settings, $element);
     $form[$name]['#element_validate'][] = 'rules_ui_element_integer_list_validate';
     return $form;
+  }
+}
+
+/**
+ * UI for entity-based data types.
+ */
+class RulesDataUIEntity extends RulesDataUIText {
+
+  public static function getDefaultMode() {
+    return 'select';
+  }
+
+  public static function inputForm($name, $info, $settings, RulesPlugin $element) {
+    $form = parent::inputForm($name, $info, $settings, $element);
+    if (empty($info['options list'])) {
+      $form[$name]['#type'] = 'textfield';
+
+      $entity_info = entity_get_info($info['type']);
+      if (empty($entity_info['entity keys']['name'])) {
+        $form[$name]['#element_validate'][] = 'rules_ui_element_integer_validate';
+      }
+      $form[$name]['#title'] = t('@entity identifier', array('@entity' => $entity_info['label']));
+      $entity_label = strtolower($entity_info['label'][0]) . substr($entity_info['label'], 1);
+      $form[$name]['#description'] = t('Specify the identfier of the @entity that should be used.', array('@entity' => $entity_label));
+    }
+    return $form;
+  }
+}
+
+/**
+ * UI for exportable entity-based data types.
+ */
+class RulesDataUIEntityExportable extends RulesDataUIEntity {
+
+  public static function getDefaultMode() {
+    return 'input';
   }
 }

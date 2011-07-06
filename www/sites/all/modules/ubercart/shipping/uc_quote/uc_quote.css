@@ -1,10 +1,18 @@
-/* table.checkout-shipping {
-  width: 50%;
-}
+/**
+ * @file
+ * Styles for uc_quote module.
  */
 .form-item .description {
   /* Fix the inheritance from table rows. */
   white-space: normal;
+}
+
+#uc-cart-pane-quotes .uc-store-address-field .form-item label {
+  padding: 5px 6px 6px;
+}
+
+#uc-cart-pane-quotes .form-submit {
+  margin-left: 16em;
 }
 
 .solid-border#quote {
@@ -12,9 +20,9 @@
 }
 
 .quote-button {
+  color: rgb(0, 0, 125);
   cursor: pointer;
   font-weight: bold;
-  color: rgb(0, 0, 125);
 }
 
 .quote-error {

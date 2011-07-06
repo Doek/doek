@@ -6,6 +6,8 @@ dependencies[] = forum
 dependencies[] = ctools
 dependencies[] = views
 
+configure = admin/config/content/advanced-forum
+
 ; Views handlers
 files[] = includes/views/advanced_forum_handler_field_node_topic_icon.inc
 files[] = includes/views/advanced_forum_handler_field_node_topic_pager.inc
@@ -13,9 +15,9 @@ files[] = includes/views/advanced_forum_plugin_style_forum_topic_list.inc
 
 core = 7.x
 
-; Information added by drupal.org packaging script on 2011-03-06
-version = "7.x-2.x-dev"
+; Information added by drupal.org packaging script on 2011-04-04
+version = "7.x-2.0-alpha1"
 core = "7.x"
 project = "advanced_forum"
-datestamp = "1299369689"
+datestamp = "1301932868"
 

@@ -1,5 +1,4 @@
 <?php
-// $Id: rules.module,v 1.1.2.18 2011/02/16 17:22:24 fago Exp $
 
 /**
  * @file Rules engine module
@@ -83,12 +82,13 @@ function rules_condition($name, $settings = array()) {
  *      variable upon execution. As a consequence no value will be set
  *      initially, but the "Set data value" action may be used to do so. This is
  *      in particular useful for defining variables which can be provided to the
- *      caller (see e.g. rules_action_set()) but need not be passed in as
- *      parameter.
+ *      caller (see $provides argument) but need not be passed in as parameter.
+ * @param $provides
+ *   An array of the names of variables, which should be provided to the caller.
  * @return Rule
  */
-function rule($variables = NULL) {
-  return rules_plugin_factory('rule', $variables);
+function rule($variables = NULL, $provides = array()) {
+  return rules_plugin_factory('rule', $variables, $provides);
 }
 
 /**
@@ -479,7 +479,6 @@ function rules_rules_plugin_info() {
           'class' => 'RulesRuleUI',
         ),
       ),
-      'import keys' => array('IF', 'DO'),
     ),
     'loop' => array(
       'class' => 'RulesLoop',
@@ -489,7 +488,6 @@ function rules_rules_plugin_info() {
           'class' => 'RulesLoopUI',
         ),
       ),
-      'import keys' => array('LOOP OVER'),
     ),
     'reaction rule' => array(
       'class' => 'RulesReactionRule',
@@ -923,7 +921,8 @@ function rules_permission() {
 }
 
 /**
- * Callback for loading rules configuration elements.
+ * Menu callback for loading rules configuration elements.
+ * @see RulesUIController::config_menu()
  */
 function rules_element_load($element_id, $config_name) {
   $config = rules_config_load($config_name);
@@ -931,7 +930,8 @@ function rules_element_load($element_id, $config_name) {
 }
 
 /**
- * Callback for getting the title as configured.
+ * Menu callback for getting the title as configured.
+ * @see RulesUIController::config_menu()
  */
 function rules_get_title($text, $element) {
   if ($element instanceof RulesPlugin) {
@@ -943,6 +943,22 @@ function rules_get_title($text, $element) {
   }
   // As fallback treat $element as simple string.
   return t($text, array('!plugin' => $element));
+}
+
+/**
+ * Menu callback for getting the title for the add element page.
+ *
+ * Uses a work-a-round for accessing the plugin name.
+ * @see RulesUIController::config_menu()
+ */
+function rules_menu_add_element_title($array) {
+  $plugin_name = arg($array[0]);
+  $cache = rules_get_cache();
+  if (isset($cache['plugin_info'][$plugin_name]['class'])) {
+    $info = $cache['plugin_info'][$plugin_name] + array('label' => $plugin_name);
+    $label = drupal_strtolower(drupal_substr($info['label'], 0, 1)) . drupal_substr($info['label'], 1);
+    return t('Add a new !plugin', array('!plugin' => $label));
+  }
 }
 
 /**
@@ -966,7 +982,7 @@ function rules_page_build(&$page) {
     }
     unset($_SESSION['rules_debug']);
   }
-  if (variable_get('rules_debug', FALSE) || (user_access('administer rules') && RulesLog::logger()->hasErrors())) {
+  if (rules_show_debug_output()) {
     $logger = RulesLog::logger();
     $region = variable_get('rules_debug_region', 'help');
     if ($log = $logger->render()) {
@@ -1000,10 +1016,18 @@ function rules_drupal_goto_alter(&$path, &$options, &$http_response_code) {
 }
 
 /**
+ * Returns whether the debug log should be shown.
+ */
+function rules_show_debug_output() {
+  // For performance avoid unnecessary auto-loading of the RulesLog class.
+  return variable_get('rules_debug', FALSE) || (class_exists('RulesLog', FALSE) && RulesLog::logger()->hasErrors() && user_access('administer rules'));
+}
+
+/**
  * Implements hook_exit().
  */
 function rules_exit() {
-  if (variable_get('rules_debug', FALSE) || (user_access('administer rules') && RulesLog::logger()->hasErrors())) {
+  if (rules_show_debug_output()) {
     if ($log = RulesLog::logger()->render()) {
       // Keep the log in the session so we can show it on the next page.
       $_SESSION['rules_debug'][] = $log;
@@ -1056,4 +1080,29 @@ function rules_modules_disabled($modules) {
  */
 function rules_config_access($op, $rules_config, $account = NULL) {
   return user_access('administer rules', $account);
+}
+
+/**
+ * Implements hook_menu().
+ */
+function rules_menu() {
+  $items['admin/config/workflow/rules/upgrade'] = array(
+    'title' => 'Upgrade',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('rules_upgrade_form'),
+    'access arguments' => array('administer rules'),
+    'file' => 'includes/rules.upgrade.inc',
+    'file path' => drupal_get_path('module', 'rules'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/config/workflow/rules/upgrade/clear'] = array(
+    'title' => 'Clear',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('rules_upgrade_confirm_clear_form'),
+    'access arguments' => array('administer rules'),
+    'file' => 'includes/rules.upgrade.inc',
+    'file path' => drupal_get_path('module', 'rules'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
 }

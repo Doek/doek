@@ -1,13 +1,12 @@
 <?php
-// $Id: uc_taxes.install,v 1.16 2010/09/01 15:05:29 islandusurper Exp $
 
 /**
  * @file
- * Install hooks for uc_taxes.module.
+ * Install, update and uninstall functions for the uc_taxes module.
  */
 
 /**
- * Implement hook_schema().
+ * Implements hook_schema().
  */
 function uc_taxes_schema() {
   $schema = array();
@@ -107,6 +106,13 @@ function uc_taxes_schema() {
 }
 
 /**
+ * Implements hook_update_last_removed().
+ */
+function uc_taxes_update_last_removed() {
+  return 6003;
+}
+
+/**
  * Add "price including tax" columns.
  */
 function uc_taxes_update_7000() {
@@ -185,4 +191,3 @@ function uc_taxes_update_7001() {
     $l_insert->execute();
   }
 }
-

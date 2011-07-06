@@ -1,11 +1,13 @@
 <?php
-// $Id: uc_payment_pack.install,v 1.6 2010/03/15 13:30:50 islandusurper Exp $
 
 /**
  * @file
- * Install hooks for uc_payment_pack.module.
+ * Install, update and uninstall functions for the uc_payment_pack module.
  */
 
+/**
+ * Implements hook_schema().
+ */
 function uc_payment_pack_schema() {
   $schema = array();
 
@@ -109,6 +111,9 @@ function uc_payment_pack_schema() {
   return $schema;
 }
 
+/**
+ * Implements hook_uninstall().
+ */
 function uc_payment_pack_uninstall() {
   db_delete('variable')
     ->condition(db_or()
@@ -116,4 +121,11 @@ function uc_payment_pack_uninstall() {
       ->condition('name', 'uc_cod_%', 'LIKE')
     )
     ->execute();
+}
+
+/**
+ * Implements hook_update_last_removed().
+ */
+function uc_payment_pack_update_last_removed() {
+  return 6000;
 }

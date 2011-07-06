@@ -1,16 +1,15 @@
 <?php
-// $Id: uc_file.install,v 1.11 2010/12/09 18:52:30 islandusurper Exp $
 
 /**
  * @file
- * DB Schema and upgrade path for uc_file.
+ * Install, update and uninstall functions for the uc_file module.
  */
 
 // -1 is the UC_FILE_LIMIT_SENTINEL constant in uc_file.module, but
 // it might not be available (like when upgrading from 5 -> 6.
 
 /**
- * Implement hook_schema().
+ * Implements hook_schema().
  */
 function uc_file_schema() {
   $schema = array();
@@ -206,7 +205,7 @@ function uc_file_schema() {
 }
 
 /**
- * Implement hook_uninstall().
+ * Implements hook_uninstall().
  */
 function uc_file_uninstall() {
   db_delete('uc_product_features')
@@ -216,6 +215,13 @@ function uc_file_uninstall() {
   db_delete('variable')
     ->condition('name', 'uc_file_%', 'LIKE')
     ->execute();
+}
+
+/**
+ * Implements hook_update_last_removed().
+ */
+function uc_file_update_last_removed() {
+  return 6006;
 }
 
 /**

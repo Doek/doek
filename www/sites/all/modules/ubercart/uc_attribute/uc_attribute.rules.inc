@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_attribute.rules.inc,v 1.1 2010/07/16 12:57:37 islandusurper Exp $
 
 /**
  * @file
@@ -7,7 +6,7 @@
  */
 
 /**
- * Implement hook_rules_condition_info().
+ * Implements hook_rules_condition_info().
  */
 function uc_attribute_rules_condition_info() {
   $conditions = array();
@@ -27,7 +26,7 @@ function uc_attribute_rules_condition_info() {
 }
 
 /**
- * Return TRUE if a product in the given order has the selected option.
+ * Returns TRUE if a product in the given order has the selected option.
  *
  * @see uc_attribute_condition_ordered_product_option_form()
  */

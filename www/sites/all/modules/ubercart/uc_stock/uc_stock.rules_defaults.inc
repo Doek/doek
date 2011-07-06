@@ -1,12 +1,12 @@
 <?php
-// $Id: uc_stock.rules_defaults.inc,v 1.1 2010/07/16 12:57:36 islandusurper Exp $
 
 /**
+ * @file
  * Rules default configurations for uc_stock.module.
  */
 
 /**
- * Implement hook_default_rules_configuration().
+ * Implements hook_default_rules_configuration().
  */
 function uc_stock_default_rules_configuration() {
   $configs = array();
@@ -20,4 +20,3 @@ function uc_stock_default_rules_configuration() {
 
   return $configs;
 }
-

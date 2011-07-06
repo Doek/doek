@@ -34,7 +34,7 @@ function media_gallery_list_galleries($term) {
   $breadcrumb[] = l(t('Home'), NULL);
   $breadcrumb = array_reverse($breadcrumb);
   drupal_set_breadcrumb($breadcrumb);
-  drupal_add_feed(url('taxonomy/term/' . $term->tid . '/feed'), 'RSS - ' . $term->name);
+  drupal_add_feed('taxonomy/term/' . $term->tid . '/feed', 'RSS - ' . $term->name);
 
   $build['term_heading'] = array(
     '#prefix' => '<div class="term-listing-heading">',
@@ -372,7 +372,7 @@ function media_gallery_media_page_edit($gallery, $media) {
   // include file. In addition to loading it here, we also set the include file
   // info within $form_state in case there are AJAX enabled widgets that will
   // submit to system/ajax, bypassing this menu callback.
-  module_load_include('inc', 'media', 'media.pages');
+  module_load_include('inc', 'media', 'includes/media.pages');
   $form_state['build_info']['files']['menu'] = array('type' => 'inc', 'module' => 'media', 'name' => 'media.pages');
 
   // Provide context information for form building and processing functions.
@@ -404,24 +404,12 @@ function media_gallery_media_page_multiedit($node) {
   // @todo To support AJAX enabled widgets within the form, we need to also add
   //   media.pages.inc to $form_state['build_info']['files']['menu']. Figure out
   //   how to integrate that properly with the Multiform module.
-  module_load_include('inc', 'media', 'media.pages');
+  module_load_include('inc', 'media', 'includes/media.pages');
 
   // Build and process the form.
   $form = media_page_multiedit($media_entities);
 
-  // @todo The Multiform module is broken with respect to redirection, and as a
-  //   result, doesn't redirect, so we do it here, but this is a temporary hack
-  //   only until the Multiform module is fixed.
-  if (isset($_POST['op']) && $_POST['op'] === 'Save' && !form_get_errors()) {
-    $uri = entity_uri('node', $node);
-    if (isset($_GET['page'])) {
-      $uri['options']['query']['page'] = $_GET['page'];
-    }
-    drupal_goto($uri['path'], $uri['options']);
-  }
-
-  // If we're here, then we haven't redirected, so override the page title set
-  // by media_page_multiedit() and return the form.
+  // Override the page title set by media_page_multiedit() and return the form.
   drupal_set_title(t('<em>Edit media for</em> @title', array('@type' => $node->type, '@title' => $node->title)), PASS_THROUGH);
   return $form;
 }

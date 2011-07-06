@@ -1,5 +1,4 @@
 <?php
-// $Id: moldova_498_1.cif,v 1.2 2010/09/28 20:29:45 islandusurper Exp $
 
 function moldova_install() {
   // Make the entry in the country table.

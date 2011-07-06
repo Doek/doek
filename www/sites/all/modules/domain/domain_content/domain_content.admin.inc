@@ -39,19 +39,17 @@ function domain_content_page() {
  */
 function domain_content_list() {
   global $user;
-  $build = array();
-  if (user_access('administer nodes') || user_access('review content for all domains')) {
-    // Return all domains.
-    $query = "SELECT domain_id, subdomain, sitename, scheme FROM {domain} d";
-  }
-  else {
+  $show_all = user_access('bypass node access') || user_access('review content for all domains');
+
+  if (!$show_all) {
     if (empty($user->domain_user)) {
       return drupal_access_denied();
     }
-    // Cast the -1 as 0.
-    if (isset($user->domain_user[-1])) {
-      unset($user->domain_user[-1]);
-      $user->domain_user[0] = 0;
+    $user_domains = array_filter($user->domain_user);
+    // We don't bother to unset the -1 here, since it won't matter to the query.
+    // Cast the -1 as domain 0 for the query.
+    if (!empty($user->domain_user[-1])) {
+      $user_domains[] = 0;
     }
   }
   // Table information
@@ -64,6 +62,10 @@ function domain_content_list() {
   // Set up the base query.
   $query = db_select('domain', 'd')
     ->fields('d', array('domain_id', 'sitename', 'subdomain', 'scheme', 'valid'));
+  // Filter by user access to assigned domains.
+  if (!$show_all) {
+    $query->condition('domain_id', $user_domains, 'IN');
+  }
   // Add the tablesort.
   $query = $query
     ->extend('TableSort')
@@ -74,6 +76,7 @@ function domain_content_list() {
   foreach ($result as $data) {
     $domains[] = (array) $data;
   }
+
   // Create the table.
   $rows = array();
   foreach ($domains as $domain) {
@@ -81,18 +84,22 @@ function domain_content_list() {
     $rows[] = array(
       $domain['domain_id'],
       l(t('@sitename content', array('@sitename' => $domain['sitename'])), 'admin/domain/content/'. $domain['domain_id']),
-      (int) db_query("SELECT COUNT(nid) FROM {domain_access} WHERE gid = :gid AND realm = :realm", array(':gid' => $domain['domain_id'], ':realm' => 'domain_id'))->fetchField(),
+      number_format((int) db_query("SELECT COUNT(nid) FROM {domain_access} WHERE gid = :gid AND realm = :realm", array(':gid' => $domain['domain_id'], ':realm' => 'domain_id'))->fetchField()),
       l(t('view site'), $path),
     );
   }
 
+  // Add entry for 'all affiliates'
   $all = array(
     '-',
     l(t('Content assigned to all affiliates'), 'admin/domain/content/all'),
-    (int) db_query("SELECT COUNT(nid) FROM {domain_access} WHERE gid = :gid AND realm = :realm", array(':gid' => 0, ':realm' => 'domain_site'))->fetchField(),    
+    number_format((int) db_query("SELECT COUNT(nid) FROM {domain_access} WHERE gid = :gid AND realm = :realm", array(':gid' => 0, ':realm' => 'domain_site'))->fetchField()),
     '',
   );
   array_unshift($rows, $all);
+
+  // Build result table for UI
+  $build = array();
   if (!empty($rows)) {
     $output = '<p>'. t('The table below shows all the affiliates sites whose content you may edit. Click on the site name link to see all content assigned to that affiliate.') .'</p>';
     $build['header'] = array(
@@ -227,7 +234,7 @@ function domain_content_form() {
 
   // Enable language column if translation module is enabled
   // or if we have any node with language.
-  $multilanguage = (module_exists('translation') || db_query("SELECT COUNT(*) FROM {node} WHERE language <> :language", array(':language' => LANGUAGE_NONE))->fetchField());
+  $multilanguage = (module_exists('translation') || db_query("SELECT 1 FROM {node} WHERE language <> :language", array(':language' => LANGUAGE_NONE))->fetchField());
 
   // Build the sortable table header.
   $header = array(

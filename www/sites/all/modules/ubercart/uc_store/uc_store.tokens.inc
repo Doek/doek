@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_store.tokens.inc,v 1.2 2010/04/07 21:27:51 islandusurper Exp $
 
 /**
  * @file
@@ -7,7 +6,7 @@
  */
 
 /**
- * Implement hook_token_info().
+ * Implements hook_token_info().
  */
 function uc_store_token_info() {
   $type = array(
@@ -71,7 +70,7 @@ function uc_store_token_info() {
 }
 
 /**
- * Implement hook_tokens().
+ * Implements hook_tokens().
  */
 function uc_store_tokens($type, $tokens, $data = array(), $options = array()) {
   global $base_url;
@@ -140,4 +139,3 @@ function uc_store_tokens($type, $tokens, $data = array(), $options = array()) {
 
   return $values;
 }
-

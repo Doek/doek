@@ -1,11 +1,18 @@
 <?php
-// $Id: uc_order_handler_filter_order_status.inc,v 1.1 2010/11/24 15:18:30 islandusurper Exp $
+
+/**
+ * @file
+ * Views handler.
+ */
 
 /**
  * Filter by order status
  */
 class uc_order_handler_filter_order_status extends views_handler_filter_in_operator {
 
+  /**
+   *
+   */
   function get_value_options() {
     if (!isset($this->value_options)) {
       $this->value_title = t('Order Status');
@@ -18,4 +25,3 @@ class uc_order_handler_filter_order_status extends views_handler_filter_in_opera
   }
 
 }
-

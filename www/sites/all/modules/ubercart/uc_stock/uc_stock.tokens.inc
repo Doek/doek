@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_stock.tokens.inc,v 1.1 2010/04/07 20:44:27 islandusurper Exp $
 
 /**
  * @file
@@ -7,7 +6,7 @@
  */
 
 /**
- * Implement hook_token_info().
+ * Implements hook_token_info().
  */
 function uc_stock_token_info() {
   $type = array(
@@ -36,7 +35,7 @@ function uc_stock_token_info() {
 }
 
 /**
- * Implement hook_tokens().
+ * Implements hook_tokens().
  */
 function uc_stock_tokens($type, $tokens, $data = array(), $options = array()) {
   $values = array();
@@ -63,4 +62,3 @@ function uc_stock_tokens($type, $tokens, $data = array(), $options = array()) {
 
   return $values;
 }
-

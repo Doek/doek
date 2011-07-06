@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_stock.rules.inc,v 1.1 2010/07/16 12:57:36 islandusurper Exp $
 
 /**
  * @file
@@ -7,7 +6,7 @@
  */
 
 /**
- * Implement hook_rules_action_info().
+ * Implements hook_rules_action_info().
  */
 function uc_stock_rules_action_info() {
   $actions['uc_stock_action_decrement_stock'] = array(
@@ -26,7 +25,7 @@ function uc_stock_rules_action_info() {
 }
 
 /**
- * Decrease the stock of ordered products.
+ * Decreases the stock of ordered products.
  */
 function uc_stock_action_decrement_stock($order) {
   if (is_array($order->products)) {

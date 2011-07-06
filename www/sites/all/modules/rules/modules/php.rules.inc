@@ -1,5 +1,4 @@
 <?php
-// $Id: php.rules.inc,v 1.1.2.1 2010/12/16 09:30:43 fago Exp $
 
 /**
  * @file rules integration for the php module
@@ -56,6 +55,7 @@ function rules_php_action_info() {
           'restriction' => 'input',
           'type' => 'text',
           'label' => t('PHP code'),
+          'description' => t('Enter PHP code without &lt;?php ?&gt; delimiters.'),
         ),
       ),
       'base' => 'rules_execute_php_eval',
@@ -98,6 +98,7 @@ function rules_php_condition_info() {
           'restriction' => 'input',
           'type' => 'text',
           'label' => t('PHP code'),
+          'description' => t('Enter PHP code without &lt;?php ?&gt; delimiters that returns a boolean value; e.g. <code>@code</code>.', array('@code' => "return arg(0) == 'node';")),
         ),
       ),
       'base' => 'rules_execute_php_eval',

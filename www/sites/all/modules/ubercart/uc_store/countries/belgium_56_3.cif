@@ -1,5 +1,4 @@
 <?php
-// $Id: belgium_56_3.cif,v 1.5 2010/04/14 14:20:56 islandusurper Exp $
 
 function belgium_install() {
   // Make the entry in the country table.

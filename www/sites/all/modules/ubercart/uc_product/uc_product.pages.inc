@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_product.pages.inc,v 1.6 2010/07/15 20:32:39 islandusurper Exp $
 
 /**
  * @file

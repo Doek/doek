@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_product_handler_field_price.inc,v 1.4 2010/08/25 13:40:26 islandusurper Exp $
 
 /**
  * @file
@@ -7,7 +6,7 @@
  */
 
 /**
- * Return a formatted price value to display in the View.
+ * Returns a formatted price value to display in the View.
  */
 class uc_product_handler_field_price extends views_handler_field_numeric {
   function option_definition() {
@@ -37,7 +36,7 @@ class uc_product_handler_field_price extends views_handler_field_numeric {
     // Change weight and dependency of the previous field on the parent numeric ones
     $weight = 2;
     foreach (array('set_precision', 'precision', 'decimal', 'separator', 'prefix', 'suffix') as $field) {
-      $form[$field]['#process'] = array('views_process_dependency');
+      $form[$field]['#process'] = array('ctools_dependent_process');
 
       if (is_array($form[$field]['#dependency'])) {
         $form[$field]['#dependency'] += array('radio:options[format]' => array('numeric'));

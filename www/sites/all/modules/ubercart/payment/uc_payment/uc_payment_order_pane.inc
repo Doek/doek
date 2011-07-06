@@ -1,9 +1,8 @@
 <?php
-// $Id: uc_payment_order_pane.inc,v 1.16 2010/08/25 13:40:25 islandusurper Exp $
 
 /**
  * @file
- * This file contains the callbacks for the payment order pane supplied with
+ * Contains the callbacks for the payment order pane supplied with
  * Ubercart and their corresponding helper functions.
  *
  * Order panes are defined using hook_uc_order_pane() and use a callback to
@@ -13,7 +12,7 @@
  */
 
 /**
- * Handle the Payment order pane.
+ * Handles the Payment order pane.
  */
 function uc_order_pane_payment($op, $order, &$form = NULL, &$form_state = NULL) {
   switch ($op) {
@@ -61,12 +60,13 @@ function uc_order_pane_payment($op, $order, &$form = NULL, &$form_state = NULL) 
       return $build;
 
     case 'edit-form':
-      drupal_add_js('misc/progress.js');
+      drupal_add_library('system', 'drupal.progress');
       drupal_add_js(array('defPaymentMsg' => ''), 'setting');
 
       $form['payment'] = array();
 
       $methods = _uc_payment_method_list();
+      $options = array();
       foreach ($methods as $method) {
         $options[$method['id']] = $method['name'];
       }
@@ -74,9 +74,9 @@ function uc_order_pane_payment($op, $order, &$form = NULL, &$form_state = NULL) 
         '#type' => 'select',
         '#title' => t('Payment method'),
         '#default_value' => $order->payment_method,
-        '#options' => (is_array($options)) ? $options : array(t('None available')),
+        '#options' => !empty($options) ? $options : array(t('None available')),
         '#attributes' => array('onchange' => "add_order_save_hold(); get_payment_details(Drupal.settings.ucURL.adminOrders + '" . $order->order_id . "/payment_details/' + this.value);"),
-        '#disabled' => (is_array($options)) ? FALSE : TRUE,
+        '#disabled' => empty($options),
       );
       return $form;
 

@@ -1,12 +1,10 @@
-// $Id: uc_shipping.js,v 1.9 2010/04/06 14:43:54 islandusurper Exp $
-
 /**
  * @file
- * Add autofill address functionality to shipment forms.
+ * Adds autofill address functionality to shipment forms.
  */
 
 /**
- * Autofill shipment address form from user selection.
+ * Autofills shipment address form from user selection.
  *
  * @param type
  *   Field prefix used to identify the address.
@@ -27,13 +25,8 @@ function apply_address(type, json_address) {
 
     if (jQuery('#edit-' + type + '-country').val() != address.country) {
       jQuery('#edit-' + type + '-country').val(address.country);
-      try {
-        uc_update_zone_select('edit-' + type + '-country', address.zone);
-      }
-      catch (err) {}
     }
 
     jQuery('#edit-' + type + '-zone').val(address.zone);
   //}
 }
-

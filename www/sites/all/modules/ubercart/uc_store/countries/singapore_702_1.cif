@@ -1,8 +1,7 @@
 <?php
-// $Id: singapore_702_1.cif,v 1.7 2010/04/14 14:20:56 islandusurper Exp $
 
 /**
- * Implementation of hook_install().
+ * Implements hook_install().
  */
 function singapore_install() {
   // Make the entry in the country table.

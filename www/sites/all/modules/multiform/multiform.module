@@ -101,11 +101,14 @@ function multiform_get_form() {
     }
     // Keep the redirect from the first form.
     if (!$key) {
-      $redirect = isset($form_state['redirect']) ? $form_state['redirect'] : NULL;
+      $redirect = isset($form_state['redirect']) ? $form_state : array();
     }
   }
   form_set_cache($build_id, $form['buttons'], $form_state_save);
   if (!empty($form_state_save['input'])) {
+    // We forced $form_state['no_redirect'] to TRUE above, so unset it in order
+    // to allow the redirection to proceed.
+    unset($redirect['no_redirect']);
     drupal_redirect_form($redirect);
   }
   return $form;

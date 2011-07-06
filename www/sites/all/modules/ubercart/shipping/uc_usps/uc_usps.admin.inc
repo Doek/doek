@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_usps.admin.inc,v 1.8 2010/07/16 12:57:37 islandusurper Exp $
 
 /**
  * @file
@@ -7,12 +6,23 @@
  */
 
 /**
- * Configure USPS settings.
+ * Configures USPS settings.
  *
+ * @see uc_usps_admin_settings_validate()
+ * @see uc_usps_admin_settings_submit()
  * @ingroup forms
  */
 function uc_usps_admin_settings($form, &$form_state) {
-  $form['uc_usps_user_id'] = array(
+  // Container for credential forms
+  $form['uc_usps_credentials'] = array(
+    '#type'          => 'fieldset',
+    '#title'         => t('Credentials'),
+    '#description'   => t('Account number and authorization information.'),
+    '#collapsible'   => TRUE,
+    '#collapsed'     => TRUE,
+  );
+
+  $form['uc_usps_credentials']['uc_usps_user_id'] = array(
     '#type' => 'textfield',
     '#title' => t('USPS user ID'),
     '#description' => t('To acquire or locate your user ID, refer to the <a href="!url">USPS documentation</a>.', array('!url' => 'http://www.ubercart.org/docs/user/312/usps_web_tool_shipping_quote_settings')),
@@ -22,7 +32,7 @@ function uc_usps_admin_settings($form, &$form_state) {
   $form['domestic'] = array(
     '#type' => 'fieldset',
     '#title' => t('USPS Domestic'),
-    '#description' => l(t('Set the conditions that will return a USPS quote.'), CA_UI_PATH . '/uc_usps_get_quote/edit/conditions'),
+    '#description' => t('Set the conditions that will return a USPS quote.'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
@@ -42,15 +52,18 @@ function uc_usps_admin_settings($form, &$form_state) {
     '#description' => t('Select the USPS services that are available to customers. Be sure to include the services that the Postal Service agrees are available to you.'),
   );
 
-  $form['domestic']['env_conditions'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Envelope service conditions'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-  $conditions = rules_config_load('get_quote_from_usps_env');
-  if ($conditions) {
-    $conditions->form($form['domestic']['env_conditions'], $form_state);
+  if (module_exists('rules')) {
+    $form['domestic']['env_conditions'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Envelope service conditions'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    $conditions = rules_config_load('get_quote_from_usps_env');
+    if ($conditions) {
+      RulesPluginUI::$basePath = 'admin/config/workflow/rules/components';
+      $conditions->form($form['domestic']['env_conditions'], $form_state);
+    }
   }
 
   $form['domestic']['uc_usps_services'] = array(
@@ -61,21 +74,24 @@ function uc_usps_admin_settings($form, &$form_state) {
     '#description' => t('Select the USPS services that are available to customers. Be sure to include the services that the Postal Service agrees are available to you.'),
   );
 
-  $form['domestic']['parcel_conditions'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Parcel service conditions'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-  $conditions = rules_config_load('get_quote_from_usps');
-  if ($conditions) {
-    $conditions->form($form['domestic']['parcel_conditions'], $form_state);
+  if (module_exists('rules')) {
+    $form['domestic']['parcel_conditions'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Parcel service conditions'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    $conditions = rules_config_load('get_quote_from_usps');
+    if ($conditions) {
+      RulesPluginUI::$basePath = 'admin/config/workflow/rules/components';
+      $conditions->form($form['domestic']['parcel_conditions'], $form_state);
+    }
   }
 
   $form['international'] = array(
     '#type' => 'fieldset',
     '#title' => t('USPS International'),
-    '#description' => l(t('Set the conditions that will return a USPS International quote.'), CA_UI_PATH . '/uc_usps_get_intl_quote/edit/conditions'),
+    '#description' => t('Set the conditions that will return a USPS International quote.'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
@@ -88,15 +104,18 @@ function uc_usps_admin_settings($form, &$form_state) {
     '#description' => t('Select the USPS services that are available to customers. Be sure to include the services that the Postal Service agrees are available to you.'),
   );
 
-  $form['international']['env_conditions'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Envelope service conditions'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-  $conditions = rules_config_load('get_quote_from_usps_intl_env');
-  if ($conditions) {
-    $conditions->form($form['international']['env_conditions'], $form_state);
+  if (module_exists('rules')) {
+    $form['international']['env_conditions'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Envelope service conditions'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    $conditions = rules_config_load('get_quote_from_usps_intl_env');
+    if ($conditions) {
+      RulesPluginUI::$basePath = 'admin/config/workflow/rules/components';
+      $conditions->form($form['international']['env_conditions'], $form_state);
+    }
   }
 
   $form['international']['uc_usps_intl_services'] = array(
@@ -107,58 +126,152 @@ function uc_usps_admin_settings($form, &$form_state) {
     '#description' => t('Select the USPS services that are available to customers. Be sure to include the services that the Postal Service agrees are available to you.'),
   );
 
-  $form['international']['parcel_conditions'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Parcel service conditions'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-  $conditions = rules_config_load('get_quote_from_usps_intl');
-  if ($conditions) {
-    $conditions->form($form['international']['parcel_conditions'], $form_state);
+  if (module_exists('rules')) {
+    $form['international']['parcel_conditions'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Parcel service conditions'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    $conditions = rules_config_load('get_quote_from_usps_intl');
+    if ($conditions) {
+      RulesPluginUI::$basePath = 'admin/config/workflow/rules/components';
+      $conditions->form($form['international']['parcel_conditions'], $form_state);
+    }
   }
 
-  $form['uc_usps_markup_type'] = array(
+  // Container for quote options
+  $form['uc_usps_quote_options'] = array(
+    '#type'          => 'fieldset',
+    '#title'         => t('Quote options'),
+    '#description'   => t('Preferences that affect computation of quote.'),
+    '#collapsible'   => TRUE,
+    '#collapsed'     => TRUE,
+  );
+
+  $form['uc_usps_quote_options']['uc_usps_all_in_one'] = array(
+    '#type' => 'radios',
+    '#title' => t('Product packages'),
+    '#default_value' => variable_get('uc_usps_all_in_one', 1),
+    '#options' => array(
+      0 => t('Each product in its own package'),
+      1 => t('All products in one package'),
+    ),
+    '#description' => t('Indicate whether each product is quoted as shipping separately or all in one package. Orders with one kind of product will still use the package quantity to determine the number of packages needed, however.'),
+  );
+
+  // Insurance
+  $form['uc_usps_quote_options']['uc_usps_insurance'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Package insurance'),
+    '#default_value' => variable_get('uc_usps_insurance', FALSE),
+    '#description' => t('When enabled, the quotes presented to the customer will include the cost of insurance for the full sales price of all products in the order.'),
+    '#disabled' => TRUE,
+  );
+
+  // Delivery Confirmation
+  $form['uc_usps_quote_options']['uc_usps_delivery_confirmation'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Delivery confirmation'),
+    '#default_value' => variable_get('uc_usps_delivery_confirmation', FALSE),
+    '#description' => t('When enabled, the quotes presented to the customer will include the cost of delivery confirmation for all packages in the order.'),
+    '#disabled' => TRUE,
+  );
+
+  // Signature Confirmation
+  $form['uc_usps_quote_options']['uc_usps_signature_confirmation'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Signature confirmation'),
+    '#default_value' => variable_get('uc_usps_signature_confirmation', FALSE),
+    '#description' => t('When enabled, the quotes presented to the customer will include the cost of signature confirmation for all packages in the order.'),
+    '#disabled' => TRUE,
+  );
+
+  // Container for markup forms
+  $form['uc_usps_markups'] = array(
+    '#type'          => 'fieldset',
+    '#title'         => t('Markups'),
+    '#description'   => t('Modifiers to the shipping weight and quoted rate.'),
+    '#collapsible'   => TRUE,
+    '#collapsed'     => TRUE,
+  );
+
+  $form['uc_usps_markups']['uc_usps_rate_markup_type'] = array(
     '#type' => 'select',
-    '#title' => t('Markup type'),
-    '#default_value' => variable_get('uc_usps_markup_type', 'percentage'),
+    '#title' => t('Rate markup type'),
+    '#default_value' => variable_get('uc_usps_rate_markup_type', 'percentage'),
     '#options' => array(
       'percentage' => t('Percentage (%)'),
       'multiplier' => t('Multiplier (×)'),
       'currency' => t('Addition (!currency)', array('!currency' => variable_get('uc_currency_sign', '$'))),
     ),
   );
-  $form['uc_usps_markup'] = array(
+  $form['uc_usps_markups']['uc_usps_rate_markup'] = array(
     '#type' => 'textfield',
     '#title' => t('Shipping rate markup'),
-    '#default_value' => variable_get('uc_usps_markup', '0'),
+    '#default_value' => variable_get('uc_usps_rate_markup', '0'),
     '#description' => t('Markup shipping rate quote by dollar amount, percentage, or multiplier.'),
   );
-  $form['uc_usps_all_in_one'] = array(
-    '#type' => 'radios',
-    '#title' => t('Product packages'),
-    '#default_value' => variable_get('uc_usps_all_in_one', 1),
-    '#options' => array(
-      0 => t('Each in its own package'),
-      1 => t('All in one'),
+
+  // Form to select type of weight markup
+  $form['uc_usps_markups']['uc_usps_weight_markup_type'] = array(
+    '#type'          => 'select',
+    '#title'         => t('Weight markup type'),
+    '#default_value' => variable_get('uc_usps_weight_markup_type', 'percentage'),
+    '#options'       => array(
+      'percentage' => t('Percentage (%)'),
+      'multiplier' => t('Multiplier (×)'),
+      'mass'       => t('Addition (!mass)', array('!mass' => '#')),
     ),
-    '#description' => t('Indicate whether each product is quoted as shipping separately or all in one package. Orders with one kind of product will still use the package quantity to determine the number of packages needed, however.'),
+    '#disabled' => TRUE,
   );
+
+  // Form to select weight markup amount
+  $form['uc_usps_markups']['uc_usps_weight_markup'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Shipping weight markup'),
+    '#default_value' => variable_get('uc_usps_weight_markup', '0'),
+    '#description'   => t('Markup shipping weight on a per-package basis before quote, by weight amount, percentage, or multiplier.'),
+    '#disabled' => TRUE,
+  );
+
+  // Taken from system_settings_form(). Only, don't use its submit handler.
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+  );
+
+  if (!empty($_POST) && form_get_errors()) {
+    drupal_set_message(t('The settings have not been saved because of the errors.'), 'error');
+  }
+  if (!isset($form['#theme'])) {
+    $form['#theme'] = 'system_settings_form';
+  }
 
   return $form;
 }
 
 /**
  * Validation handler for uc_usps_admin_settings form.
+ *
+ * @see uc_usps_admin_settings()
+ * @see uc_usps_admin_settings_submit()
  */
 function uc_usps_admin_settings_validate($form, &$form_state) {
-  if (!is_numeric($form_state['values']['uc_usps_markup'])) {
-    form_set_error('uc_usps_markup', t('Rate markup must be a numeric value.'));
+  if (!is_numeric($form_state['values']['uc_usps_rate_markup'])) {
+    form_set_error('uc_usps_rate_markup', t('Rate markup must be a numeric value.'));
+  }
+  if (!is_numeric($form_state['values']['uc_usps_weight_markup'])) {
+    form_set_error('uc_usps_weight_markup', t('Weight markup must be a numeric value.'));
   }
 }
 
 /**
  * Submit handler for uc_usps_admin_settings form.
+ *
+ * @see uc_usps_admin_settings()
+ * @see uc_usps_admin_settings_validate()
  */
 function uc_usps_admin_settings_submit($form, &$form_state) {
   $fields = array(
@@ -168,9 +281,14 @@ function uc_usps_admin_settings_submit($form, &$form_state) {
     'uc_usps_services',
     'uc_usps_intl_env_services',
     'uc_usps_intl_services',
-    'uc_usps_markup_type',
-    'uc_usps_markup',
-    'uc_usps_all_in_once',
+    'uc_usps_rate_markup_type',
+    'uc_usps_rate_markup',
+    'uc_usps_weight_markup_type',
+    'uc_usps_weight_markup',
+    'uc_usps_all_in_one',
+    'uc_usps_insurance',
+    'uc_usps_delivery_confirmation',
+    'uc_usps_signature_confirmation',
   );
 
   foreach ($fields as $key) {

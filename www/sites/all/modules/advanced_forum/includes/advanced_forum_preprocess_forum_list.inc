@@ -11,7 +11,7 @@ function _advanced_forum_preprocess_forum_list(&$variables) {
   // Add needed items for the collapsible containers.
   $collapsible = variable_get('advanced_forum_collapsible_containers', 'toggle');
   $variables['collapsible'] = FALSE;
-  if ($collapsible != 'disable') {
+  if ($collapsible != 'none') {
     drupal_add_library('system', 'jquery.cookie');
     drupal_add_js(drupal_get_path('module', 'advanced_forum') . '/js/advanced_forum.js');
     $settings['advanced_forum'] = array('modulePath' => drupal_get_path('module', 'advanced_forum'), 'effect' => $collapsible);
@@ -45,7 +45,8 @@ function _advanced_forum_preprocess_forum_list(&$variables) {
       $lowest_depth = $forum->depth;
     }
   }
-
+  
+  // Calculate number of and number of new child posts for each item.
   for ($depth = $lowest_depth; $depth > 0; $depth--) {
     foreach ($items as $id => $item) {
       if ($item->depth == $depth) {
@@ -92,6 +93,7 @@ function _advanced_forum_preprocess_forum_list(&$variables) {
         // Top level container always starts a new table.
         $table_counter++;
         $tables[$table_counter]['table_info'] = $item;
+        $tables[$table_counter]['items'] = array();
 
         // Reset the striping.
         advanced_forum_stripe(TRUE);
@@ -144,6 +146,8 @@ function _advanced_forum_preprocess_forum_list(&$variables) {
           // container. Start a new generic one. We need a tid so just grab
           // the tid of the current forum for it.
           $table_counter++;
+          if (!isset($tables[$table_counter]['table_info']))
+            $tables[$table_counter]['table_info'] = new stdClass();
           $tables[$table_counter]['table_info']->name = t('Forums');
           $tables[$table_counter]['table_info']->description = '';
           $tables[$table_counter]['table_info']->tid = $item->tid;
@@ -173,7 +177,7 @@ function _advanced_forum_preprocess_forum_list(&$variables) {
     }
   }
 
-  // Theme subcontainers, subforums and add post counts to parents.
+  // Theme subcontainers and subforums.
   foreach ($tables as $table_id => $table) {
     foreach ($table['items'] as $item_id => $item) {
       if (!empty($item->subforum_list)) {
@@ -304,6 +308,7 @@ function advanced_forum_process_forum($forum) {
 
       if ($forum->new_posts) {
         $forum->new_posts_text = format_plural($forum->new_posts, '1 new', '@count new');
+        $forum->new_posts_path = "forum/$forum->tid";
         $forum->new_posts_link = url("forum/$forum->tid", array('fragment' => 'new'));
       }
     }

@@ -1,5 +1,3 @@
-// $Id: uc_order.js,v 1.14 2010/11/02 20:51:05 islandusurper Exp $
-
 /**
  * @file
  * Handles asynchronous requests for order editing forms.
@@ -7,10 +5,9 @@
 
 var customer_select = '';
 var add_product_browser = '';
-var order_save_holds = 0;
 
 /**
- * Add the double click behavior to the order table at admin/store/orders.
+ * Adds the double click behavior to the order table at admin/store/orders.
  */
 Drupal.behaviors.ucOrderClick = {
   attach: function(context, settings) {
@@ -45,10 +42,6 @@ Drupal.behaviors.ucOrderSubmit = {
 
 jQuery(document).ready(
   function() {
-    if (order_save_holds == 0) {
-      release_held_buttons();
-    }
-
     jQuery('.uc-orders-table tr.odd, .uc-orders-table tr.even').each(
       function() {
         jQuery(this).dblclick(
@@ -140,10 +133,6 @@ function apply_address(type, address_str) {
 
   if (jQuery('#edit-' + type + '-country').val() != address['country']) {
     jQuery('#edit-' + type + '-country').val(address['country']);
-    try {
-      uc_update_zone_select('edit-' + type + '-country', address['zone']);
-    }
-    catch (err) {}
   }
 
   jQuery('#edit-' + type + '-zone').val(address['zone']);
@@ -181,22 +170,12 @@ function load_customer_search() {
  * Display the results of the customer search.
  */
 function load_customer_search_results() {
-  var first_name = jQuery('#customer-select #edit-first-name').val();
-  var last_name = jQuery('#customer-select #edit-last-name').val();
-  var email = jQuery('#customer-select #edit-email').val();
-
-  if (first_name == '') {
-    first_name = '0';
-  }
-  if (last_name == '') {
-    last_name = '0';
-  }
-  if (email == '') {
-    email = '0';
-  }
-
-  jQuery.post(Drupal.settings.ucURL.adminOrders + 'customer/search/' + encodeURIComponent(first_name) + '/' + encodeURIComponent(last_name) + '/' + encodeURIComponent(email),
-    { },
+  jQuery.post(Drupal.settings.ucURL.adminOrders + 'customer/search',
+    {
+      first_name: jQuery('#customer-select #edit-first-name').val(),
+      last_name: jQuery('#customer-select #edit-last-name').val(),
+      email: jQuery('#customer-select #edit-email').val()
+    },
     function (contents) {
       jQuery('#customer-select').empty().append(contents);
     }
@@ -209,16 +188,8 @@ function load_customer_search_results() {
  */
 function select_customer_search() {
   var data = jQuery('#edit-cust-select').val();
-  jQuery('#edit-uid').val(data.substr(0, data.indexOf(':')));
-  jQuery('#edit-uid-text').val(data.substr(0, data.indexOf(':')));
-  jQuery('#edit-primary-email').val(data.substr(data.indexOf(':') + 1));
-  jQuery('#edit-primary-email-text').val(data.substr(data.indexOf(':') + 1));
-  try {
-    jQuery('#edit-submit-changes').get(0).click();
-  }
-  catch (err) {
-  }
-  return close_customer_select();
+  var i = data.indexOf(':');
+  return select_existing_customer(data.substr(0, i), data.substr(i + 1));
 }
 
 /**
@@ -246,7 +217,7 @@ function check_new_customer_address() {
     'email' : jQuery('#customer-select #edit-email').val(),
     'sendmail' : jQuery('#customer-select #edit-sendmail').attr('checked')
   };
-  jQuery.post(Drupal.settings.ucURL.adminOrders + 'customer/new/check/' + encodeURIComponent(options['email']), options,
+  jQuery.post(Drupal.settings.ucURL.adminOrders + 'customer/new/check', options,
     function (contents) {
       jQuery('#customer-select').empty().append(contents);
     }
@@ -258,10 +229,8 @@ function check_new_customer_address() {
  * Load existing customer as new order's customer.
  */
 function select_existing_customer(uid, email) {
-  jQuery('#edit-uid').val(uid);
-  jQuery('#edit-uid-text').val(uid);
-  jQuery('#edit-primary-email').val(email);
-  jQuery('#edit-primary-email-text').val(email);
+  jQuery('input[name=uid], #edit-uid-text').val(uid);
+  jQuery('input[name=primary_email], #edit-primary-email-text').val(email);
   try {
     jQuery('#edit-submit-changes').click();
   }
@@ -289,30 +258,3 @@ function confirm_line_item_delete(message, img_id) {
     jQuery('#uc-order-edit-form #edit-submit-changes').get(0).click();
   }
 }
-
-/**
- * Disable order submit button while parts of the page are still loading.
- */
-function add_order_save_hold() {
-  order_save_holds++;
-  jQuery('#uc-order-edit-form input.save-button').attr('disabled', 'disabled');
-}
-
-/**
- * Remove a hold and enable the save buttons when all holds are gone!
- */
-function remove_order_save_hold() {
-  order_save_holds--;
-
-  if (order_save_holds == 0) {
-    release_held_buttons();
-  }
-}
-
-/**
- * Remove the disable attribute on any input item with the save-button class.
- */
-function release_held_buttons() {
-  jQuery('#uc-order-edit-form input.save-button').removeAttr('disabled');
-}
-

@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_file.rules_defaults.inc,v 1.1 2010/07/16 12:57:37 islandusurper Exp $
 
 /**
  * @file
@@ -7,10 +6,11 @@
  */
 
 /**
- * Implement hook_default_rules_configuration().
+ * Implements hook_default_rules_configuration().
  */
 function uc_file_default_rules_configuration() {
-  // Renew all the files on an order when the status matches what's set in the files admin settings.
+  // Renew all the files on an order when the status matches what's set
+  // in the files admin settings.
   $rule = rules_reaction_rule();
   $rule->label = t('Renew purchased files');
   $rule->active = TRUE;
@@ -39,4 +39,3 @@ function uc_file_default_rules_configuration() {
 
   return $configs;
 }
-

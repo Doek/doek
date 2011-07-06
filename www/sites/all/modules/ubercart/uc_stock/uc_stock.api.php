@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_stock.api.php,v 1.1 2010/02/03 14:19:06 islandusurper Exp $
 
 /**
  * @file
@@ -12,7 +11,7 @@
  */
 
 /**
- * Allow modules to take action when a stock level is changed.
+ * Allows modules to take action when a stock level is changed.
  *
  * @param $sku
  *   The SKU whose stock level is being changed.
@@ -34,4 +33,3 @@ function hook_uc_stock_adjusted($sku, $stock, $qty) {
 /**
  * @} End of "addtogroup hooks".
  */
-

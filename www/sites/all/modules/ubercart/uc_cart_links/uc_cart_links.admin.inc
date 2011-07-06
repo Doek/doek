@@ -1,5 +1,4 @@
 <?php
-// $Id: uc_cart_links.admin.inc,v 1.12 2010/09/14 13:46:57 islandusurper Exp $
 
 /**
  * @file
@@ -7,13 +6,13 @@
  */
 
 /**
- * Define a form to configure the cart links settings.
+ * Defines a form to configure the cart links settings.
  *
  * @ingroup forms
  */
 function uc_cart_links_settings_form($form, &$form_state) {
   $form['instructions'] = array(
-    '#markup' => '<div>' . t('<a href="!url">View the help page</a> to learn how to create cart links.', array('!url' => url('admin/store/help/cart_links'))) . '</div>',
+    '#markup' => '<div>' . t('<a href="!url">View the help page</a> to learn how to create cart links.', array('!url' => url('admin/store/help/cart-links'))) . '</div>',
   );
 
   $form['uc_cart_links_add_show'] = array(
@@ -31,6 +30,11 @@ function uc_cart_links_settings_form($form, &$form_state) {
     '#title' => t('Cart links messages'),
     '#description' => t('Enter in messages available to the cart links API for display through a link. Separate messages with a line break.<br />Messages should have a numeric key and text value. Example: 1337|Message text.'),
     '#default_value' => variable_get('uc_cart_links_messages', ''),
+  );
+  $form['uc_cart_links_empty'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow cart links to empty customer carts.'),
+    '#default_value' => variable_get('uc_cart_links_empty', TRUE),
   );
   $form['uc_cart_links_restrictions'] = array(
     '#type' => 'textarea',
@@ -51,7 +55,7 @@ function uc_cart_links_settings_form($form, &$form_state) {
 }
 
 /**
- * Display the cart links report.
+ * Displays the cart links report.
  *
  * @return
  *   HTML output.

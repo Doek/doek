@@ -1,5 +1,9 @@
 <?php
-// $Id: ca.inc,v 1.1 2010/07/16 14:18:31 islandusurper Exp $
+
+/**
+ * @file
+ * Helper functions for upgrade from Ubercart 2.x to Ubercart 3.x.
+ */
 
 /**
  * Base helper function to convert CA predicates to Rules configurations.
@@ -31,7 +35,7 @@ function ca_convert_predicate($predicate) {
 }
 
 /**
- * Save the conditions of the predicate as a separate component.
+ * Saves the conditions of the predicate as a separate component.
  *
  * @param $predicate
  *   An object row from {ca_predicates}.
@@ -50,7 +54,7 @@ function ca_extract_conditions($predicate, $name) {
 }
 
 /**
- * Read a predicate's conditions array and add them to a component.
+ * Reads a predicate's conditions array and add them to a component.
  *
  * @param &$component
  *   A RulesConditionContainer or a Rule to receive conditions.
@@ -113,7 +117,7 @@ function ca_add_conditions(&$component, $conditions) {
         }
 
         if ($condition['#name'] == 'ca_condition_date' && $key == 'date') {
-          $settings['date'] = $settings['date']['year'] . '/' . $settings['date']['month'] . '/'. $settings['date']['day'];
+          $settings['date'] = $settings['date']['year'] . '/' . $settings['date']['month'] . '/' . $settings['date']['day'];
         }
         else {
           $settings[$key] = $value;
@@ -251,7 +255,7 @@ function ca_add_conditions(&$component, $conditions) {
 }
 
 /**
- * Read a predicate's actions array and add them to a Rule.
+ * Reads a predicate's actions array and add them to a Rule.
  *
  * @param Rule &$rule
  *   The configuration to receive actions.
@@ -292,7 +296,7 @@ function ca_add_actions(&$rule, $actions) {
 }
 
 /**
- * Map obsolete conditions to correct settings for 'data_is'.
+ * Maps obsolete conditions to correct settings for 'data_is'.
  */
 function ca_data_map() {
   return array(

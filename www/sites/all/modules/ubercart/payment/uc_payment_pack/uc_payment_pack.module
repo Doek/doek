@@ -1,14 +1,14 @@
 <?php
-// $Id: uc_payment_pack.module,v 1.23 2010/10/18 18:26:07 islandusurper Exp $
 
 /**
- * @file Provides the check/money order, COD, and "other" payment methods.
+ * @file
+ * Provides the Check/Money Order, COD, and "Other" payment methods.
  */
 
-/*******************************************************************************
- * Hook Functions (Drupal)
- ******************************************************************************/
 
+/**
+ * Implements hook_menu().
+ */
 function uc_payment_pack_menu() {
   $items['admin/store/orders/%uc_order/receive_check'] = array(
     'title' => 'Receive Check',
@@ -21,6 +21,9 @@ function uc_payment_pack_menu() {
   return $items;
 }
 
+/**
+ * Implements hook_theme().
+ */
 function uc_payment_pack_theme() {
   return array(
     'uc_payment_method_other_form' => array(
@@ -37,7 +40,7 @@ function uc_payment_pack_theme() {
 }
 
 /**
- * Implement hook_init().
+ * Implements hook_init().
  */
 function uc_payment_pack_init() {
   global $conf;
@@ -46,7 +49,7 @@ function uc_payment_pack_init() {
 }
 
 /**
- * Implement hook_uc_payment_method().
+ * Implements hook_uc_payment_method().
  */
 function uc_payment_pack_uc_payment_method() {
   $methods[] = array(
@@ -84,7 +87,7 @@ function uc_payment_pack_uc_payment_method() {
 }
 
 /**
- * Handle the generic payment method "Other."
+ * Payment method callback for the generic payment method "Other".
  */
 function uc_payment_method_other($op, &$order) {
   switch ($op) {
@@ -131,6 +134,12 @@ function uc_payment_method_other($op, &$order) {
   }
 }
 
+/**
+ * Form to collect additional information needed by payment method "Other".
+ *
+ * @see theme_uc_payment_method_other_form(). 
+ * @ingroup forms
+ */
 function uc_payment_method_other_form($form, &$form_state, $order) {
   $form['pm_other_description'] = array(
     '#type' => 'textfield',
@@ -142,6 +151,12 @@ function uc_payment_method_other_form($form, &$form_state, $order) {
   return $form;
 }
 
+/**
+ * Theme function for uc_payment_method_other_form(). 
+ *
+ * @see uc_payment_method_other_form(). 
+ * @ingroup themeable
+ */
 function theme_uc_payment_method_other_form($variables) {
   $form = $variables['form'];
 
@@ -153,7 +168,7 @@ function theme_uc_payment_method_other_form($variables) {
 }
 
 /**
- * Handle the Cash on Delivery payment method.
+ * Payment method callback for the "Cash on Delivery" payment method.
  */
 function uc_payment_method_cod($op, &$order) {
   switch ($op) {
@@ -172,9 +187,11 @@ function uc_payment_method_cod($op, &$order) {
 
     case 'cart-process':
       if (variable_get('uc_cod_delivery_date', FALSE)) {
-        $order->payment_details['delivery_month'] = intval($_POST['cod_delivery_month']);
-        $order->payment_details['delivery_day'] = intval($_POST['cod_delivery_day']);
-        $order->payment_details['delivery_year'] = intval($_POST['cod_delivery_year']);
+        $order->payment_details = array(
+          'delivery_month' => intval($_POST['cod_delivery_month']),
+          'delivery_day'   => intval($_POST['cod_delivery_day']),
+          'delivery_year'  => intval($_POST['cod_delivery_year']),
+        );
       }
       return TRUE;
 
@@ -224,9 +241,11 @@ function uc_payment_method_cod($op, &$order) {
     case 'order-load':
       $result = db_query("SELECT * FROM {uc_payment_cod} WHERE order_id = :id", array(':id' => $order->order_id));
       if ($row = $result->fetchObject()) {
-        $order->payment_details['delivery_month'] = $row->delivery_month;
-        $order->payment_details['delivery_day'] = $row->delivery_day;
-        $order->payment_details['delivery_year'] = $row->delivery_year;
+        $order->payment_details = array(
+          'delivery_month' => $row->delivery_month,
+          'delivery_day'   => $row->delivery_day,
+          'delivery_year'  => $row->delivery_year,
+        );
       }
       break;
 
@@ -247,8 +266,8 @@ function uc_payment_method_cod($op, &$order) {
         ->key(array('order_id' => $order->order_id))
         ->fields(array(
           'delivery_month' => $order->payment_details['delivery_month'],
-          'delivery_day' => $order->payment_details['delivery_day'],
-          'delivery_year' => $order->payment_details['delivery_year'],
+          'delivery_day'   => $order->payment_details['delivery_day'],
+          'delivery_year'  => $order->payment_details['delivery_year'],
         ))
         ->execute();
       break;
@@ -281,6 +300,13 @@ function uc_payment_method_cod($op, &$order) {
   }
 }
 
+/**
+ * Form to collect additional information needed by the "Cash on Delivery"
+ * payment method.
+ *
+ * @see theme_uc_payment_method_cod_form(). 
+ * @ingroup forms
+ */
 function uc_payment_method_cod_form($form, &$form_state, $order) {
   $month = (!empty($order->payment_details['delivery_month'])) ? $order->payment_details['delivery_month'] : format_date(REQUEST_TIME, 'custom', 'n');
   $form['cod_delivery_month'] = uc_select_month(NULL, $month);
@@ -294,6 +320,12 @@ function uc_payment_method_cod_form($form, &$form_state, $order) {
   return $form;
 }
 
+/**
+ * Theme function for uc_payment_method_cod_form(). 
+ *
+ * @see uc_payment_method_cod_form(). 
+ * @ingroup themeable
+ */
 function theme_uc_payment_method_cod_form($variables) {
   drupal_add_css('.cod-table div, .cod-table { display: inline; } .cod-table tbody { border-top: 0px; }', 'inline');
 
@@ -313,12 +345,14 @@ function theme_uc_payment_method_cod_form($variables) {
 }
 
 /**
- * Handle the Check payment method.
+ * Payment method callback for the "Check" payment method.
  */
 function uc_payment_method_check($op, &$order, $form = NULL, &$form_state = NULL) {
   switch ($op) {
     case 'cart-details':
-      $build['instructions'] = array('#markup' => t('Checks should be made out to:'));
+      $build['instructions'] = array(
+        '#markup' => t('Checks should be made out to:')
+      );
 
       if (!variable_get('uc_check_mailing_street1', FALSE)) {
         $build['address'] = array(
@@ -392,7 +426,7 @@ function uc_payment_method_check($op, &$order, $form = NULL, &$form_state = NULL
 
       $result = db_query("SELECT clear_date FROM {uc_payment_check} WHERE order_id = :id ", array(':id' => $order->order_id));
       if ($clear_date = $result->fetchField()) {
-        $build['#markup'] = t('Clear Date:') . ' ' . format_date($clear_date, 'custom', variable_get('uc_date_format_default', 'm/d/Y'));
+        $build['#markup'] = t('Clear Date:') . ' ' . format_date($clear_date, 'uc_store');
       }
       else {
         $build['#markup'] = l(t('Receive Check'), 'admin/store/orders/' . $order->order_id . '/receive_check');
@@ -410,7 +444,7 @@ function uc_payment_method_check($op, &$order, $form = NULL, &$form_state = NULL
       $result = db_query("SELECT clear_date FROM {uc_payment_check} WHERE order_id = :id ", array(':id' => $order->order_id));
       if ($clear_date = $result->fetchField()) {
         $build['#markup'] = t('Check received') . '<br />' .
-          t('Expected clear date:') . '<br />' . format_date($clear_date, 'custom', variable_get('uc_date_format_default', 'm/d/Y'));
+          t('Expected clear date:') . '<br />' . format_date($clear_date, 'uc_store');
       }
 
       return $build;
@@ -419,20 +453,21 @@ function uc_payment_method_check($op, &$order, $form = NULL, &$form_state = NULL
       $form['check_address_info'] = array(
         '#markup' => '<div>' . t('Set the mailing address to display to customers who choose this payment method during checkout.') . '</div>',
       );
-      $form['uc_check_mailing_company'] = uc_textfield(uc_get_field_name('company'), variable_get('uc_check_mailing_company', ''), FALSE, NULL, 128);
       $form['uc_check_mailing_name'] = uc_textfield(t('Contact'), variable_get('uc_check_mailing_name', ''), FALSE, t('Direct checks to a person or department.'), 128);
-      $form['uc_check_mailing_street1'] = uc_textfield(uc_get_field_name('street1'), variable_get('uc_check_mailing_street1', ''), FALSE, NULL, 128);
-      $form['uc_check_mailing_street2'] = uc_textfield(uc_get_field_name('street2'), variable_get('uc_check_mailing_street2', ''), FALSE, NULL, 128);
-      $form['uc_check_mailing_city'] = uc_textfield(uc_get_field_name('city'), variable_get('uc_check_mailing_city', ''), FALSE);
-      $form['uc_check_mailing_country'] = uc_country_select(uc_get_field_name('country'), variable_get('uc_check_mailing_country', uc_store_default_country()));
-      if (isset($_POST['uc_check_mailing_country'])) {
-        $country_id = intval($_POST['uc_check_mailing_country']);
-      }
-      else {
-        $country_id = variable_get('uc_check_mailing_country', uc_store_default_country());
-      }
-      $form['uc_check_mailing_zone'] = uc_zone_select(uc_get_field_name('zone'), variable_get('uc_check_mailing_zone', ''), FALSE, $country_id);
-      $form['uc_check_mailing_postal_code'] = uc_textfield(uc_get_field_name('postal_code'), variable_get('uc_check_mailing_postal_code', ''), FALSE, NULL, 10, 10);
+      $form['uc_check_address'] = array(
+        '#type' => 'uc_address',
+        '#default_value' => array(
+          'uc_check_mailing_company' => variable_get('uc_check_mailing_company', ''),
+          'uc_check_mailing_street1' => variable_get('uc_check_mailing_street1', ''),
+          'uc_check_mailing_street2' => variable_get('uc_check_mailing_street2', ''),
+          'uc_check_mailing_city' => variable_get('uc_check_mailing_city', ''),
+          'uc_check_mailing_zone' => variable_get('uc_check_mailing_zone', ''),
+          'uc_check_mailing_country' => isset($form_state['values']['uc_check_mailing_country']) ? $form_state['values']['uc_check_mailing_country'] : variable_get('uc_check_mailing_country', ''),
+          'uc_check_mailing_postal_code' => variable_get('uc_check_mailing_postal_code', ''),
+        ),
+        '#required' => FALSE,
+        '#key_prefix' => 'uc_check_mailing',
+      );
       $form['uc_check_policy'] = array(
         '#type' => 'textarea',
         '#title' => t('Check payment policy', array(), array('context' => 'cheque')),

@@ -1,12 +1,14 @@
-// $Id: colorbox_load.js,v 1.2.2.3 2010/11/29 09:42:06 frjo Exp $
 (function ($) {
 
 Drupal.behaviors.initColorboxLoad = {
   attach: function (context, settings) {
+    if (!$.isFunction($.colorbox)) {
+      return;
+    }
     $.urlParam = function(name, url){
       var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(url);
-      if (!results) { return 0; }
-      return results[1] || 0;
+      if (!results) { return ''; }
+      return results[1] || '';
     };
     $('a, area, input', context).filter('.colorbox-load').once('init-colorbox-load-processed').colorbox({
       transition:settings.colorbox.transition,

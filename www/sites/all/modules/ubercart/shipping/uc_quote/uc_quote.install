@@ -1,13 +1,12 @@
 <?php
-// $Id: uc_quote.install,v 1.11 2010/06/04 15:38:40 islandusurper Exp $
 
 /**
  * @file
- * Install hooks for uc_quote.module.
+ * Install, update and uninstall functions for the uc_quote module.
  */
 
 /**
- * Implement hook_schema().
+ * Implements hook_schema().
  */
 function uc_quote_schema() {
   $schema = array();
@@ -172,7 +171,7 @@ function uc_quote_schema() {
 }
 
 /**
- * Implement hook_uninstall().
+ * Implements hook_uninstall().
  */
 function uc_quote_uninstall() {
   db_delete('variable')
@@ -180,6 +179,13 @@ function uc_quote_uninstall() {
     ->execute();
 
   variable_del('uc_store_shipping_type');
+}
+
+/**
+ * Implements hook_update_last_removed().
+ */
+function uc_quote_update_last_removed() {
+  return 6004;
 }
 
 /**
