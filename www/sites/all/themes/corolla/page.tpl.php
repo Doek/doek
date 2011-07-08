@@ -105,8 +105,8 @@
                 <?php endif; ?>
               </div> <!-- /#name-and-slogan -->
             <?php endif; ?>
-
-          </div> <!-- /#branding -->
+        	<?php print render($page['doek_domain']); ?>
+	  </div> <!-- /#branding -->
         </div> <!-- /#branding-wrapper -->
       <?php endif; ?>
 

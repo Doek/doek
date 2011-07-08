@@ -31,6 +31,7 @@ regions[content_bottom] = Content bottom
 regions[help]           = Help
 regions[page_top]       = Page top
 regions[page_bottom]    = Page bottom
+regions[doek_domain]    = DOEK DOMAIN
 
 settings[shortcut_module_link] = 1
 settings[base_font_size]        = '12px'

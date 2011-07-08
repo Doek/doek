@@ -2,8 +2,25 @@
 	display: inline;
 	width: 20%;
 	height: 100%;
+	padding: 2px 0px 0px 2px;
 }
 #doek_domain_shift{
 	height: 55px;
 	width: 300px;
+}
+
+#doek_domain_shift a{
+	border: none;
+}
+.region-doek-domain{
+	float: right;
+
+}
+#branding{
+	width: 100%;
+
+}
+#branding-wrapper{
+	width: 100%;
+
 }

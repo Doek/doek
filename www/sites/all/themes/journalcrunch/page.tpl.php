@@ -27,13 +27,7 @@
         </div>
         
         <div id="topSocial">
-            
-            <ul>									
-                <li><a class="twitter tip" href="http://twitter.com/morethanthemes" title="Follow Us on Twitter!"></a></li>
-                <li><a class="facebook" href="http://www.facebook.com/pages/More-than-just-themes/194842423863081" title="Join Us on Facebook!"></a></li>
-                <li><a class="rss" href="#" title="Subcribe to Our RSS Feed"></a></li>
-            </ul>
-        
+       		<?php print render($page['doek_domain']);?>     
         </div>
 		
     
