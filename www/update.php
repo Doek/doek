@@ -104,14 +104,7 @@ function update_script_selection_form($form, &$form_state) {
 
   if (empty($count)) {
     drupal_set_message(t('No pending updates.'));
-    if ($incompatible_updates_exist) {
-      // Work around issue with collapsible regions
-      $form['start']['#collapsed'] = FALSE;
-      $form['start']['#collapsible'] = FALSE;
-    }
-    else {
-      unset($form);
-    }
+    unset($form);
     $form['links'] = array(
       '#markup' => theme('item_list', array('items' => update_helpful_links())),
     );
@@ -391,10 +384,6 @@ if (empty($op) && update_access_allowed()) {
 
   // Set up theme system for the maintenance page.
   drupal_maintenance_theme();
-
-  // Rebuild the registry to ensure that removed hooks in modules do not result
-  // in undefined function errors and that newly defined hooks are called.
-  registry_rebuild();
 
   // Check the update requirements for Drupal.
   update_check_requirements();
