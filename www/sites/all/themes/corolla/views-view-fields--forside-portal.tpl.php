@@ -1,7 +1,10 @@
 
 <div class="node_front">
 <?php
-echo "<h2><span class='site'>".$fields['sitename']->content."</span> | <span class='node-title'>".$fields['title']->content."</span></h2>";
+
+$domain = domain_lookup($fields['domain_id']->content);
+
+echo "<h2><span class='site'><a href='http://".$domain['subdomain']."'>".$domain['sitename']."</a></span> | <span class='node-title'>".$fields['title']->content."</span></h2>";
 echo "<span class='date-time'>".$fields['entity_id_2']->content."</span>";
 ?>
 	<div class='picture'>
