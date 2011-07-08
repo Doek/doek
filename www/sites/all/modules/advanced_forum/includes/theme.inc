@@ -71,26 +71,6 @@ function theme_advanced_forum_node_type_create_list(&$variables) {
 }
 
 /**
- * Theme function to show who last edited a post.
- */
-function theme_advanced_forum_post_edited(&$variables) {
-  $editor = user_load($variables['who']);
-  $editor_name = theme('username', array('account' => $editor));
-
-  $datetime = format_date($variables['when'], 'custom', variable_get('date_format_short', 'm/d/Y - H:i'));
-
-  $edited = t('<span class="post-edit-label">Edited by:</span> !editor <span class="post-edit-label">on</span> !datetime.', array('!editor' => $editor_name, '!datetime' => $datetime));
-
-  // Don't include reason part if there is no reason
-  if (empty($variables['why'])) {
-    return $edited;
-  }
-  else {
-    return $edited . ' ' . t('<span class="post-edit-label">Reason:</span> !reason', array('!reason' => $variables['why']));
-  }
-}
-
-/**
  * Theme function to show simple author pane when not using Author Pane.
  */
 function theme_advanced_forum_simple_author_pane(&$variables) {
@@ -135,58 +115,6 @@ function theme_advanced_forum_reply_link(&$variables) {
     // User is not allowed to reply to this topic.
     return theme('comment_post_forbidden', array('node' => $node));
   }
-}
-
-/**
- * Theme function to return assembled pager for use on each topic in list.
- *
- * @param $pagecount
- *   Number of pages to include on the pager.
- * @param $topic
- *   Topic object to create a pager for.
- * @return
- *   Assembled pager.
- */
-function theme_advanced_forum_topic_pager($variables) {
-  $pagecount = $variables['pagecount'];
-  $topic = $variables['topic'];
-
-  // Get the information to assemble the pager. This returns an object with
-  // the following properties:
-  //  initial_pages: Array of linked numbers for first set of pages
-  //  last_page_text: Linked text "Last page" (translatable)
-  //  last_page_number: Linked number pointing to the last page.
-  $topic_pager = advanced_forum_create_topic_pager($pagecount, $topic);
-  $last_page = '';
-
-  if (!empty($topic_pager->initial_pages)) {
-    if (!empty($topic_pager->last_page_text)) {
-      // If you prefer to end with the number, replace
-      // $topic_pager->last_page_text with $topic_pager->last_page_number
-      $last_page = ' &hellip; ' . $topic_pager->last_page_text;
-    }
-
-    return '<span class="topic-pager">(Page: ' . implode(", ", $topic_pager->initial_pages) . $last_page . ')</span>';
-  }
-}
-
-/**
- * Theme function to create shadow topic reference.
- *
- * @param $title
- *   Unlinked title of the topic.
- * @param $nid
- *   Node id of the topic.
- * @param $new_forum
- *   Name of the forum that now contains the topic.
- * @return
- *   String to print in place of the title/author info on topic lists.
- */
-function theme_advanced_forum_shadow_topic(&$variables) {
-  $nid = $variables['nid'];
-  return $variables['title'] . '<br />' .
-  t('This topic has been moved to "!forum"', array('!forum' => $variables['new_forum'])) .
-  ' (' . l(t('View topic'), "node/$nid") . ')';
 }
 
 /**
@@ -308,7 +236,12 @@ function advanced_forum_preprocess_forum_submitted(&$variables) {
       $short_topic_title = truncate_utf8($variables['topic']->node_title, $title_length, TRUE, TRUE);
     }
 
+    $variables['short_topic_title'] = $short_topic_title;
+
     $fragment = ($new_replies) ? 'new' : NULL;
+
+    $variables['topic_link_fragment'] = $fragment;
+    $variables['topic_link_query'] = $query;
     $variables['topic_link'] = l($short_topic_title, "node/$nid", array('query' => $query, 'fragment' => $fragment));
   }
 
@@ -321,6 +254,54 @@ function advanced_forum_preprocess_forum_submitted(&$variables) {
       $variables['date_posted'] = format_date($timestamp, 'small');
     }
   }
+}
+
+function advanced_forum_preprocess_advanced_forum_topic_pager(&$variables) {
+  $pagecount = $variables['pagecount'];
+  $topic = $variables['topic'];
+
+  // Get the information to assemble the pager. This returns an object with
+  // the following properties:
+  //  initial_pages: Array of linked numbers for first set of pages
+  //  last_page_text: Linked text "Last page" (translatable)
+  //  last_page_number: Linked number pointing to the last page.
+  $topic_pager = advanced_forum_create_topic_pager($pagecount, $topic);
+
+
+  $variables['last_page_text'] = '';
+
+  if (!empty($topic_pager->initial_pages)) {
+    $variables['pages'] = $topic_pager->initial_pages;
+    if (!empty($topic_pager->last_page_text)) {
+      $variables['last_page'] = $topic_pager->last_page;
+      $variables['last_page_text'] = $topic_pager->last_page_text;
+      $variables['last_page_number'] = $topic_pager->last_page_number;
+
+      // If you prefer to end with the number, replace
+      // $topic_pager->last_page_text with $topic_pager->last_page_number
+      $variables['last_page_text'] = ' &hellip; ' . $topic_pager->last_page_text;
+    }
+  }
+}
+
+/**
+ * Preprocess variables for advanced-forum.naked.post-edited.tpl.php
+ *
+ */
+function advanced_forum_preprocess_advanced_forum_post_edited(&$variables) {
+  $editor = user_load($variables['who']);
+
+  $variables['edited_name'] = theme('username', array('account' => $editor));
+  $variables['edited_datetime'] = format_date($variables['when'], 'custom', variable_get('date_format_short', 'm/d/Y - H:i'));
+  $variables['edited_reason'] = empty($variables['why']) ? '' : $variables['why'];
+}
+
+function advanced_forum_preprocess_advanced_forum_shadow_topic(&$variables) {
+  $nid = $variables['nid'];
+
+  $variables['new_forum_url'] = url("node/$nid");
+  // compatibility variable
+  $variables['new_forum_link'] = l(t('View topic'), "node/$nid");
 }
 
 /* * * JUST FORUM OVERVIEW PAGE ********************************************** */
@@ -375,13 +356,17 @@ function advanced_forum_preprocess_views_view__advanced_forum_topic_list(&$varia
   _advanced_forum_add_files();
   advanced_forum_add_template_suggestions("topic_list_outer_view", $variables);
 
-  // @TODO: This is messy tying it to the URL. Need to find a better way.
   $variables['node_create_list'] = '';
   $variables['forum_tools'] = '';
-  $tid = arg(1);
-  if (arg(0) == 'forum' && $tid > 0 && !variable_get('advanced_forum_forum_disabled', FALSE)) {
-    $variables['node_create_list'] = theme('advanced_forum_node_type_create_list', array('forum_id' => $tid));
-    $variables['forum_tools'] = advanced_forum_forum_tools($tid);
+
+  $menu_item = menu_get_item();
+
+  if ($menu_item['map'][0] == 'forum') {
+    $forum = $menu_item['map'][1];
+    if ($forum->vid == variable_get('forum_nav_vocabulary') && $forum->tid > 0 && !variable_get('advanced_forum_forum_disabled', FALSE)) {
+      $variables['node_create_list'] = theme('advanced_forum_node_type_create_list', array('forum_id' => $forum->tid));
+      $variables['forum_tools'] = advanced_forum_forum_tools($forum->tid);
+    }
   }
 }
 
@@ -435,10 +420,6 @@ function advanced_forum_preprocess_advanced_forum_topic_header(&$variables) {
 
   $node = $variables['node'];
 
-  // Form to search within the topic. (only works with nodecomment)
-  if (module_exists('nodecomment')) {
-    $variables['search'] = theme('advanced_forum_search_topic', array('node' => $node));
-  }
 
   // Reply link / button
   $variables['reply_link'] = theme('advanced_forum_reply_link', array('node' => $node));
@@ -458,6 +439,9 @@ function advanced_forum_preprocess_advanced_forum_topic_header(&$variables) {
 
   // Link to last post in topic.
   $variables['last_post_link'] = advanced_forum_last_post_link($node);
+
+  // Pager
+  $variables['pager'] = theme('pager');
 }
 
 /**
@@ -514,12 +498,7 @@ function advanced_forum_preprocess_comment_wrapper(&$variables) {
 
     $form_on_seperate_page = variable_get('comment_form_location_' . $variables['node']->type, COMMENT_FORM_SEPARATE_PAGE) == COMMENT_FORM_SEPARATE_PAGE;
 
-    if (module_exists('nodecomment')) {
-      $comments_locked = $variables['node']->node_comment != COMMENT_NODE_OPEN;
-    }
-    else {
-      $comments_locked = $variables['node']->comment != COMMENT_NODE_OPEN;
-    }
+    $comments_locked = $variables['node']->comment != COMMENT_NODE_OPEN;
 
     if ($form_on_seperate_page || $comments_locked) {
       // If the post is locked or the comment form is on a seperate page,
@@ -543,7 +522,7 @@ function advanced_forum_preprocess_comment(&$variables) {
 
 function advanced_forum_preprocess_views_view__advanced_forum_group_topic_list(&$variables) {
   _advanced_forum_add_files();
-  advanced_forum_add_template_suggestions("group_topic_list_outer_view", array('view' => $variables['view']));
+  advanced_forum_add_template_suggestions("group_topic_list_outer_view", $variables);
 
   // Set a variable for displaying the topic legend.
   $variables['topic_legend'] = theme('advanced_forum_topic_legend');
