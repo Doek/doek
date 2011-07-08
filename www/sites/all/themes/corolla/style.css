@@ -1,5 +1,7 @@
 /* $Id: style.css,v 1.94 2011/01/11 20:18:47 jarek Exp $ */
-
+.picture a {
+	border-bottom: 0px !important;
+} 
 /**
  * Layout
  */
