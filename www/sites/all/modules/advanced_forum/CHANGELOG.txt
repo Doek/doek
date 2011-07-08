@@ -1,6 +1,98 @@
 
-
 ****************************** DRUPAL 7 - 2.x BRANCH ********************************
+
+June 29, 2011
+-------------
+by troky: Views updated to 7.x-3.0-rc1.
+by troky: Removed all Nodecomment relaed code.
+
+June 22, 2011
+-------------
+Issue #1194792 by a.ross: Removed 3px margin between post header and post body.
+
+June 21, 2011
+-------------
+Issue #1194792 by a.ross: Changed .forum-post selector to div.forum-post to avoid some themes (bad) overrides.
+
+June 18, 2011
+-------------
+by troky: Fixed theme views search path again.
+by troky: Updated comment-wrapper.tpl
+
+June 17, 2011
+-------------
+by troky: Changed code to delete all related AF variables on uninstall.
+
+June 10,2011
+------------
+Issue #1182632 by troky: Added pager variable to topic header template.
+
+June 06,2011
+------------
+Issue #1154588 by troky: Removed 'User picture preset' option from settings page when Author Pane is not installed.
+by troky: Moved post-edited to template and removed theme function.
+by troky: Moved shadow-topic to template and removed theme function.
+
+June 05,2011
+------------
+Issue #1145852 by troky: Fixed permissions issue when upgraded from D6.
+by troky: Fixed hardcoded 'forums' vocabulary machine_name in views.
+Issue #1157054 by troky: Fixed bug in 'mark as read' code.
+
+June 04, 2011
+-------------
+by troky: Updated topic_list preprocess function: getting 'tid' usig arg() replaced by using menu_get_item() function.
+by troky: Fixed notice in views introduced by above patch.
+by troky: Moved topic-pager to template and removed theme function.
+
+June 02, 2011
+-------------
+by troky: Upgraded template_preprocess_advanced_forum_topic_list_view to Views 3.x
+
+May 31, 2011
+------------
+by troky: Fixed missing forum data when only container is displayed.
+by troky: Fixed theme views search path.
+
+May 30, 2011
+------------
+by troky: Fixed ignored comment wrapper template.
+by troky: Changed collapsible containers javascript code to allow any element as handle. Added 'collapsible' class to handle parent element, too.
+by troky: Added more (fragmented) variables for themers in advanced_forum_preprocess_forum_submitted.
+by troky: Added option to load/override AF views from theme folder.
+
+May 12, 2011
+------------
+by troky: Added new mark_as_read code.
+by troky: Removed unused views.
+
+May 08, 2011
+------------
+Issue #1150278 by troky: Fixed notice when statistics module is disabled.
+
+May 07, 2011
+------------
+by troky: Unanswered topics view rebuilt. Removed unnecessary columns and changed sort criteria to topic/post creation date because there is no sense sorting it by last comment time since there are no comments by definition.
+
+May 03, 2011
+------------
+Issue #1145852 by troky: Fixed topic-icon render code to display prober topic status.
+
+May 02, 2011
+------------
+Issue #1140636 by troky: Updated views and few view-related notices.
+
+April 28, 2011
+--------------
+Issue #1140636 by troky: Unanswered topics view rebuilt from scratch and re-exported. Fixed related code.
+
+April 12, 2011
+--------------
+Issue #1124116 by dereine: Fixed notice and updated Views fields render code in template preprocess function.
+
+April 07, 2011
+--------------
+Issue #1118822 by troky: Fixed Organic Groups view definition.
 
 April 03, 2011
 --------------

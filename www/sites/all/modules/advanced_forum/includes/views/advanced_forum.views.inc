@@ -14,7 +14,10 @@
  * Thanks to Moshe and OG for the code.
  */
 function advanced_forum_views_default_views() {
+  global $theme, $theme_path;
   $files = file_scan_directory(drupal_get_path('module', 'advanced_forum') . '/includes/views', '/.view$/');
+  $files += file_scan_directory(drupal_get_path('theme', variable_get('theme_default', 'garland')) . '/advanced_forum/views', '/.view$/');
+
   foreach ($files as $absolute => $file) {
     $view = NULL;
     require $absolute;
@@ -22,6 +25,7 @@ function advanced_forum_views_default_views() {
       $views[$view->name] = $view;
     }
   }
+  
   return $views;
 }
 

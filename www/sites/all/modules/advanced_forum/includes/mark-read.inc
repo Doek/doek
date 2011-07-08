@@ -29,78 +29,49 @@ function advanced_forum_get_mark_read_link($tid = 0, &$links = array()) {
 /**
  * Marks all posts in forums or in a given forum as read by the current user.
  */
-function advanced_forum_markasread($current_forum_id = 0) {
+function advanced_forum_markasread($tid = NULL) {
   global $user;
-  // See if we're on a forum or on the forum overview
-  // Path will be /forum/markasread or /forum/markasread/tid
-  if ($current_forum_id) {
-    // Delete the current history entries so already visited nodes get updated.
-    //
-    // Can't write dynamic query here because D7 DeleteQuery (still) doesn't support joins
-    $sql = "DELETE h
-            FROM {history} AS h
-              INNER JOIN {forum} AS f ON (h.nid = f.nid)
-            WHERE h.uid = :uid AND f.tid = :tid";
-    db_query($sql, array(':uid' => $user->uid, ':tid' => $current_forum_id));
+  $vid = variable_get('forum_nav_vocabulary', 0);
 
-    // Update the history table with all forum nodes newer than the cutoff.
-    //
-    // Can't write dynamic query here because D7 InsertQuery (still) doesn't support joins
-    $sql = "INSERT INTO {history} (uid, nid, timestamp)
-            SELECT DISTINCT :uid, n.nid, :req_time
-            FROM {node} AS n
-              INNER JOIN {forum} AS f ON (n.nid = f.nid)
-              INNER JOIN {node_comment_statistics} AS ncs ON ncs.nid = n.nid
-            WHERE (n.changed > :changed OR ncs.last_comment_timestamp > :timestamp) AND f.tid = :tid";
-
-    db_query($sql, array(
-      ':uid' => $user->uid,
-      ':req_time' => REQUEST_TIME,
-      ':changed' => NODE_NEW_LIMIT,
-      ':timestamp' => NODE_NEW_LIMIT,
-      ':tid' => $current_forum_id
-    ));
-
-    // Readpath integration
-    if (module_exists('readpath')) {
-      readpath_clear_readpath();
-    }
-
-    drupal_set_message(t('All content in this forum has been marked as read'));
-    drupal_goto('forum/' . $current_forum_id);
+  // Don't bother trying to mark things read for anonymous users.
+  if (empty($user->uid)) {
+    return;
   }
+  // Delete all entries in the history table for the current $uid and
+  // optionally a forum term id.
 
-  // We are on the forum overview, requesting all forums be marked read
-  $forum_vocabulary_id = variable_get('forum_nav_vocabulary', '');
+  // Subquery to find nids to delete from history table.
+  $query_node = db_select('node', 'n');
+  $query_node->join('forum', 'f', 'n.nid = f.nid');
+  $query_node->join('taxonomy_term_data', 't', 'f.tid = t.tid');
+  $query_node->join('node_comment_statistics', 'ncs', 'n.nid = ncs.nid');
+  $query_node->condition(db_or()
+    ->condition('n.changed', NODE_NEW_LIMIT, '>')
+    ->condition('ncs.last_comment_timestamp', NODE_NEW_LIMIT, '>')
+  );
+  if (isset($tid)) {
+    $query_node->condition('f.tid', $tid);
+  }
+  $query_node->condition('t.vid', $vid);
+  $query_node->addField('n', 'nid');
+  // Select query objects are one-shot, so clone for INSERT below.
+  $query_history_insert = clone($query_node);
+  // Delete values based upon sub-query.
+  $query = db_delete('history')
+    ->condition('uid', $user->uid)
+    ->condition('nid', $query_node, 'IN')
+    ->execute();
 
-  // Delete the current history entries so already visited nodes get updated.
-  $sql = "DELETE h
-          FROM {history} AS h
-            INNER JOIN {forum} AS f ON (h.nid = f.nid)
-            INNER JOIN {taxonomy_term_data} AS td ON (td.tid = f.tid)
-          WHERE h.uid = :uid AND td.vid = :vid";
+  // Now insert the nids into the history table.
+  $query_history_insert->addExpression(':uid', 'uid', array(':uid' => $user->uid));
+  $query_history_insert->addExpression(':time', 'timestamp', array(':time' => time()));
 
-  db_query($sql, array(':uid' => $user->uid, ':vid' => $forum_vocabulary_id));
+  db_insert('history')
+    ->fields(array('nid', 'uid', 'timestamp'))
+    ->from($query_history_insert)
+    ->execute();
 
-  // Update the history table with all forum nodes newer than the cutoff.
-  $sql = "INSERT INTO {history} (uid, nid, timestamp)
-            SELECT DISTINCT :uid, n.nid, :req_time
-            FROM {node} AS n
-              INNER JOIN {forum} AS f ON (n.nid = f.nid)
-              INNER JOIN {node_comment_statistics} AS ncs ON ncs.nid = n.nid
-              INNER JOIN {taxonomy_term_data} AS td ON f.tid = td.tid
-            WHERE (n.changed > :changed OR ncs.last_comment_timestamp > :timestamp) AND td.vid = :vid";
-
-   db_query($sql, array(
-      ':uid' => $user->uid,
-      ':req_time' => REQUEST_TIME,
-      ':changed' => NODE_NEW_LIMIT,
-      ':timestamp' => NODE_NEW_LIMIT,
-      ':vid' => $forum_vocabulary_id
-    ));
-
-  drupal_set_message(t('All forum content been marked as read'));
-  drupal_goto('forum');
+  drupal_goto(empty($tid) ? 'forum' : 'forum/' . $tid);
 }
 
 /**

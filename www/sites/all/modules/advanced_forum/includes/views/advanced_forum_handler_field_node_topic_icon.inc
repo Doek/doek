@@ -38,9 +38,10 @@
   function render($values) {
     $new_posts = advanced_forum_reply_num_new($values->nid);
     return theme('forum_icon', array(
-      'new_posts' => $new_posts, 
-      'num_posts' => $values->node_comment_statistics_comment_count, 
-      'comment_mode' => $values->node_comment, 
+      'new_posts' => $new_posts,
+      // fixes notice when statistics module is enabled.
+      'num_posts' => empty($values->node_counter_totalcount) ? 0 : $values->node_counter_totalcount,
+      'comment_mode' => $values->node_comment,
       'sticky' => $values->node_sticky
     ));
   }
