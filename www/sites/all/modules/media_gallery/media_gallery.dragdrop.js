@@ -60,8 +60,11 @@ Drupal.mediaGallerySort.addDraggableIcon = function () {
 Drupal.mediaGallerySort.handle_update = function (event, ui) {
   var $ = jQuery;
   var sortable = $(this);
-  var post = {order: sortable.sortable('toArray')};
   var reorder = event.data.reorder;
+  var post = {
+    order: sortable.sortable('toArray'),
+    page: $.deparam.querystring().page
+  };
 
   /**
    * Change ID attributes of sorted items to reflect the new order.
