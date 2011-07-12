@@ -14,18 +14,19 @@ INSTALLATION
 
    You should generally download the latest official release of each project.
    However, this version of Media Gallery has been specifically tested with the
-   versions shown in parentheses below.
+   versions shown in parentheses below. If you do not use these exact versions,
+   it is likely that this release will not work correctly.
 
    Required:
 
-   a. Media (latest release, tested with 7.x-1.0-beta4)
+   a. Media (7.x-1.0-beta5)
       - Download from http://drupal.org/project/media and unpack it in your
         contributed modules directory (usually sites/all/modules).
-   b. Multiform (latest release, tested with 7.x-1.0-beta2)
+   b. Multiform (7.x-1.0-beta2)
       - Download from http://drupal.org/project/multiform and unpack it in your
         contributed modules directory (usually sites/all/modules).
-   c. Styles (latest release, tested with 7.x-2.0-alpha5)
-      - Download from http://drupal.org/project/styles and unpack it in your
+   c. Chaos tool suite (latest release, tested with 7.x-1.0-beta1)
+      - Download from http://drupal.org/project/ctools and unpack it in your
         contributed modules directory (usually sites/all/modules).
    d. ColorBox jQuery plugin (latest release, tested with 1.3.17)
       - Download from http://colorpowered.com/colorbox and unpack it in
@@ -33,13 +34,13 @@ INSTALLATION
 
    Recommended for the best experience:
 
-   e. Media Browser Plus (latest release, tested with 7.x-1.0-beta2)
+   e. Media Browser Plus (latest release, tested with 7.x-1.0-beta3)
       - Download from http://drupal.org/project/media_browser_plus and unpack
         it in your contributed modules directory (usually sites/all/modules).
-   f. Media YouTube (latest release, 7.x-1.0-alpha4)
+   f. Media YouTube (latest release, tested with 7.x-1.0-alpha5)
       - Download from http://drupal.org/project/media_youtube and unpack it in
         your contributed modules directory (usually sites/all/modules).
-   g. Plupload (latest release, 7.x-1.0-beta3)
+   g. Plupload (latest release, tested with 7.x-1.0-beta3)
       - First, download the module from http://drupal.org/project/plupload and
         unpack it in your contributed modules directory (usually
         sites/all/modules).
