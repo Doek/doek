@@ -2,9 +2,16 @@
 <div class="node_front">
 <?php
 echo "<h2>".$fields['title']->content."</h2>";
+
+echo "<span class='date-time'>";
+
 if(isset($fields['entity_id_2'])){
-   echo "<span class='date-time'>".$fields['entity_id_2']->content."</span>";
+  echo $fields['entity_id_2']->content;
 }
+if (isset($fields['comment_count'])){
+  echo " - ".$fields['comment_count']->content;
+}
+   echo "</span>";
 ?>
 	<div class='picture'>
 		<?php echo $fields['entity_id_1']->content; ?>
