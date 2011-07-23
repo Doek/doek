@@ -2,8 +2,7 @@ body
 {
 	margin: 0px;
 	padding: 0px;
-	background-color: #EFF9FB;
-	background: url(../images/bg.jpg) no-repeat 50% 0%;
+	background: #EFF9FB url(../images/bg.jpg) no-repeat 50% 0%;
 	font-family: "Trebuchet MS",Arial,sans-serif;
 }
 h1, h2, h3, h4, h5, h6
