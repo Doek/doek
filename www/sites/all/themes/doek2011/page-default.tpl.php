@@ -68,7 +68,7 @@
 <div id="wrapper">
 	<div id="header">
 		<h1 id="logo">
-			<a href="/intro2011/index.php" title="DØK INTRO 2011"></a>
+			<a href="/" title="DØK INTRO 2011"></a>
 		</h1>
 
 		<div id="search">
