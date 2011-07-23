@@ -48,8 +48,10 @@
 					<?php if (!empty($fields['field_phone']->content)) { ?><li><strong>Telefon:</strong> <?php echo $fields['field_phone']->content; ?></li><?php } ?>
 					<?php if (!empty($fields['mail']->content)) { ?><li><strong>Mail:</strong> <?php echo $fields['mail']->content; ?></li><?php } ?>
 					<?php if (!empty($fields['field_facebook']->content)) { ?><li><strong>Facebook:</strong> <a href="<?php if (substr($fields['field_facebook']->content, 0, 4) != 'http') { echo 'http://'; } ?><?php echo $fields['field_facebook']->content; ?>" title="Besøg <?php echo $fields['field_name']->content; ?>'s facebook-profil"><?php echo $fields['field_facebook']->content; ?></a></li><?php } ?>
-					<?php if (!empty($fields['field_beskrivelse']->content)) { ?><li><strong>Om vejlederen:</strong> <?php echo $fields['field_beskrivelse']->content; ?></li><?php } ?>
 				</ul>
+				<?php if (!empty($fields['field_beskrivelse']->content)) { ?>
+				<div class="blaabog"><?php echo $fields['field_beskrivelse']->content; ?></div>
+				<?php } ?>
 			</div>
 		</div>
 	</div>
