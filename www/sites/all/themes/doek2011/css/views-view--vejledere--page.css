@@ -97,6 +97,11 @@ vejledere-inner
 	line-height: 160%;
 }
 
+.blaabog
+{
+	clear: both;
+}
+
 .list-header
 {
 	font-weight: bold;
