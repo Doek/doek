@@ -24,6 +24,7 @@
  * @ingroup views_templates
  */
  drupal_add_css(drupal_get_path('theme', 'doek2011') . '/css/views-view--vejledere--page.css', array('group' => CSS_DEFAULT, 'every_page' => TRUE));
+ $names = explode(" ", $fields['field_name']->content);
 ?>
 
 <div class="vejledere-page-item" >
@@ -35,10 +36,11 @@
 			<div class="vejledere-content-inner clearfix">
 				<div class="vejledere-picture clearfix">
 					<?php echo $fields['picture']->content; ?>
-					<span class="caption"><?php echo $fields['field_name']->content; ?></span>
+					<span class="caption"><?php echo $names[0]; ?></span>
 					<span class="corner"> </span>
 				</div>
 				<ul>
+					<li><strong>Fulde navn:</strong> <?php echo $fields['field_name']->content; ?></li>
 					<?php if (!empty($fields['field_aka']->content)) { ?><li><strong>AKA:</strong> <?php echo $fields['field_aka']->content; ?></li><?php } ?>
 					<?php if (!empty($fields['field_motto']->content)) { ?><li><strong>Citat:</strong> <?php echo $fields['field_motto']->content; ?></li><?php } ?>
 					<?php if (!empty($fields['field_study_year']->content)) { ?><li><strong>Årgang:</strong> <?php echo $fields['field_study_year']->content; ?></li><?php } ?>
