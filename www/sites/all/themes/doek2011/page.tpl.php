@@ -1,6 +1,6 @@
 <?php
 if ($is_front) {
-  require 'frontpage.tpl.php';
+  require 'page-default.tpl.php';
 } else {
   require 'page-default.tpl.php';
 }
