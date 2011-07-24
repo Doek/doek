@@ -157,3 +157,52 @@ div.megamenu ul li a {
 	color: white;
 }
 /* End Main menu */
+
+/* Sidebar menu styles */
+.sidebar {
+	overflow: visible;
+}
+
+.region-sidebar {
+	margin-left: 0;
+	margin-right: -15px;
+}
+
+.region-sidebar block-menu {
+	padding-left: 15px;
+	padding-right: 15px;
+}
+
+.sidebar ul {
+	list-style: none;
+	margin-left: -15px;
+	padding: 0;
+}
+
+.sidebar ul li {
+	list-style: none;
+	background: url('/sites/all/themes/doek2011/images/nav-sep.gif') no-repeat right bottom;
+	margin-right: -30px;
+	line-height: 160%;
+}
+
+.sidebar ul li a {
+	padding-left: 15px;
+	padding-bottom: 15px;
+	padding-top: 20px;
+	font-size: 1.2em;
+	font-weight: bold;
+	font-family: "Trebuchet MS",Arial,sans-serif;
+	display: block;
+	outline: medium none;
+	color: white;
+	margin-right: -25px;
+	/*padding: 6px 0;*/
+}
+
+.sidebar ul li a.active {
+	background: url('/sites/all/themes/doek2011/images/grad.png') no-repeat right;
+	color: #5292C9 !important;
+}
+
+/* End Sidebar menu styles */
