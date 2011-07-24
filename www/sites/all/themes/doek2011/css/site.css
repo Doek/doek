@@ -175,6 +175,7 @@ div.megamenu ul li a {
 
 .sidebar ul {
 	list-style: none;
+	margin-top: -50px;
 	margin-left: -15px;
 	padding: 0;
 }
@@ -198,6 +199,11 @@ div.megamenu ul li a {
 	color: white;
 	margin-right: -25px;
 	/*padding: 6px 0;*/
+}
+
+.sidebar ul li a:hover {
+	background: url('/sites/all/themes/doek2011/images/grad.png') no-repeat right;
+	color: #5292C9 !important;
 }
 
 .sidebar ul li a.active {
