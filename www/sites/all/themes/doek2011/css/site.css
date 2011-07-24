@@ -173,20 +173,20 @@ div.megamenu ul li a {
 	padding-right: 15px;
 }
 
-.sidebar ul {
+.sidebar ul.megamenu {
 	list-style: none;
 	margin-left: -15px;
 	padding: 0;
 }
 
-.sidebar ul li {
+.sidebar ul.megamenu li {
 	list-style: none;
 	background: url('/sites/all/themes/doek2011/images/nav-sep.gif') no-repeat right bottom;
 	margin-right: -30px;
 	line-height: 160%;
 }
 
-.sidebar ul li a {
+.sidebar ul.megamenu li a {
 	padding-left: 15px;
 	padding-bottom: 15px;
 	padding-top: 20px;
@@ -200,12 +200,12 @@ div.megamenu ul li a {
 	/*padding: 6px 0;*/
 }
 
-.sidebar ul li a:hover {
+.sidebar ul.megamenu li a:hover {
 	background: url('/sites/all/themes/doek2011/images/grad.png') no-repeat right;
 	color: #5292C9 !important;
 }
 
-.sidebar ul li a.active {
+.sidebar ul.megamenu li a.active {
 	background: url('/sites/all/themes/doek2011/images/grad.png') no-repeat right;
 	color: #5292C9 !important;
 }
