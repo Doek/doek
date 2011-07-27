@@ -43,6 +43,7 @@
 					<li><strong>Fulde navn:</strong> <?php echo $fields['field_name']->content; ?></li>
 					<?php if (!empty($fields['field_aka']->content)) { ?><li><strong>AKA:</strong> <?php echo $fields['field_aka']->content; ?></li><?php } ?>
 					<?php if (!empty($fields['field_motto']->content)) { ?><li><strong>Citat:</strong> <?php echo $fields['field_motto']->content; ?></li><?php } ?>
+					<?php if (!empty($fields['field_interesser']->content)) { ?><li><strong>Interesser:</strong> <?php echo $fields['field_interesser']->content; ?></li><?php } ?>
 					<?php if (!empty($fields['field_study_year']->content)) { ?><li><strong>Årgang:</strong> <?php echo $fields['field_study_year']->content; ?></li><?php } ?>
 					<?php if (!empty($fields['field_job_title']->content) || !empty($fields['field_job_title']->content)) { ?><li><strong>Studiejob:</strong>  <?php echo $fields['field_job_title']->content; if (!empty($fields['field_company']->content)) { ?> hos <?php echo $fields['field_company']->content; ?></li><?php } } ?>
 					<?php if (!empty($fields['field_phone']->content)) { ?><li><strong>Telefon:</strong> <?php echo $fields['field_phone']->content; ?></li><?php } ?>
