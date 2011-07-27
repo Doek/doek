@@ -33,7 +33,7 @@
  */
 ?>
 <div class="profile" style="clear: none;">
-  <?php if ($user_profile["field_study_year"]["#object"]->uid ." = ". $user->uid .": ". ($user_profile["field_study_year"]["#object"]->uid == $user->uid)) { ?>
+  <?php if (menu_get_object('user')->uid == $user->uid)  { ?>
     <button><a href="/user/<?php echo $user->uid; ?>/edit" title="Redigér din profil">Edit</a></button>
   <?php } ?>
   <?php print render($user_profile); ?>
