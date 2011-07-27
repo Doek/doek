@@ -215,3 +215,6 @@ div.megamenu ul li a {
 #block-user-login {
 	color: white;
 }
+#block-user-login label {
+	font-size: 0.7em;
+}
