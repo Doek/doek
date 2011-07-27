@@ -32,6 +32,6 @@
  * @see template_preprocess_user_profile()
  */
 ?>
-<div class="profile">
+<div class="profile" style="clear: none;">
   <?php print render($user_profile); ?>
 </div>
