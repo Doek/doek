@@ -10,9 +10,13 @@ h1, h2, h3, h4, h5, h6
 	color: #5292C9;
 }
 
-p, li, td
+p, li, dd
 {
 	font-size: 0.9em;
+}
+
+td {
+	font-size: 0.8em;
 }
 
 a
