@@ -103,9 +103,9 @@
 			<div id="main" style="width:100%">
 				<div class="inner clearfix">
 					<?php print render($page['content']); ?>
+					<iframe src="http://www.facebook.com/plugins/like.php?app_id=153523888058209&amp;href=www.facebook.com%2Fdoekintro2011&amp;send=false&amp;layout=standard&amp;width=655&amp;show_faces=true&amp;action=like&amp;colorscheme=light&amp;font&amp;height=80" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:655px; height:80px;" allowTransparency="true"></iframe>
 				</div>
 			</div>
-		<iframe src="http://www.facebook.com/plugins/like.php?app_id=153523888058209&amp;href=www.facebook.com%2Fdoekintro2011&amp;send=false&amp;layout=standard&amp;width=655&amp;show_faces=true&amp;action=like&amp;colorscheme=light&amp;font&amp;height=80" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:655px; height:80px;" allowTransparency="true"></iframe>
 		</div>
 		<!-- //CONTENT -->
 	</div>
