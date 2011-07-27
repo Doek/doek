@@ -107,6 +107,9 @@
 			</div>
 		</div>
 		<!-- //CONTENT -->
+		<div id="fb-root"></div>
+		<script src="http://connect.facebook.net/en_US/all.js#xfbml=1"></script>
+		<fb:like-box href="http://www.facebook.com/doekintro2011" width="220" show_faces="true" border_color="" stream="true" header="false"></fb:like-box>
 	</div>
 	</div>
 	<!-- //Main Container -->
