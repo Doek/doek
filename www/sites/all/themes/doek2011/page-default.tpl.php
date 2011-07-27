@@ -107,9 +107,7 @@
 			</div>
 		</div>
 		<!-- //CONTENT -->
-		<div id="fb-root"></div>
-		<script src="http://connect.facebook.net/en_US/all.js#xfbml=1"></script>
-		<fb:like-box href="http://www.facebook.com/doekintro2011" width="220" show_faces="true" border_color="" stream="true" header="false"></fb:like-box>
+		<iframe src="http://www.facebook.com/plugins/like.php?app_id=153523888058209&amp;href=www.facebook.com%2Fdoekintro2011&amp;send=false&amp;layout=standard&amp;width=655&amp;show_faces=true&amp;action=like&amp;colorscheme=light&amp;font&amp;height=80" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:655px; height:80px;" allowTransparency="true"></iframe>
 	</div>
 	</div>
 	<!-- //Main Container -->
