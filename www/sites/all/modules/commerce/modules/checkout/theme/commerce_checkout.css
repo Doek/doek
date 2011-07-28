@@ -1,0 +1,43 @@
+
+fieldset.checkout-buttons {
+  text-align: right;
+}
+
+fieldset.checkout-buttons .form-button, fieldset.checkout-buttons .form-submit {
+  margin-left: 1em;
+}
+
+fieldset.checkout-buttons .checkout-cancel, fieldset.checkout-buttons .checkout-back {
+  float: left;
+}
+
+table.checkout-review .pane-title td {
+  padding-left: 1em;
+  font-weight: bold;
+}
+
+table.checkout-review tr.pane-data {
+  vertical-align: top;
+}
+
+table.checkout-review .pane-data-key {
+  font-weight: bold;
+  text-align: right;
+  white-space: nowrap;
+  padding-left: 3em;
+  width: 50%;
+}
+
+table.checkout-review .pane-data-value {
+  padding-right: 3em;
+}
+
+table.checkout-review .pane-data-full {
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+.checkout-processing {
+  padding-right: 18px !important;
+  background: url(../images/status-active.gif) right center no-repeat;
+}

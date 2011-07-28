@@ -1,0 +1,82 @@
+<?php
+
+/**
+ * Implementation of hook_payment_method().
+ */
+function uc_quickpay_uc_payment_method() {
+  $title = t("Credit card via Quickpay: " ); 
+
+  $methods[] = array(
+    'id' => 'quickpay',
+    'name' => t('QuickPay'),
+    'title' => $title,
+    'review' => t('Credit card'),
+    'desc' => t('Redirect to QuickPay to pay by credit card.'),
+    'callback' => 'uc_payment_method_quickpay',
+    'weight' => 3,
+    'checkout' => TRUE,
+    'no_gateway' => TRUE,
+  );
+
+  return $methods;
+}
+
+/**
+ * Callback for quickpay payment method settings.
+ */
+function uc_payment_method_quickpay($op, &$arg1) {
+  switch ($op) {
+    case 'order-view':
+    case 'customer-view':
+      // Fetch the description for the payment entered by the administrator.
+      if ($description = db_query("SELECT description FROM {uc_payment_quickpay} WHERE order_id = :id", array(':id' => $order->order_id))->fetchField()) {
+        return array('#markup' => t('Description: @desc', array('@desc' => $description)));
+      }
+      break;
+
+    case 'order-details':
+      $details = drupal_get_form('uc_payment_method_quickpay_form', $order);
+      return uc_strip_form($details);
+
+    case 'edit-process':
+      $changes['payment_details']['pm_quickpay_description'] = check_plain($_POST['pm_quickpay_description']);
+      return $changes;
+
+    case 'order-load':
+      if ($description = db_query("SELECT description FROM {uc_payment_quickpay} WHERE order_id = :id", array(':id' => $order->order_id))->fetchField()) {
+        $order->payment_details['description'] = $description;
+      }
+      break;
+
+    case 'order-save':
+      if (empty($order->payment_details['pm_quickpay_description'])) {
+        db_delete('uc_payment_quickpay')
+          ->condition('order_id', $order->order_id)
+          ->execute();
+      }
+      else {
+        db_merge('uc_payment_quickpay')
+          ->key(array(
+            'order_id' => $order->order_id,
+          ))
+          ->fields(array(
+            'description' => $order->payment_details['pm_quickpay_description'],
+          ))
+          ->execute();
+      }
+
+      break;
+  }
+
+}
+
+function uc_payment_method_quickpay_form ($form, &$form_state, $order) {
+$form['pm_quickpay_description'] = array(
+    '#type' => 'textfield',
+    '#size' => 32,
+    '#maxlength' => 64,
+    '#default_value' => $order->payment_details['description'],
+  );
+
+  return $form;
+}
