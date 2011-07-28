@@ -1,0 +1,254 @@
+<?php
+test
+/**
+ * @file
+ * Implements Quickpay payment services for use in Drupal Commerce.
+ */
+
+/**
+ * Implements hook_commerce_payment_method_info().
+ */
+function commerce_quickpay_commerce_payment_method_info() {
+  $payment_methods = array();
+
+  $payment_methods['quickpay'] = array(
+    'base' => 'commerce_quickpay',
+    'title' => t('Quickpay'),
+    'short_title' => t('Quickpay'),
+    'display_title' => t('Quickpay'),
+    'description' => t('Integrates Quickpay payment system'),
+    'terminal' => FALSE,
+    'offsite' => TRUE,
+    'offsite_autoredirect' => FALSE,
+  );
+
+  return $payment_methods;
+}
+
+/**
+ * Payment method callback: settings form.
+ *
+ * Returns form elements for the payment methods settings form included
+ * as part of the payment methodÕs enabling action in Rules
+ */
+function commerce_quickpay_settings_form($settings = NULL) {
+  $form = array();
+
+  $settings = (array) $settings + array(
+    'account' => '',
+    'merchant' => '',
+    'merchant_md5' => '',
+    'order_prefix' => '',
+    'auto_capture' => '',
+    'currency' => '',
+  );
+
+
+  // BASIC settings
+  $form['account'] = array(
+    '#type' 		=> 'checkbox',
+    '#title' 		=> t('Quickpay Test'),
+    '#description' 	=> 'Set the payments in test-mode',
+    '#default_value' 	=> $settings['account'],
+  );
+
+  $form['merchant'] = array(
+    '#type' 		=> 'textfield',
+    '#title'		=> t('Quickpay Merchant ID'),
+    '#description' 	=> t('Your Quickpay Merchant ID'), 
+    '#default_value' 	=> $settings['merchant'],
+  );
+
+  $form['merchant_md5'] = array(
+    '#type'		=> 'textfield',
+    '#title' 		=> t('Quickpay Merchant MD5'),
+    '#description' 	=> t('Your Quickpay Merchant MD5'), 
+    '#default_value' 	=> $settings['merchant_md5'],
+  );
+
+  $form['order_prefix'] = array(
+    '#type' 		=> 'textfield',
+    '#title' 		=> t('Quickpay Order Prefix'),
+    '#description' 	=> t('Your Quickpay Order Prefix'), 
+    '#default_value' 	=> $settings['order_prefix'],
+  );
+
+  $form['auto_capture'] = array(
+    '#type' 		=> 'radios',
+    '#title'		=> t('Quickpay Auto Capture'),
+    '#description' 	=> t('Select if Quickpay should auto capture non-shipable'), 
+    '#options' 		=> array('false' => ('Do not auto capture non shipables'), 'true' => ('Auto capture non-shipables')),
+    '#default_value' 	=> $settings['auto_capture'],
+    '#required'		=> TRUE
+  );
+
+  $form['currency'] = array(
+    '#type' 		=> 'radios',
+    '#title'		=> t('Quickpay Currency'),
+    '#description' 	=> t('Select which currency Quickpay should charge'), 
+    '#options' 		=> quickpay_get_currencies(),	
+    '#default_value' 	=> $settings['currency'],
+  );
+
+  // @TODO: LAYOUT settings
+  $form['#submit'][] = 'commerce_quickpay_settings_form_submit';
+
+  return $form;
+}
+
+
+/**
+ * Payment method callback: redirect form
+ *
+ * returns form elements that should be submitted to the redirected
+ * payment service; because of the array merge that happens upon return,
+ * the serviceÕs URL that should receive the POST variables should be set in
+ * the #action property of the returned form array
+ */
+function commerce_quickpay_redirect_form($form, &$form_state, $order, $payment_method) {
+  // Return an error if the enabling action's settings haven't been configured.
+  if (empty($payment_method['settings']['merchant'])) {
+    drupal_set_message(t('Quickpay is not configured for use. No Quickpay Merchant has been specified.'), 'error');
+    return array();
+  }
+
+  // Set feedback URLs
+  $settings = array(
+    // Return to the previous page when payment is canceled
+    'cancel_return' => url('checkout/' . $order->order_id . '/payment/back/' . $order->data['payment_redirect_key'], array('absolute' => TRUE)),
+
+    // Return to the payment redirect page for processing successful payments
+    'return' => url('checkout/' . $order->order_id . '/payment/return/' . $order->data['payment_redirect_key'], array('absolute' => TRUE)),
+
+    // Return the data from Quickpay Form
+    'callback' => url('quickpay/' . $order->order_number, array('absolute' => TRUE)),
+
+    // Specify the current payment method instance ID in the notify_url
+    'payment_method' => $payment_method['instance_id'],
+  );
+
+  return commerce_quickpay_build_redirect_form($form, $form_state, $order, $payment_method['settings'] + $settings);
+}
+
+
+/**
+ * Builds an Quickpay payment form from an order object.
+ */
+function commerce_quickpay_build_redirect_form($form, &$form_state, $order, $settings) {
+  $wrapper = entity_metadata_wrapper('commerce_order', $order);
+
+  $secret = $settings['merchant_md5'];
+
+  // Get financial info
+  $currency_code = $wrapper->commerce_order_total->currency_code->value();
+  $amount = $wrapper->commerce_order_total->amount->value();
+
+  // Build the data array that will be translated into hidden form values.
+  // NOTE: keys should be uppercase for the SHA-1 security string
+  $data = array(
+    // General parameters
+    'protocol'		=> '4',
+    'msgtype' 		=> 'authorize',
+    'merchant'		=> $settings['merchant'],
+    'language'		=> 'en',
+    'ordernumber'	=> $settings['order_prefix'].$order->order_number,
+    'amount'		=> '100',
+    'currency' 		=> $settings['currency'],
+    'continueurl'	=> $settings['return'],
+    'cancelurl'		=> $settings['cancel_return'],
+    'callbackurl'	=> $settings['return'],
+    'autocapture'	=> '1',
+    'cardtypelock'	=> '',
+    'group'		=> '11111',
+    'splitpayment'	=> '0',
+  );
+
+  // Redirect to Ogone Test or Prod URL
+
+  $url = 'https://secure.quickpay.dk/form/';
+  $form['#action'] = $url;
+
+
+$md5 = md5
+(
+	$data['protocol']. 
+	$data['msgtype']. 
+	$data['merchant']. 
+	$data['language'].
+	$data['ordernumber']. 
+	$data['amount']. 
+	$data['currency'].
+	$data['continueurl'].
+	$data['cancelurl'].
+	$data['callbackurl'].
+	$data['autocapture'].
+	$data['cardtypelock'].
+	$data['group'].
+	$data['splitpayment'].
+	$secret
+	);
+  
+  $data['md5check'] = $md5;
+
+  foreach ($data as $name => $value) {
+      $value = trim($value);
+      
+      // Add the value as a hidden form element
+      $form[$name] = array('#type' => 'hidden', '#value' => $value);
+  }
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Pay'),
+  );
+
+  return $form;
+}
+
+/**
+ * Process the payment transaction with the info received from Ogone
+ *
+ * @param $order
+ *   The loaded order that is being processed
+ * @param $payment_method
+ *   The payment method settings
+ * @param $feedback
+ *   The parameters received from Ogone regarding the payment
+ */
+function commerce_quickpay_process_transaction($order, $payment_method, $feedback) {
+  $transaction = commerce_payment_transaction_new('commerce_quickpay', $order->order_id);
+  $payment_status = commerce_quickpay_feedback_status($feedback['STATUS']);
+
+  // identifying data
+  $transaction->instance_id = $payment_method['instance_id'];
+  $transaction->remote_id = $feedback['PAYID'];
+  // payment amount details
+  $transaction->amount = $order->commerce_order_total[LANGUAGE_NONE][0]['amount'];
+  $transaction->currency_code = $order->commerce_order_total[LANGUAGE_NONE][0]['currency_code'];
+  // payment status
+  $transaction->remote_status = $feedback['STATUS'];
+  $transaction->status = $payment_status['code'];
+  $transaction->message = $payment_status['message'];
+  commerce_payment_transaction_save($transaction);
+}
+
+function quickpay_get_currencies(){
+  $options = array();
+  foreach (commerce_currencies(TRUE) as $currency_code => $currency) {
+    $options[$currency_code] = t('@code - !name', array('@code' => $currency['code'], '@symbol' => $currency['symbol'], '!name' => $currency['name']));
+
+    if (!empty($currency['symbol'])) {
+      $options[$currency_code] .= ' - ' . check_plain($currency['symbol']);
+    }
+  }
+  return $options;
+
+}
+
+/**
+ * Implements hook_redirect_form_validate.
+ */
+function commerce_quickpay_redirect_form_validate($order, $payment_method) {
+	die(var_dump($_REQUEST));
+
+}
