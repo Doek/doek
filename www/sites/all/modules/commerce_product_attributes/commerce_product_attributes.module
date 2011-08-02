@@ -1,0 +1,297 @@
+<?php
+
+/**
+ * @file
+ * This module adds some improvements to the Drupal Commerce core.
+ */
+
+
+/**
+ * Implementation of hook_entity_info_alter
+ * 
+ * We need an additional view_mode. By altering the entity we can add
+ * this view mode.
+ */
+function commerce_product_attributes_entity_info_alter(&$entity_info) {
+  // Alter the commerce_order entity to add the additional view mode
+  $entity_info['commerce_product']['view modes']['attribute_view'] = array(
+    'label' => t('Attribute View'),
+    'custom settings' => FALSE,
+  );
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function commerce_product_attributes_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'commerce_product_attributes') . '/includes/views',
+  );
+}
+
+/**
+ * Implements hook_attribute_field()
+ */
+function commerce_product_attributes_attribute_field(&$element, &$line_item) {
+  // Add displayed attributes on product page also in shopping cart:
+  $line_item_wrapper = entity_metadata_wrapper('commerce_line_item', $line_item);
+  $product = $line_item_wrapper->commerce_product;
+  
+  $output = field_attach_view('commerce_product', $product->value(), 'attribute_view');
+  $element['attributes'][] = array(
+    '#markup' => '<div class="commerce-product-attributes-wrapper">' . drupal_render($output) . '</div>',
+  );  
+  
+}
+
+
+/**
+ * Implements hook_theme().
+ */
+function commerce_product_attributes_theme() {
+  return array(
+    'commerce_product_attributes_item_title' => array(
+      'variables' => array('item' => NULL, 'path' => NULL, 'options' => NULL, 'create_link' => NULL),
+    ),
+  );
+}
+
+
+
+function theme_commerce_product_attributes_item_title($variables) {
+  $item = $variables['item'];
+  $path = $variables['path'];
+  $options = $variables['options'];
+  $create_link = $variables['create_link'];
+  
+  $output = '<div class="line-item-title">';
+  
+  if ($create_link) {
+    $output .= l(commerce_line_item_title($item), $path, $options);
+  }
+  else {
+    $output .= commerce_line_item_title($item);
+  }
+  $output .= '</div>';
+  
+  return $output;
+}
+
+
+/**
+ * Implementation of hook_form_alter()
+ *
+ * Here we modify the add to cart form. 
+ */
+function commerce_product_attributes_form_alter(&$form, &$form_state, $form_id) {    
+  if (strstr($form_id, 'commerce_cart_add_to_cart_form')) {
+    if (isset($form_state['line_item'])) {
+      $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Update cart'),
+        '#weight' => 10,
+      );
+      
+      if ($form['quantity']['#type'] == 'textfield') {
+        $form['quantity']['#default_value'] = (float)$form_state['line_item']->quantity->value();
+      }
+      else {
+        $form['quantity']['#value'] = (float)$form_state['line_item']->quantity->value();
+      }
+      
+      
+      
+      // Remove the default submit handler, we need a update handler
+      foreach ($form['#submit'] as $handler_id => $handler) {
+        if ($handler == 'commerce_cart_add_to_cart_form_submit') {
+          unset($form['#submit'][$handler_id]);
+        }
+        // Ensure that our handler is only assign once
+        elseif ($handler == 'commerce_product_attributes_add_to_cart_form_submit') {
+          unset($form['#submit'][$handler_id]);
+        }
+        
+        $form['#submit'][] = 'commerce_product_attributes_add_to_cart_form_submit';
+      }
+      
+    }
+  }
+  
+
+}
+
+/**
+ * Implements hook_forms().
+ *
+ * To provide distinct form IDs for add to cart forms, the product IDs
+ * referenced by the form are appended to the base ID,
+ * commerce_cart_add_to_cart_form. When such a form is built or submitted, this
+ * function will return the proper callback function to use for the given form.
+ */
+function commerce_product_attributes_forms($form_id, $args) {
+  $forms = array();
+
+  // Construct a valid cart form ID from the arguments.
+  if (strpos($form_id, 'commerce_cart_add_to_cart_form_') === 0) {
+    $forms[$form_id] = array(
+      'wrapper_callback' => 'commerce_product_attributes_add_to_cart_form_wrapper',
+    );
+  }
+
+  return $forms;
+}
+
+
+function commerce_product_attributes_add_to_cart_form_wrapper($form, &$form_state, $product_ids, $show_quantity = FALSE, $default_quantity = 1, $context = array(), $display_uri = NULL) {
+  
+  if (isset($_GET['line_item_id'])) {
+    $form_state['line_item'] = entity_metadata_wrapper('commerce_line_item', commerce_line_item_load($_GET['line_item_id']));
+    if (!isset($form_state['values']['product_id']) && isset($form_state['line_item']->commerce_product) && is_object($form_state['line_item']->commerce_product)) {
+      $form_state['values']['product_id'] = $form_state['line_item']->commerce_product->product_id->value();
+    }
+  }
+  
+  return $form;
+}
+
+
+function commerce_product_attributes_add_to_cart_form_submit($form, &$form_state) {
+
+  if (isset($form_state['line_item'])) {
+    $product_id = $form_state['values']['product_id'];
+    $product = $form_state['products'][$product_id];
+
+    // Add the product to the specified shopping cart.
+    $form_state['line_item'] = commerce_attribute_cart_product_update(
+      $form_state['values']['uid'],
+      $product_id,
+      $form_state['values']['quantity'],
+      $form_state['values']['display_uri'],
+      $form_state['line_item']->line_item_id->value()
+    );
+    
+
+    drupal_goto('cart');
+  
+  }
+  else {
+    commerce_cart_add_to_cart_form_submit($form, $form_state);
+  }
+}
+
+
+
+/**
+ * Adds the specified product to a customer's shopping cart.
+ *
+ * @param $uid
+ *   The uid of the user whose cart you are adding the product to.
+ * @param $product_id
+ *   The ID of the product to add to the cart.
+ * @param $quantity
+ *   The quantity of this product to add to the cart.
+ * @param $line_item_id
+ *   The line item to update
+ * @param $display_uri
+ *   A URI array as returned by entity_uri() indicating the display to link the
+ *     product line item to; defaults to NULL for no display.
+ *
+ * @return
+ *   The new or updated line item object or FALSE on failure.
+ */
+function commerce_attribute_cart_product_update($uid, $product_id, $quantity, $display_uri = NULL, $line_item_id) {
+  // Load and validate the specified product ID.
+  $product = commerce_product_load($product_id);
+
+  // Fail if the product does not exist or is disabled.
+  if (empty($product) || !$product->status) {
+    return FALSE;
+  }
+
+  // First attempt to load the customer's shopping cart order.
+  $order = commerce_cart_order_load($uid);
+
+  // If no order existed, create one now.
+  if (empty($order)) {
+    $order = commerce_cart_order_new($uid);
+  }
+  $line_item = commerce_line_item_load($line_item_id);
+  $line_item_wrapper = entity_metadata_wrapper('commerce_line_item', $line_item);
+  
+  if (empty($line_item_wrapper)) {
+    return;
+  }
+
+  // Wrap the order for easy access to field data.
+  $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
+
+  // Invoke the product prepare event with the shopping cart order.
+  rules_invoke_all('commerce_cart_product_prepare', $order, $product, $quantity);
+  
+  $line_item_wrapper->quantity = $quantity;
+  $line_item_wrapper->commerce_product = $product_id;
+  
+  commerce_line_item_save($line_item);
+  
+  entity_get_controller('commerce_line_item')->resetCache(array($line_item->line_item_id));
+
+  // Invoke the product add event with the newly saved or updated line item.
+  // TODO: Implement this rule event:
+  //rules_invoke_all('commerce_cart_product_update', $order, $product, $quantity, $line_item);
+
+  // Return the line item.
+  return $line_item;
+}
+
+
+
+
+
+function commerce_product_attributes_add_to_cart_form_attributes_refresh($form, $form_state) {
+  $commands = array();
+
+  // Render the form afresh to capture any changes to the available widgets
+  // based on the latest selection.
+  $commands[] = ajax_command_replace('.' . drupal_html_class($form['#form_id']), drupal_render($form));
+
+  // Then render and return the various product fields that might need to be
+  // updated on the page.
+  
+  if (!empty($form_state['context'])) {
+    $product = $form_state['default_product'];
+
+    foreach (field_info_instances('commerce_product', $product->type) as $product_field_name => $product_field) {
+      $class = drupal_html_class(implode('-', array($form_state['context']['class_prefix'], 'product', $product_field_name)));
+      
+
+      $element = field_view_field('commerce_product', $product, $product_field_name, $form_state['context']['view_mode']);
+      
+      // Allow other modules to modify the product output in a
+      // refresh context
+      $hook = 'attribute_product_field_alter';
+      foreach (module_implements($hook) as $module_name) {
+        $function = $module_name . '_' . $hook;
+        if (function_exists($function)) {
+          $function($element, $product, $product_field_name, $form, $form_state);
+        }
+      }
+      
+      $element += array(
+        '#prefix' => '<span class="' . $class . '">',
+        '#suffix' => '</span>',
+      );
+
+      $commands[] = ajax_command_replace('.' . $class, drupal_render($element));
+    }
+  }
+
+  return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+
+
+
+
+
+

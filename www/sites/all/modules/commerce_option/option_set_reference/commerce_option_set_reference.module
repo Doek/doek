@@ -1,0 +1,252 @@
+<?php
+
+function commerce_option_set_reference_field_info() {
+  return array(
+    'commerce_option_set_reference' => array(
+      'label' => t('Option Set Reference'),
+      'description' => t('This field stores the ID of the option set.'),
+      'settings' => array(),
+      'instance_settings' => array(),
+      'default_widget' => 'commerce_option_set_reference_select_list',
+      'default_formatter' => 'commerce_option_set_reference_form',
+      //'property_type' => 'commerce_option_set',
+      //'property_callbacks' => array('commerce_product_reference_property_info_callback'),
+    ),
+  );
+}
+
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function commerce_option_set_reference_field_formatter_info() {
+  return array(
+    'commerce_option_set_reference_form' => array(
+      'label' => t('Option Set: Form'),
+      'description' => t('Display a form for the customer to enter the options.'),
+      'field types' => array('commerce_option_set_reference'),
+    ),
+    'commerce_option_set_reference_attribute_view' => array(
+      'label' => t('Option Set: Attribute View'),
+      'description' => t('Display the options as attribute view..'),
+      'field types' => array('commerce_option_set_reference'),
+    ),
+  );
+}
+
+
+function commerce_option_set_reference_field_is_empty($item, $field) {
+  // set_id = 0 is empty too, which is exactly what we want.
+  return empty($item['set_id']);
+}
+
+
+function commerce_option_set_reference_field_formatter_view($entity_type, $object, $field, $instance, $langcode, $items, $display) {
+  $result = array();
+
+  // Collect the list of product IDs.
+  $product_ids = array();
+
+  if($display['type'] == 'commerce_option_set_reference_form') {
+    /*foreach ($items as $delta => $item) {
+      
+      $option_set = commerce_option_set_load($item['set_id']);
+      
+      if(is_array($option_set)) {
+        // Create new option:
+        $option = entity_create('commerce_option', array('set_id' => $option_set['set_id']));
+      }
+    }*/
+  }
+  if($display['type'] == 'commerce_option_set_reference_attribute_view') {
+    foreach ($items as $delta => $item) {
+      
+      $option_set = commerce_option_set_load($item['set_id']);
+      
+      if(is_array($option_set)) {
+        
+      }
+    }
+  }
+
+  return $result;
+}
+
+
+
+
+
+/**
+ * Implements hook_field_widget_info().
+ *
+ * Defines widgets available for use with field types as specified in each
+ * widget's $info['field types'] array.
+ */
+function commerce_option_set_reference_field_widget_info() {
+  $widgets = array();
+
+  // Define an autocomplete textfield widget for product referencing that works
+  // like the Term Reference autocomplete widget.
+  $widgets['commerce_option_set_reference_select_list'] = array(
+    'label' => t('Select list'),
+    'description' => t('Display the list of option sets as drop down.'),
+    'field types' => array('commerce_option_set_reference'),
+  );
+
+  return $widgets;
+}
+
+
+
+
+
+
+
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function commerce_option_set_reference_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+
+  if($instance['widget']['type'] == 'commerce_option_set_reference_select_list') {
+    $option_sets = commerce_option_get_sets();
+    
+    foreach($option_sets as $set) {
+      $options[$set->set_id] = $set->name;
+    }
+        
+    $element['set_id'] = $element + array(
+      '#type' => 'select',
+      '#default_value' => isset($items[$delta]['set_id']) ? $items[$delta]['set_id'] : NULL,
+      '#attributes' => array('class' => array('commerce-option-set-reference')),
+      '#options' => $options,
+    );
+  }
+
+  return $element;
+}
+
+
+/**
+ * Implementation of hook_form_alter()
+ *
+ * Here we modify the add to cart form. 
+ */
+function commerce_option_form_alter(&$form, &$form_state, $form_id) {
+  if (strstr($form_id, 'commerce_cart_add_to_cart_form')) {
+    
+    if (isset($form_state['default_product'])) {
+      $current_product = $form_state['default_product'];
+    }
+    elseif (isset($form_state['products'])) {
+      $current_product = reset($form_state['products']);
+    }
+    else {
+      return;
+    }
+    
+    $someFieldIsAdded = false;
+
+    // Iterates of the fields of this product. We search for 
+    // option set reference fields. 
+    foreach ($current_product as $field_name => $field) {
+      $field_info = field_info_field($field_name);
+      $type = $field_info['type'];
+      
+      if ($type == 'commerce_option_set_reference') {
+        $lang_code = field_language('commerce_product', $current_product, $field_name);
+        
+        foreach($field[$lang_code] as $id => $set_id) {
+          $option = entity_create('commerce_option', $set_id);
+          
+          $form_state['commerce_option'][$field_name][$id] = $option;
+          field_attach_form('commerce_option', $option, $form, $form_state);
+          $someFieldIsAdded = true;
+        }
+      }
+    }
+    
+    // print_r($form);
+    if (isset($form_state['bundle'])) {
+      die();
+      
+      foreach ($form_state['bundle'] as $id => &$bundle_set) {
+        $sub_product = $form_state['bundle'][$id]['default_product'];
+        
+        echo 'asdf';
+        die();
+        
+        // Iterates of the fields of this product. We search for 
+        // option set reference fields. 
+        foreach ($sub_product as $field_name => $field) {
+          $field_info = field_info_field($field_name);
+          $type = $field_info['type'];
+      
+          if ($type == 'commerce_option_set_reference') {
+            $lang_code = field_language('commerce_product', $current_product, $field_name);
+        
+            foreach($field[$lang_code] as $delta => $set_id) {
+              $option = entity_create('commerce_option', $set_id);
+          
+              $form_state[$id]['commerce_option'][$field_name][$delta] = $option;
+              field_attach_form('commerce_option', $option, $form, $form_state);
+              $someFieldIsAdded = true;
+            }
+          }
+        }
+        
+      }  
+    }
+    
+    if ($someFieldIsAdded) {
+      $form['#submit'][] = 'commerce_option_add_to_cart_submit';
+    }
+  }
+
+}
+
+
+function commerce_option_add_to_cart_submit($form, $form_state){
+    
+  if (isset($form_state['default_product'])) {
+    $current_product = $form_state['default_product'];
+  }
+  elseif (isset($form_state['products'])) {
+    $current_product = reset($form_state['products']);
+  }
+  else {
+    return;
+  }
+  
+  foreach($current_product as $field_name => $field)
+  {
+    $field_info = field_info_field($field_name);
+    $type = $field_info['type'];
+    
+    if($type == 'commerce_option_set_reference')
+    {
+      $lang_code = field_language('commerce_product', $current_product, $field_name);
+      
+      foreach($field[$lang_code] as $id => $set_id) {
+        
+        $option = $form_state['commerce_option'][$field_name][$id];
+        
+        // Notify field widgets.
+        field_attach_submit('commerce_option', $option, $form, $form_state);
+        
+        $option->line_item_id = $form_state['line_item']->line_item_id;
+        
+        // Save the product.
+        commerce_option_save($option);
+
+      }
+    }
+  }
+  
+}
+
+
+
+
+
+

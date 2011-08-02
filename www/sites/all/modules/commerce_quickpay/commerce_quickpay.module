@@ -1,5 +1,4 @@
 <?php
-test
 /**
  * @file
  * Implements Quickpay payment services for use in Drupal Commerce.
@@ -19,9 +18,8 @@ function commerce_quickpay_commerce_payment_method_info() {
     'description' => t('Integrates Quickpay payment system'),
     'terminal' => FALSE,
     'offsite' => TRUE,
-    'offsite_autoredirect' => FALSE,
+    'offsite_autoredirect' => TRUE,
   );
-
   return $payment_methods;
 }
 
@@ -121,7 +119,7 @@ function commerce_quickpay_redirect_form($form, &$form_state, $order, $payment_m
     'return' => url('checkout/' . $order->order_id . '/payment/return/' . $order->data['payment_redirect_key'], array('absolute' => TRUE)),
 
     // Return the data from Quickpay Form
-    'callback' => url('quickpay/' . $order->order_number, array('absolute' => TRUE)),
+    'callback' => 'http://doek.dk/sites/all/modules/commerce_quickpay/quickpay_return.php',
 
     // Specify the current payment method instance ID in the notify_url
     'payment_method' => $payment_method['instance_id'],
@@ -156,7 +154,7 @@ function commerce_quickpay_build_redirect_form($form, &$form_state, $order, $set
     'currency' 		=> $settings['currency'],
     'continueurl'	=> $settings['return'],
     'cancelurl'		=> $settings['cancel_return'],
-    'callbackurl'	=> $settings['return'],
+    'callbackurl'	=> $settings['callback'],
     'autocapture'	=> '1',
     'cardtypelock'	=> '',
     'group'		=> '11111',
@@ -205,32 +203,6 @@ $md5 = md5
   return $form;
 }
 
-/**
- * Process the payment transaction with the info received from Ogone
- *
- * @param $order
- *   The loaded order that is being processed
- * @param $payment_method
- *   The payment method settings
- * @param $feedback
- *   The parameters received from Ogone regarding the payment
- */
-function commerce_quickpay_process_transaction($order, $payment_method, $feedback) {
-  $transaction = commerce_payment_transaction_new('commerce_quickpay', $order->order_id);
-  $payment_status = commerce_quickpay_feedback_status($feedback['STATUS']);
-
-  // identifying data
-  $transaction->instance_id = $payment_method['instance_id'];
-  $transaction->remote_id = $feedback['PAYID'];
-  // payment amount details
-  $transaction->amount = $order->commerce_order_total[LANGUAGE_NONE][0]['amount'];
-  $transaction->currency_code = $order->commerce_order_total[LANGUAGE_NONE][0]['currency_code'];
-  // payment status
-  $transaction->remote_status = $feedback['STATUS'];
-  $transaction->status = $payment_status['code'];
-  $transaction->message = $payment_status['message'];
-  commerce_payment_transaction_save($transaction);
-}
 
 function quickpay_get_currencies(){
   $options = array();
@@ -249,6 +221,86 @@ function quickpay_get_currencies(){
  * Implements hook_redirect_form_validate.
  */
 function commerce_quickpay_redirect_form_validate($order, $payment_method) {
-	die(var_dump($_REQUEST));
 
+	$server = mysql_connect('localhost', 'doek', 'yixWccPY');
+	$DB = mysql_select_db('doek_quickpay', $server);
+
+	$sql = "SELECT * FROM quickpay_info WHERE ordernumber = '".$payment_method['settings']['order_prefix'].$order->order_id."'";
+	$result = mysql_query($sql);
+
+	while($row = mysql_fetch_assoc($result)){
+		$feedback = $row;
+		$row['id'] = '';
+		$string = implode('', $row);
+		$string = str_replace($row['md5check'],'',$string).$payment_method['settings']['merchant_md5'];
+		$row_secret = $row['md5check'];
+	}
+	if($string == $row_secret){
+		commerce_quickpay_process_transaction($order, $payment_method, $feedback);
+		return true;
+	}
+	else{
+		commerce_quickpay_process_transaction($order, $payment_method, $feedback);
+		return true;
+	}
 }
+
+/**
+ * Process the payment transaction with the info received from Quickpay
+ *
+ * @param $order
+ *   The loaded order that is being processed
+ * @param $payment_method
+ *   The payment method settings
+ * @param $feedback
+ *   The parameters received from Quickpay regarding the payment
+ */
+function commerce_quickpay_process_transaction($order, $payment_method, $feedback) {
+  $transaction = commerce_payment_transaction_new('commerce_quickpay', $order->order_id);
+  $payment_status = commerce_quickpay_feedback_status($feedback['qpstat']);
+
+  // identifying data
+  $transaction->instance_id = $payment_method['instance_id'];
+  $transaction->remote_id = $feedback['transaction'];
+  // payment amount details
+  $transaction->amount = $order->commerce_order_total[LANGUAGE_NONE][0]['amount'];
+  $transaction->currency_code = $order->commerce_order_total[LANGUAGE_NONE][0]['currency_code'];
+  // payment status
+  $transaction->remote_status = $feedback['qpstat'];
+  $transaction->status = $payment_status['code'];
+  $transaction->message = $payment_status['message'];
+  
+  commerce_payment_transaction_save($transaction);
+}
+
+/**
+ * Get a payment status and message based on Quickpay status ID
+ * @param $status
+ *   received Quickpay status ID
+ * @return array
+ *   key 'code' contains the commerce status
+ *   key 'message' contains a textual representation of the Quickpay status ID
+ */
+function commerce_quickpay_feedback_status($status) {
+ switch ($status) {
+  case '000': // Accepted
+    return array('code' => COMMERCE_PAYMENT_STATUS_SUCCESS, 'message' => t('Transaction Accepted'));
+    break;
+  case '001': // Rejected
+  case '003': // Expired
+  case '008': // Bad parameters sent to quickpay (could be user error)
+    // Handled as failed.
+    return array('code' => COMMERCE_PAYMENT_STATUS_FAILURE, 'message' => t('Transaction Error'));
+    break;
+  case '002': // Communication error
+  case '004': // Wrong status (not authorized)
+  case '005': // Authorization expired
+  case '006': // Error at PBS
+  case '007': // Error at QuickPay
+    // All these are handled as internal error.
+    return array('code' => COMMERCE_PAYMENT_STATUS_FAILURE, 'message' => t('Transaction Error'));
+  default:
+    return 'unknown';
+  }
+}
+
