@@ -24,6 +24,6 @@ if (isset($fields['comment_count'])){
 	</div>
 <div class="clearfix"></div>
 
-<p class="read_more"><?php echo $fields['view_node']->content; ?></p>
+<p class="read_more"><?php echo $fields['view_node']->content; ?></p><p class="signup"><?php if(isset($fields['node_link']->content)){echo $fields['node_link']->content;} ?></p>
 <br />
 </div>

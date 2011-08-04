@@ -49,10 +49,13 @@ class commerce_product_attributes_handler_field_attributes extends views_handler
     $line_item_id = $this->get_value($values, 'line_item_id');
     $line_item = commerce_line_item_load($line_item_id);
     $line_item_wrapper = entity_metadata_wrapper('commerce_line_item', $line_item);
-
+    
+    $properties = $line_item_wrapper->getPropertyInfo();
+    
     $element = array();
-    $path = $line_item_wrapper->commerce_display_path->value();
-    if ($this->options['link_with_line_item']) {
+    
+    if (isset($properties['commerce_display_path']) && $this->options['link_with_line_item']) {
+      $path = $line_item_wrapper->commerce_display_path->value();
       $options = array(
         'query' => array(
           'line_item_id' => $line_item_id,
@@ -61,6 +64,7 @@ class commerce_product_attributes_handler_field_attributes extends views_handler
       );
     }
     else {
+      $path = NULL;
       $options = array();
     }
     

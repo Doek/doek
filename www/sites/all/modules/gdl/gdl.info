@@ -1,0 +1,6 @@
+name = Goer det laekkert
+description = Fordeler fraggler paa tjanser
+package = DOEK Intro
+core = 7.x
+
+files[] = gdl.module

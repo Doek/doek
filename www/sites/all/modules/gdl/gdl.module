@@ -1,0 +1,41 @@
+<?php
+function gdl_menu() {
+	$items['gdl/execute'] = array('page callback' => 'gdl_execute', 'access callback' => true);
+	return $items;
+}
+
+function gdl_execute() {
+	$users = user_load_multiple(array(), array('field_study_year' => '2011'));
+	$fraggler = array();
+	foreach ($users as $user) {
+		$fraggler.push(array('id' => $user->uid, 'tjanser' => array()));
+	}
+
+	foreach($tjanser as $tjans) {
+		uasort($fraggler, 'cmp');
+		if (isFraggleEligeble($fraggler[0], $tjans)) {
+			$fraggle_tjanser[$fraggler[0]->uid].push($tjans);
+		}
+	}
+	die(var_dump($fraggler));
+}
+
+function isFraggleEligeble($fraggle, $tjans) {
+	$eligeble = true;
+	foreach ($fraggler['tjanser'] as $fraggletjans) {
+		if ($fraggletjans['type'] == $tjans['type'] || $fraggletjans['dag'] == $tjans['dag']) {
+			$eligeble = false;
+			break;
+		}
+	}
+	return $eligeble;
+}
+
+function cmp($a, $b) {
+    if ($a['tjanser'].size() == $b['tjanser'].size()) {
+        return 0;
+    }
+    return ($a['tjanser'].size() < $b['tjanser'].size()) ? -1 : 1;
+}
+
+?>

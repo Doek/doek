@@ -22,6 +22,6 @@ $message .= $sql;
 
 mysql_query($sql);
 
-mail('henrikthorn@gmail.com', 'Quickpay Order-Reply', $message);
+mail('peter.joelving@gmail.com', 'Quickpay Order-Reply', $message);
 
 ?>

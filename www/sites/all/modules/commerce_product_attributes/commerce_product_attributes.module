@@ -34,6 +34,11 @@ function commerce_product_attributes_views_api() {
  * Implements hook_attribute_field()
  */
 function commerce_product_attributes_attribute_field(&$element, &$line_item) {
+  
+  if ($line_item->type != 'product') {
+    return;
+  }
+  
   // Add displayed attributes on product page also in shopping cart:
   $line_item_wrapper = entity_metadata_wrapper('commerce_line_item', $line_item);
   $product = $line_item_wrapper->commerce_product;
@@ -67,7 +72,7 @@ function theme_commerce_product_attributes_item_title($variables) {
   
   $output = '<div class="line-item-title">';
   
-  if ($create_link) {
+  if ($create_link && !empty($path)) {
     $output .= l(commerce_line_item_title($item), $path, $options);
   }
   else {
@@ -80,46 +85,56 @@ function theme_commerce_product_attributes_item_title($variables) {
 
 
 /**
- * Implementation of hook_form_alter()
+ * Alternative implementation of commerce_cart_add_to_cart_form_attributes_refresh()
  *
- * Here we modify the add to cart form. 
+ * We need this because, the given hook (hook_commerce_cart_attributes_refresh) alows you to change
+ * each single element. We can't change the $commands, it is to complicated. So we 
+ * need to hook earlier.
+ *
  */
-function commerce_product_attributes_form_alter(&$form, &$form_state, $form_id) {    
-  if (strstr($form_id, 'commerce_cart_add_to_cart_form')) {
-    if (isset($form_state['line_item'])) {
-      $form['submit'] = array(
-        '#type' => 'submit',
-        '#value' => t('Update cart'),
-        '#weight' => 10,
+function commerce_product_attributes_add_to_cart_form_attributes_refresh($form, $form_state) {
+  $commands = array();
+
+  // Render the form afresh to capture any changes to the available widgets
+  // based on the latest selection.
+  $commands[] = ajax_command_replace('.' . drupal_html_class($form['#form_id']), drupal_render($form));
+
+  // Then render and return the various product fields that might need to be
+  // updated on the page.
+  if (!empty($form_state['context'])) {
+    $product = $form_state['default_product'];
+
+    foreach (field_info_instances('commerce_product', $product->type) as $product_field_name => $product_field) {
+      $class = drupal_html_class(implode('-', array($form_state['context']['class_prefix'], 'product', $product_field_name)));
+      
+
+      $element = field_view_field('commerce_product', $product, $product_field_name, $form_state['context']['view_mode']);
+      
+      // Allow other modules to modify the product output in a
+      // refresh context
+      $hook = 'attribute_product_field_alter';
+      foreach (module_implements($hook) as $module_name) {
+        $function = $module_name . '_' . $hook;
+        if (function_exists($function)) {
+          $function($element, $product, $product_field_name, $form, $form_state);
+        }
+      }
+      
+      $element += array(
+        '#prefix' => '<span class="' . $class . '">',
+        '#suffix' => '</span>',
       );
-      
-      if ($form['quantity']['#type'] == 'textfield') {
-        $form['quantity']['#default_value'] = (float)$form_state['line_item']->quantity->value();
-      }
-      else {
-        $form['quantity']['#value'] = (float)$form_state['line_item']->quantity->value();
-      }
-      
-      
-      
-      // Remove the default submit handler, we need a update handler
-      foreach ($form['#submit'] as $handler_id => $handler) {
-        if ($handler == 'commerce_cart_add_to_cart_form_submit') {
-          unset($form['#submit'][$handler_id]);
-        }
-        // Ensure that our handler is only assign once
-        elseif ($handler == 'commerce_product_attributes_add_to_cart_form_submit') {
-          unset($form['#submit'][$handler_id]);
-        }
-        
-        $form['#submit'][] = 'commerce_product_attributes_add_to_cart_form_submit';
-      }
-      
+
+      $commands[] = ajax_command_replace('.' . $class, drupal_render($element));
     }
   }
   
+  // Allow other modules to add arbitrary AJAX commands on the refresh.
+  drupal_alter('commerce_cart_attributes_refresh', $commands, $form, $form_state);
 
+  return array('#type' => 'ajax', '#commands' => $commands);
 }
+
 
 /**
  * Implements hook_forms().
@@ -128,7 +143,7 @@ function commerce_product_attributes_form_alter(&$form, &$form_state, $form_id) 
  * referenced by the form are appended to the base ID,
  * commerce_cart_add_to_cart_form. When such a form is built or submitted, this
  * function will return the proper callback function to use for the given form.
- */
+ *//*
 function commerce_product_attributes_forms($form_id, $args) {
   $forms = array();
 
@@ -137,40 +152,107 @@ function commerce_product_attributes_forms($form_id, $args) {
     $forms[$form_id] = array(
       'wrapper_callback' => 'commerce_product_attributes_add_to_cart_form_wrapper',
     );
+    
   }
+  
 
   return $forms;
 }
 
 
-function commerce_product_attributes_add_to_cart_form_wrapper($form, &$form_state, $product_ids, $show_quantity = FALSE, $default_quantity = 1, $context = array(), $display_uri = NULL) {
+
+function commerce_product_attributes_add_to_cart_form_wrapper($form, &$form_state, $line_item, $show_quantity = FALSE, $default_quantity = 1, $context = array(), $display_uri = NULL) {
   
   if (isset($_GET['line_item_id'])) {
-    $form_state['line_item'] = entity_metadata_wrapper('commerce_line_item', commerce_line_item_load($_GET['line_item_id']));
+    $form_state['pre_selected_line_item'] = entity_metadata_wrapper('commerce_line_item', commerce_line_item_load($_GET['line_item_id']));
     if (!isset($form_state['values']['product_id']) && isset($form_state['line_item']->commerce_product) && is_object($form_state['line_item']->commerce_product)) {
       $form_state['values']['product_id'] = $form_state['line_item']->commerce_product->product_id->value();
     }
+    
   }
   
   return $form;
+}*/
+
+
+/**
+ * Implementation of hook_form_alter()
+ *
+ * Here we modify the add to cart form. 
+ *//*
+function commerce_product_attributes_form_alter(&$form, &$form_state, $form_id) {    
+  if (strstr($form_id, 'commerce_cart_add_to_cart_form')) {
+    if (isset($form_state['pre_selected_line_item'])) {
+      $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Update cart'),
+        '#weight' => 10,
+      );
+      
+    
+      // Try to set the quantity from the line item (comes from the URL):
+      if (isset($form_state['pre_selected_line_item'])) {
+        $line_item = $form_state['pre_selected_line_item'];
+        
+        if (!$line_item instanceof EntityMetadataWrapper) {
+          $line_item = entity_metadata_wrapper('commerce_line_item', $line_item);
+        }
+        
+        
+        $properties = $line_item->getPropertyInfo();
+        
+        if (isset($properties['quantity'])) {
+          if ($form['quantity']['#type'] == 'textfield') {
+            $form['quantity']['#default_value'] = (float)$line_item->quantity->value();
+          }
+          else {
+            $form['quantity']['#value'] = (float)$line_item->quantity->value();
+          }
+        }      
+      }
+      
+      // Remove the default submit handler, we need a update handler
+      foreach ($form['#submit'] as $handler_id => $handler) {
+        if ($handler == 'commerce_cart_add_to_cart_form_submit') {
+        //  unset($form['#submit'][$handler_id]);
+        }
+        // Ensure that our handler is only assign once
+        elseif ($handler == 'commerce_product_attributes_add_to_cart_form_submit') {
+          unset($form['#submit'][$handler_id]);
+        }
+        
+        //$form['#submit'][] = 'commerce_product_attributes_add_to_cart_form_submit';
+      }
+      
+    }
+  }
+  
+
 }
 
 
 function commerce_product_attributes_add_to_cart_form_submit($form, &$form_state) {
+  
+  if (isset($form_state['pre_selected_line_item'])) {
+    $line_item = $form_state['pre_selected_line_item'];
 
-  if (isset($form_state['line_item'])) {
+    if (!$line_item instanceof EntityMetadataWrapper) {
+      $line_item = entity_metadata_wrapper('commerce_line_item', $line_item);
+    }
+
     $product_id = $form_state['values']['product_id'];
-    $product = $form_state['products'][$product_id];
+    if (isset($form_state['products'])) {
+      $product = $form_state['products'][$product_id];
 
-    // Add the product to the specified shopping cart.
-    $form_state['line_item'] = commerce_attribute_cart_product_update(
-      $form_state['values']['uid'],
-      $product_id,
-      $form_state['values']['quantity'],
-      $form_state['values']['display_uri'],
-      $form_state['line_item']->line_item_id->value()
-    );
-    
+      // Add the product to the specified shopping cart.
+      $form_state['line_item'] = commerce_attribute_cart_product_update(
+        $form_state['values']['uid'],
+        $product_id,
+        $form_state['values']['quantity'],
+        $form_state['values']['display_uri'],
+        $line_item->line_item_id->value()
+      );
+    }
 
     drupal_goto('cart');
   
@@ -178,7 +260,7 @@ function commerce_product_attributes_add_to_cart_form_submit($form, &$form_state
   else {
     commerce_cart_add_to_cart_form_submit($form, $form_state);
   }
-}
+}*/
 
 
 
@@ -199,7 +281,7 @@ function commerce_product_attributes_add_to_cart_form_submit($form, &$form_state
  *
  * @return
  *   The new or updated line item object or FALSE on failure.
- */
+ *//*
 function commerce_attribute_cart_product_update($uid, $product_id, $quantity, $display_uri = NULL, $line_item_id) {
   // Load and validate the specified product ID.
   $product = commerce_product_load($product_id);
@@ -243,51 +325,25 @@ function commerce_attribute_cart_product_update($uid, $product_id, $quantity, $d
   // Return the line item.
   return $line_item;
 }
+*/
 
 
 
 
 
-function commerce_product_attributes_add_to_cart_form_attributes_refresh($form, $form_state) {
-  $commands = array();
 
-  // Render the form afresh to capture any changes to the available widgets
-  // based on the latest selection.
-  $commands[] = ajax_command_replace('.' . drupal_html_class($form['#form_id']), drupal_render($form));
 
-  // Then render and return the various product fields that might need to be
-  // updated on the page.
-  
-  if (!empty($form_state['context'])) {
-    $product = $form_state['default_product'];
 
-    foreach (field_info_instances('commerce_product', $product->type) as $product_field_name => $product_field) {
-      $class = drupal_html_class(implode('-', array($form_state['context']['class_prefix'], 'product', $product_field_name)));
-      
 
-      $element = field_view_field('commerce_product', $product, $product_field_name, $form_state['context']['view_mode']);
-      
-      // Allow other modules to modify the product output in a
-      // refresh context
-      $hook = 'attribute_product_field_alter';
-      foreach (module_implements($hook) as $module_name) {
-        $function = $module_name . '_' . $hook;
-        if (function_exists($function)) {
-          $function($element, $product, $product_field_name, $form, $form_state);
-        }
-      }
-      
-      $element += array(
-        '#prefix' => '<span class="' . $class . '">',
-        '#suffix' => '</span>',
-      );
 
-      $commands[] = ajax_command_replace('.' . $class, drupal_render($element));
-    }
-  }
 
-  return array('#type' => 'ajax', '#commands' => $commands);
-}
+
+
+
+
+
+
+
 
 
 
