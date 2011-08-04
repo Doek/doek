@@ -12,9 +12,6 @@
         <div id="header-top-inside-left-feed">
             <div id="topSocial">
             <ul>									
-                <li><a class="twitter" href="http://twitter.com/morethanthemes" title="Follow Us on Twitter!"></a></li>
-                <li><a class="facebook" href="http://www.facebook.com/pages/More-than-just-themes/194842423863081" title="Join Us on Facebook!"></a></li>
-                <li><a class="rss" title="RSS" href="#" title="Subcribe to Our RSS Feed"></a></li>
             </ul>
             </div>
         </div>
@@ -99,18 +96,6 @@
     
 		<?php if($page['sidebar_first']): ?>
         <div id="right" class="clearfix">
-            
-            <div id="network" class="block">
-                <h2>Network Connect</h2>  
-                <div class="network">
-                    <a href="http://twitter.com/morethanthemes" class="twitter">Twitter</a>
-                    <a href="http://www.facebook.com/pages/More-than-just-themes/194842423863081" class="facebook">Facebook</a>
-                    <a href="http://www.flickr.com/photos/56103643@N07/" class="flickr">Flickr</a>
-                    <a href="#" class="in">In</a>
-                    <a href="#" class="tumblr">Tumblr</a>
-                    <a href="http://www.youtube.com/morethanthemes" class="youtube">Youtube</a>
-                </div>
-            </div>
                 
             <?php print render($page['sidebar_first']); ?>
         
@@ -154,15 +139,6 @@
     	<div id="footer-bottom-inside-left">
     		<?php print render($page['footer']);?>
     	</div>
-    	<div id="footer-bottom-inside-right">
-		<?php print theme('links__system_secondary_menu', array('links' => $secondary_menu, 'attributes' => array('id' => 'secondary-menu', 'class' => array('links', 'inline', 'clearfix')))); ?>
-    	</div>
-    	<div class="credits-container" style="clear:both; padding-top:12px;">Ported to Drupal for the Open Source Community by <a href="http://www.drupalizing.com">Drupalizing</a>, a Project of <a href="http://www.morethanthemes.com">More than Themes</a></div>     
-    </div>
-    <div class="credits-container clearfix">
-        <a title="Brought To You By: www.SmashingMagazine.com" class="smashing" href="http://www.smashingmagazine.com" target="_blank">Brought to you By: www.SmashingMagazine.com</a>
-        <a title="Drupalizing" class="drupalizing" href="http://www.drupalizing.com" target="_blank">Drupalizing</a> 
-    </div>  
 </div>
 <!--EOF:footer-bottom-->
 
