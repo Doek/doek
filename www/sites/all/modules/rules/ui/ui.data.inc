@@ -130,7 +130,7 @@ class RulesDataUIText extends RulesDataUI implements RulesDataDirectInputFormInt
       $element->call('loadBasicInclude');
       $form[$name] = array(
         '#type' => 'select',
-        '#options' => $info['options list']($element, $name),
+        '#options' => call_user_func($info['options list'], $element, $name),
       );
     }
     else {
@@ -342,9 +342,10 @@ class RulesDataUIListText extends RulesDataUIText {
 
     if ($form[$name]['#type'] == 'textarea') {
       // Fix up the value to be an array during after build.
+      $form[$name]['#delimiter'] = "\n";
       $form[$name]['#after_build'][] = 'rules_ui_list_textarea_after_build';
       $form[$name]['#pre_render'][] = 'rules_ui_list_textarea_pre_render';
-      $form[$name]['#default_value'] = implode("\n", $settings[$name]);
+      $form[$name]['#default_value'] = !empty($settings[$name]) ? implode("\n", $settings[$name]) : NULL;
       $form[$name]['#description'] = t('A list of values, one on each line.');
     }
     else {
@@ -373,7 +374,7 @@ class RulesDataUIListInteger extends RulesDataUIListText {
     if ($form[$name]['#type'] == 'textarea') {
       $form[$name]['#description'] = t('A list of integers, separated by commas. E.g. enter "1, 2, 3".');
       $form[$name]['#delimiter'] = ',';
-      $form[$name]['#default_value'] = implode(", ", $settings[$name]);
+      $form[$name]['#default_value'] = !empty($settings[$name]) ? implode(", ", $settings[$name]) : NULL;
       $form[$name]['#element_validate'][] = 'rules_ui_element_integer_list_validate';
       $form[$name]['#rows'] = 1;
     }
@@ -403,7 +404,7 @@ class RulesDataUIListToken extends RulesDataUIListInteger {
 class RulesDataUIEntity extends RulesDataUIText {
 
   public static function getDefaultMode() {
-    return 'select';
+    return 'selector';
   }
 
   public static function inputForm($name, $info, $settings, RulesPlugin $element) {
@@ -430,6 +431,34 @@ class RulesDataUIEntityExportable extends RulesDataUIEntity {
 
   public static function getDefaultMode() {
     return 'input';
+  }
+}
+
+/**
+ * UI for taxonomy vocabularies.
+ *
+ * @see RulesTaxonomyVocabularyWrapper
+ */
+class RulesDataUITaxonomyVocabulary extends RulesDataUIEntity {
+
+  public static function getDefaultMode() {
+    return 'input';
+  }
+
+  public static function inputForm($name, $info, $settings, RulesPlugin $element) {
+    // Add an options list of all vocabularies if there is none yet.
+    if (!isset($info['options list'])) {
+      $info['options list'] = array('RulesDataUITaxonomyVocabulary', 'optionsList');
+    }
+    return parent::inputForm($name, $info, $settings, $element);
+  }
+
+  public static function optionsList() {
+    $options = array();
+    foreach (taxonomy_vocabulary_get_names() as $machine_name => $vocab) {
+      $options[$machine_name] = $vocab->name;
+    }
+    return $options;
   }
 }
 
