@@ -176,18 +176,7 @@ function commerce_product_reference_commerce_product_delete($product) {
 
         // Loop over each entity and remove the reference to the deleted product.
         foreach ($entities as $entity_id => $entity) {
-          foreach ($entity->{$field_name} as $langcode => $items) {
-            foreach ($items as $delta => $item) {
-              if ($item['product_id'] == $product->product_id) {
-                unset($entity->{$field_name}[$langcode][$delta]);
-              }
-            }
-
-            // If the reference field is empty, wipe its data altogether.
-            if (count($entity->{$field_name}[$langcode]) == 0) {
-              unset($entity->{$field_name}[$langcode]);
-            }
-          }
+          commerce_entity_reference_delete($entity, $field_name, 'product_id', $product->product_id);
 
           // Store the changes to the entity.
           entity_save($entity_type, $entity);
@@ -234,7 +223,7 @@ function commerce_product_reference_entity_view($entity, $entity_type, $view_mod
         // Loop through the fields on the referenced product's type.
         foreach (field_info_instances('commerce_product', $product->type) as $product_field_name => $product_field) {
           // Add the product field to the entity's content array.
-          $entity->content['product:' . $product_field_name] = field_view_field('commerce_product', $product, $product_field_name, $entity_type . '_' . $view_mode);
+          $entity->content['product:' . $product_field_name] = field_view_field('commerce_product', $product, $product_field_name, $entity_type . '_' . $view_mode, $langcode);
 
           // For multiple value references, add context information so the cart
           // form can do dynamic replacement of fields.
@@ -938,17 +927,20 @@ function commerce_product_line_item_populate($line_item, $product) {
     $line_item_wrapper->commerce_display_path = '';
   }
 
-  // Set the unit price on the line item object.
-  $line_item_wrapper->commerce_unit_price = $product_wrapper->commerce_price->value();
+  // Set the unit price on the line item object if the product has a value in
+  // its commerce_price field.
+  $line_item->commerce_unit_price = $product->commerce_price;
 
-  // Add the base price to the components array.
-  if (!commerce_price_component_load($line_item_wrapper->commerce_unit_price->value(), 'base_price')) {
-    $line_item_wrapper->commerce_unit_price->data = commerce_price_component_add(
-      $line_item_wrapper->commerce_unit_price->value(),
-      'base_price',
-      $line_item_wrapper->commerce_unit_price->value(),
-      TRUE
-    );
+  if (!is_null($line_item_wrapper->commerce_unit_price->value())) {
+    // Add the base price to the components array.
+    if (!commerce_price_component_load($line_item_wrapper->commerce_unit_price->value(), 'base_price')) {
+      $line_item_wrapper->commerce_unit_price->data = commerce_price_component_add(
+        $line_item_wrapper->commerce_unit_price->value(),
+        'base_price',
+        $line_item_wrapper->commerce_unit_price->value(),
+        TRUE
+      );
+    }
   }
 }
 

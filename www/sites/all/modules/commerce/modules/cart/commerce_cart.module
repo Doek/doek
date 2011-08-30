@@ -49,20 +49,23 @@ function commerce_cart_menu() {
 function commerce_cart_menu_item_title() {
   global $user;
 
-  // Load the current user's cart order.
-  $order = commerce_cart_order_load($user->uid);
+  // Default to a static title.
+  $title = t('Shopping cart');
 
-  // If it's empty or has no line items, return a static title.
-  if (empty($order) || empty($order->commerce_line_items)) {
-    return t('Shopping cart');
+  // If the user actually has a cart order...
+  if ($order = commerce_cart_order_load($user->uid)) {
+    // Count the number of product line items on the order.
+    $wrapper = entity_metadata_wrapper('commerce_order', $order);
+    $quantity = commerce_line_items_quantity($wrapper->commerce_line_items, commerce_product_line_item_types());
+
+    // If there are more than 0 product line items on the order...
+    if ($quantity > 0) {
+      // Use the dynamic menu item title.
+      $title = format_plural($quantity, 'Shopping cart (1 item)', 'Shopping cart (@count items)');
+    }
   }
 
-  // Count the number of product line items on the order.
-  $wrapper = entity_metadata_wrapper('commerce_order', $order);
-  $quantity = commerce_line_items_quantity($wrapper->commerce_line_items, commerce_product_line_item_types());
-
-  // Return the title with an item count appended.
-  return format_plural($quantity, 'Shopping cart (1 item)', 'Shopping cart (@count items)');
+  return $title;
 }
 
 /**
@@ -255,10 +258,6 @@ function commerce_cart_line_item_delete_form_submit($form, &$form_state) {
   // If the deleted line item is a product...
   if (in_array($line_item_wrapper->type->value(), commerce_product_line_item_types())) {
     $title = $line_item_wrapper->commerce_product->title->value();
-
-    // Invoke the Rules event for removing an item from the cart so the order
-    // status can be reset by the default rule.
-    rules_invoke_all('commerce_cart_product_remove', $form_state['order'], $line_item_wrapper->commerce_product->value(), $line_item_wrapper->quantity->value(), $line_item_wrapper->value());
   }
   else {
     $title = $line_item_wrapper->line_item_label->value();
@@ -451,24 +450,26 @@ function commerce_cart_block_view($delta) {
 
   // Prepare the display of the default Shopping Cart block.
   if ($delta == 'cart') {
-    // First check for items in the shopping cart.
-    $order = commerce_cart_order_load($user->uid);
+    // Default to an empty cart block message.
+    $content = theme('commerce_cart_empty_block');
 
-    // If the cart is empty...
-    if (!$order || empty($order->commerce_line_items)) {
-      // Display an appropriate message.
-      $content = theme('commerce_cart_empty_block');
-    }
-    else {
-      drupal_add_css(drupal_get_path('module', 'commerce_cart') . '/theme/commerce_cart.css');
+    // First check to enure there are products in the shopping cart.
+    if ($order = commerce_cart_order_load($user->uid)) {
+      $wrapper = entity_metadata_wrapper('commerce_order', $order);
 
-      // Build the variables array to send to the cart block template.
-      $variables = array(
-        'order' => $order,
-        'contents_view' => commerce_embed_view('commerce_cart_block', 'defaults', array($order->order_id)),
-      );
+      // If there are one or more products in the cart...
+      if (commerce_line_items_quantity($wrapper->commerce_line_items, commerce_product_line_item_types()) > 0) {
+        // Theme the full cart block.
+        drupal_add_css(drupal_get_path('module', 'commerce_cart') . '/theme/commerce_cart.css');
 
-      $content = theme('commerce_cart_block', $variables);
+        // Build the variables array to send to the cart block template.
+        $variables = array(
+          'order' => $order,
+          'contents_view' => commerce_embed_view('commerce_cart_block', 'defaults', array($order->order_id)),
+        );
+
+        $content = theme('commerce_cart_block', $variables);
+      }
     }
 
     return array('subject' => t('Shopping cart'), 'content' => $content);
@@ -624,17 +625,51 @@ function commerce_cart_order_is_cart($order) {
 }
 
 /**
- * Implementation of hook_commerce_entity_access_condition_commerce_order_alter().
+ * Implements hook_commerce_entity_access_condition_commerce_order_alter().
  *
- * Allow visitors to access their own shopping carts.
+ * This alter hook allows the Cart module to add conditions to the query used to
+ * determine if a user has view access to a given order. The Cart module will
+ * always grant users access to view their own carts (independent of any
+ * permission settings) and also grants anonymous users access to view their
+ * completed orders if they've been given the permission.
  */
 function commerce_cart_commerce_entity_access_condition_commerce_order_alter(&$conditions, $context) {
-  if ($current_order_id = commerce_cart_order_id($context['account']->uid)) {
+  // Find the user's cart order ID and anonymous user's completed orders.
+  $current_order_id = commerce_cart_order_id($context['account']->uid);
+  $completed_order_ids = commerce_cart_order_session_order_ids(TRUE);
+
+  // Always give the current user access to their own cart regardless of order
+  // view permissions.
+  if (!empty($current_order_id)) {
     $conditions->condition($context['base_table'] . '.order_id', $current_order_id);
   }
 
-  if ($completed_order_ids = commerce_cart_order_session_order_ids(TRUE)) {
+  // Bail now if the access query is for an authenticated user or if the
+  // anonymous user doesn't have any completed orders.
+  if ($context['account']->uid || empty($completed_order_ids)) {
+    return;
+  }
+
+  // If the user has access to view his own orders of any bundle...
+  if (user_access('view own ' . $context['entity_type'] . ' entities', $context['account'])) {
+    // Add a condition granting the user view access to any completed orders
+    // in his session.
     $conditions->condition($context['base_table'] . '.order_id', $completed_order_ids, 'IN');
+  }
+
+  // Add additional conditions on a per order bundle basis.
+  $entity_info = entity_get_info($context['entity_type']);
+
+  foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
+    // Otherwise if the user has access to view his own entities of the current
+    // bundle, add an AND condition group that grants access if the entity
+    // specified by the view query matches the same bundle and belongs to the user.
+    if (user_access('view own ' . $context['entity_type'] . ' entities of bundle ' . $bundle_name, $context['account'])) {
+      $conditions->condition(db_and()
+        ->condition($context['base_table'] . '.' . $entity_info['entity keys']['bundle'], $bundle_name)
+        ->condition($context['base_table'] . '.order_id', $completed_order_ids, 'IN')
+      );
+    }
   }
 }
 
@@ -719,28 +754,37 @@ function commerce_cart_order_refresh($order) {
     // Allow other modules alter line items on a shopping cart refresh.
     module_invoke_all('commerce_cart_line_item_refresh', $cloned_line_item, $order_wrapper);
 
-    // Compare the refreshed unit price to the original unit price looking for
-    // differences in the amount, currency code, or price components.
+    // Delete this line item if the product no longer has a valid price.
     $current_line_item_wrapper = entity_metadata_wrapper('commerce_line_item', $cloned_line_item);
-    $data = $line_item_wrapper->commerce_unit_price->data->value();
-    $current_data = $current_line_item_wrapper->commerce_unit_price->data->value();
 
-    if ($line_item_wrapper->commerce_unit_price->amount->value() != $current_line_item_wrapper->commerce_unit_price->amount->value() ||
-      $line_item_wrapper->commerce_unit_price->currency_code->value() != $current_line_item_wrapper->commerce_unit_price->currency_code->value() ||
-      $data['components'] != $current_data['components']) {
-      // Adjust the unit price accordingly if necessary.
-      $line_item_wrapper->commerce_unit_price->amount = $current_line_item_wrapper->commerce_unit_price->amount->value();
-      $line_item_wrapper->commerce_unit_price->currency_code = $current_line_item_wrapper->commerce_unit_price->currency_code->value();
+    if (is_null($current_line_item_wrapper->commerce_unit_price->value()) ||
+      is_null($current_line_item_wrapper->commerce_unit_price->amount->value()) ||
+      is_null($current_line_item_wrapper->commerce_unit_price->currency_code->value())) {
+      commerce_cart_order_product_line_item_delete($order, $cloned_line_item->line_item_id, TRUE);
+    }
+    else {
+      // Compare the refreshed unit price to the original unit price looking for
+      // differences in the amount, currency code, or price components.
+      $data = $line_item_wrapper->commerce_unit_price->data->value();
+      $current_data = $current_line_item_wrapper->commerce_unit_price->data->value();
 
-      // Only migrate the price components in the data to preserve other data.
-      $data['components'] = $current_data['components'];
-      $line_item_wrapper->commerce_unit_price->data = $data;
+      if ($line_item_wrapper->commerce_unit_price->amount->value() != $current_line_item_wrapper->commerce_unit_price->amount->value() ||
+        $line_item_wrapper->commerce_unit_price->currency_code->value() != $current_line_item_wrapper->commerce_unit_price->currency_code->value() ||
+        $data['components'] != $current_data['components']) {
+        // Adjust the unit price accordingly if necessary.
+        $line_item_wrapper->commerce_unit_price->amount = $current_line_item_wrapper->commerce_unit_price->amount->value();
+        $line_item_wrapper->commerce_unit_price->currency_code = $current_line_item_wrapper->commerce_unit_price->currency_code->value();
 
-      // Save the updated line item and clear the entity cache.
-      commerce_line_item_save($line_item_wrapper->value());
-      entity_get_controller('commerce_line_item')->resetCache(array($line_item_wrapper->line_item_id->value()));
+        // Only migrate the price components in the data to preserve other data.
+        $data['components'] = $current_data['components'];
+        $line_item_wrapper->commerce_unit_price->data = $data;
 
-      $line_item_changed = TRUE;
+        // Save the updated line item and clear the entity cache.
+        commerce_line_item_save($line_item_wrapper->value());
+        entity_get_controller('commerce_line_item')->resetCache(array($line_item_wrapper->line_item_id->value()));
+
+        $line_item_changed = TRUE;
+      }
     }
   }
 
@@ -781,8 +825,8 @@ function commerce_cart_get_properties($data = FALSE, array $options, $name) {
  * Returns an array of cart order IDs stored in the session.
  *
  * @param $completed
- *   Boolean indicating whether or not the operation should save to the
- *     completed orders array instead of the active cart orders array.
+ *   Boolean indicating whether or not the operation should retrieve the
+ *   completed orders array instead of the active cart orders array.
  *
  * @return
  *   An array of applicable cart order IDs or an empty array if none exist.
@@ -868,8 +912,8 @@ function commerce_cart_order_session_delete($order_id = NULL, $completed = FALSE
  * @param $uid
  *   The uid of the user whose cart you are adding the product to.
  * @param $line_item
- *   The product line item to be added to the cart with the following data on
- *   the line item being used to determine how to add the product to the cart:
+ *   An unsaved product line item to be added to the cart with the following data
+ *   on the line item being used to determine how to add the product to the cart:
  *   - $line_item->commerce_product: reference to the product to add to the cart.
  *   - $line_item->quantity: quantity of this product to add to the cart.
  *   - $line_item->data: data array that is saved with the line item if the line
@@ -895,6 +939,13 @@ function commerce_cart_order_session_delete($order_id = NULL, $completed = FALSE
  *   The new or updated line item object or FALSE on failure.
  */
 function commerce_cart_product_add($uid, $line_item, $combine = TRUE) {
+  // Do not add the line item if it doesn't have a unit price.
+  $line_item_wrapper = entity_metadata_wrapper('commerce_line_item', $line_item);
+
+  if (is_null($line_item_wrapper->commerce_unit_price->value())) {
+    return FALSE;
+  }
+
   // First attempt to load the customer's shopping cart order.
   $order = commerce_cart_order_load($uid);
 
@@ -906,9 +957,8 @@ function commerce_cart_product_add($uid, $line_item, $combine = TRUE) {
   // Set the incoming line item's order_id.
   $line_item->order_id = $order->order_id;
 
-  // Wrap the order and incoming line item for easy access to field data.
+  // Wrap the order for easy access to field data.
   $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
-  $line_item_wrapper = entity_metadata_wrapper('commerce_line_item', $line_item);
 
   // Extract the product and quantity we're adding from the incoming line item.
   $product = $line_item_wrapper->commerce_product->value();
@@ -927,6 +977,8 @@ function commerce_cart_product_add($uid, $line_item, $combine = TRUE) {
     $comparison_properties = array('type', 'commerce_product');
 
     // Add any field that was exposed on the Add to Cart form to the array.
+    // TODO: Bypass combination when an exposed field is no longer available but
+    // the same base product is added to the cart.
     foreach (field_info_instances('commerce_line_item', $line_item->type) as $info) {
       if (!empty($info['commerce_cart_settings']['field_access'])) {
         $comparison_properties[] = $info['field_name'];
@@ -1014,7 +1066,7 @@ function commerce_cart_order_product_line_item_delete($order, $line_item_id, $sk
   }
 
   // Remove the line item from the line item reference field.
-  $order = commerce_entity_reference_delete('commerce_order', $order, 'commerce_line_items', $line_item_id);
+  commerce_entity_reference_delete($order, 'commerce_line_items', 'line_item_id', $line_item_id);
 
   // Wrap the line item to be deleted and extract the product from it.
   $wrapper = entity_metadata_wrapper('commerce_line_item', $line_item);
@@ -1290,6 +1342,7 @@ function commerce_cart_add_to_cart_form($form, &$form_state, $line_item, $show_q
       '#type' => 'submit',
       '#value' => t('Product not available'),
       '#disabled' => TRUE,
+      '#weight' => 15,
     );
   }
   else {
@@ -1660,17 +1713,29 @@ function commerce_cart_add_to_cart_form($form, &$form_state, $line_item, $show_q
     // '#access' => FALSE to avoid specifying empty values for hidden fields.
     foreach (element_children($form['line_item_fields']) as $field_name) {
       $info = field_info_instance('commerce_line_item', $field_name, $form_state['line_item']->type);
+      $form['line_item_fields'][$field_name]['#commerce_cart_settings'] = commerce_cart_field_instance_access_settings($info);
 
-      if (empty($info['commerce_cart_settings']['field_access'])) {
-        unset($form['line_item_fields'][$field_name]);
+      if (empty($form['line_item_fields'][$field_name]['#commerce_cart_settings']['field_access'])) {
+        $form['line_item_fields'][$field_name]['#access'] = FALSE;
       }
     }
 
-    $form['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Add to cart'),
-      '#weight' => 15,
-    );
+    // Do not allow products without a price to be purchased.
+    if (is_null(commerce_product_calculate_sell_price($form_state['default_product']))) {
+      $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Product not available'),
+        '#disabled' => TRUE,
+        '#weight' => 15,
+      );
+    }
+    else {
+      $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Add to cart'),
+        '#weight' => 15,
+      );
+    }
   }
 
   // Add the handlers manually since we're using hook_forms() to associate this
@@ -1753,6 +1818,23 @@ function commerce_cart_add_to_cart_form_submit($form, &$form_state) {
     // Create the new product line item of the same type.
     $line_item = commerce_product_line_item_new($product, $form_state['values']['quantity'], 0, $form_state['line_item']->data, $form_state['line_item']->type);
 
+    // Remove line item field values the user didn't have access to modify.
+    foreach ($form_state['values']['line_item_fields'] as $field_name => $value) {
+      // Note that we're checking the Commerce Cart settings that we inserted
+      // into this form element array back when we built the form. This means a
+      // module wanting to alter a line item field widget to be available must
+      // update both its form element's #access value and the field_access value
+      // of the #commerce_cart_settings array.
+      if (empty($form['line_item_fields'][$field_name]['#commerce_cart_settings']['field_access'])) {
+        unset($form_state['values']['line_item_fields'][$field_name]);
+      }
+    }
+
+    // Unset the line item field values array if it is now empty.
+    if (empty($form_state['values']['line_item_fields'])) {
+      unset($form_state['values']['line_item_fields']);
+    }
+
     // Add field data to the line item.
     field_attach_submit('commerce_line_item', $line_item, $form['line_item_fields'], $form_state);
 
@@ -1760,16 +1842,24 @@ function commerce_cart_add_to_cart_form_submit($form, &$form_state) {
     // purchase price.
     rules_invoke_event('commerce_product_calculate_sell_price', $line_item);
 
-    // Add the product to the specified shopping cart.
-    $form_state['line_item'] = commerce_cart_product_add(
-      $form_state['values']['uid'],
-      $line_item,
-      isset($line_item->data['context']['add_to_cart_combine']) ? $line_item->data['context']['add_to_cart_combine'] : TRUE
-    );
+    // Only attempt an Add to Cart if the line item has a valid unit price.
+    $line_item_wrapper = entity_metadata_wrapper('commerce_line_item', $line_item);
 
-    // TODO: Accommodate multiple product Add to Cart forms better; i.e. should it
-    // display the product title or the product display node title?
-    drupal_set_message(t('%title added to <a href="!cart-url">your cart</a>.', array('%title' => $product->title, '!cart-url' => url('cart'))));
+    if (!is_null($line_item_wrapper->commerce_unit_price->value())) {
+      // Add the product to the specified shopping cart.
+      $form_state['line_item'] = commerce_cart_product_add(
+        $form_state['values']['uid'],
+        $line_item,
+        isset($line_item->data['context']['add_to_cart_combine']) ? $line_item->data['context']['add_to_cart_combine'] : TRUE
+      );
+
+      // TODO: Accommodate multiple product Add to Cart forms better; i.e. should it
+      // display the product title or the product display node title?
+      drupal_set_message(t('%title added to <a href="!cart-url">your cart</a>.', array('%title' => $product->title, '!cart-url' => url('cart'))));
+    }
+    else {
+      drupal_set_message(t('%title could not be added to your cart.', array('%title' => $product->title)), 'error');
+    }
   }
 }
 

@@ -390,6 +390,13 @@ function commerce_price_field_formatter_view($entity_type, $entity, $field, $ins
 
   // Loop through each price value in this field.
   foreach ($items as $delta => $item) {
+    // Do not render a price if the amount is NULL (i.e. non-zero empty value).
+    if (is_null($item['amount'])) {
+      // TODO: Consider if we should render as N/A or something indicating a
+      // price was not available as opposed to just leaving a blank.
+      continue;
+    }
+
     // Theme the display of the price based on the display type.
     switch ($display['type']) {
       case 'commerce_price_raw_amount':
@@ -584,9 +591,16 @@ function commerce_price_field_widget_form(&$form, &$form_state, $field, $instanc
         '#type' => 'textfield',
         '#title' => $element['#title'],
         '#default_value' => $default_amount,
+        '#required' => $instance['required'] && ($delta == 0 || $field['cardinality'] > 0),
         '#size' => 10,
         '#field_suffix' => $default_currency['code'],
       );
+
+      // Add the help text if specified.
+      if (!empty($element['#description'])) {
+        $element['amount']['#field_suffix'] .= '<div class="description">' . $element['#description'] . '</div>';
+      }
+
       $element['currency_code'] = array(
         '#type' => 'value',
         '#default_value' => $default_currency['code'],
@@ -599,6 +613,7 @@ function commerce_price_field_widget_form(&$form, &$form_state, $field, $instanc
         '#type' => 'textfield',
         '#title' => $element['#title'],
         '#default_value' => $default_amount,
+        '#required' => $instance['required'] && ($delta == 0 || $field['cardinality'] > 0),
         '#size' => 10,
       );
 
@@ -626,6 +641,11 @@ function commerce_price_field_widget_form(&$form, &$form_state, $field, $instanc
 
         $element['amount']['#field_suffix'] = $currency_code;
 
+        // Add the help text if specified.
+        if (!empty($element['#description'])) {
+          $element['amount']['#field_suffix'] .= '<div class="description">' . $element['#description'] . '</div>';
+        }
+
         $element['currency_code'] = array(
           '#type' => 'value',
           '#default_value' => $currency_code,
@@ -641,6 +661,11 @@ function commerce_price_field_widget_form(&$form, &$form_state, $field, $instanc
           '#default_value' => isset($items[$delta]['currency_code']) ? $items[$delta]['currency_code'] : $default_currency['code'],
           '#suffix' => '</div>',
         );
+
+        // Add the help text if specified.
+        if (!empty($element['#description'])) {
+          $element['currency_code']['#suffix'] .= '<div class="description">' . $element['#description'] . '</div>';
+        }
       }
       break;
   }
@@ -656,12 +681,19 @@ function commerce_price_field_widget_form(&$form, &$form_state, $field, $instanc
 }
 
 /**
- * Implements hook_field_widget_validate().
+ * Validate callback: ensures the amount value is numeric and converts it from a
+ * decimal value to an integer price amount.
  */
 function commerce_price_field_widget_validate($element, &$form_state) {
   if ($element['amount']['#value'] !== '') {
-    // Convert the decimal amount value entered to an integer based amount value.
-    form_set_value($element['amount'], commerce_currency_decimal_to_amount($element['amount']['#value'], $element['currency_code']['#value']), $form_state);
+    // Ensure the price is numeric.
+    if (!is_numeric($element['amount']['#value'])) {
+      form_error($element['amount'], t('%title: you must enter a numeric value for the price amount.', array('%title' => $element['amount']['#title'])));
+    }
+    else {
+      // Convert the decimal amount value entered to an integer based amount value.
+      form_set_value($element['amount'], commerce_currency_decimal_to_amount($element['amount']['#value'], $element['currency_code']['#value']), $form_state);
+    }
   }
 }
 
@@ -726,6 +758,34 @@ function commerce_price_field_data_property_info($name = NULL) {
       'setter callback' => 'entity_property_verbatim_set',
     ),
   );
+}
+
+/**
+ * Returns the data array of a single value price field from a wrapped entity,
+ * using an optional default value if the entity does not have data in the field.
+ *
+ * @param $wrapper
+ *   An EntityMetadataWrapper for the entity whose price should be retrieved.
+ * @param $field_name
+ *   The name of the field to retrieve data from in the wrapper.
+ * @param $default
+ *   Boolean indicating whether or not to return a default price array if the
+ *   entity does not have data in the specified price field.
+ *
+ * @return
+ *   The data array of the specified price field.
+ */
+function commerce_price_wrapper_value($wrapper, $field_name, $default = FALSE) {
+  // Extract the price field's value array from the given entity.
+  $price = $wrapper->{$field_name}->value();
+
+  // If the value is empty and we want to return a default value for the field,
+  // use the auto creation value defined for Entity API usage.
+  if (empty($price) && $default) {
+    $price = commerce_price_field_data_auto_creation();
+  }
+
+  return $price;
 }
 
 /**

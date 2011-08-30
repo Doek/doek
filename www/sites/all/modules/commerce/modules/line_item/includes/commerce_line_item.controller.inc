@@ -61,23 +61,23 @@ class CommerceLineItemEntityController extends DrupalCommerceEntityController {
       $line_item->changed = REQUEST_TIME;
 
       // Update the total of the line item based on the quantity and unit price.
-      $wrapper->commerce_total->amount = $line_item->quantity * $wrapper->commerce_unit_price->amount->value();
-      $wrapper->commerce_total->currency_code = $wrapper->commerce_unit_price->currency_code->value();
+      $unit_price = commerce_price_wrapper_value($wrapper, 'commerce_unit_price', TRUE);
+
+      $wrapper->commerce_total->amount = $line_item->quantity * $unit_price['amount'];
+      $wrapper->commerce_total->currency_code = $unit_price['currency_code'];
 
       // Add the components multiplied by the quantity to the data array.
-      $data = $wrapper->commerce_unit_price->data->value();
-
-      if (empty($data['components'])) {
-        $data['components'] = array();
+      if (empty($unit_price['data']['components'])) {
+        $unit_price['data']['components'] = array();
       }
       else {
-        foreach ($data['components'] as $key => $component) {
-          $data['components'][$key]['price']['amount'] *= $line_item->quantity;
+        foreach ($unit_price['data']['components'] as $key => &$component) {
+          $component['price']['amount'] *= $line_item->quantity;
         }
       }
 
       // Set the updated data array to the total price.
-      $wrapper->commerce_total->data = $data;
+      $wrapper->commerce_total->data = $unit_price['data'];
 
       return parent::save($line_item, $transaction);
     }
@@ -101,5 +101,46 @@ class CommerceLineItemEntityController extends DrupalCommerceEntityController {
     // Call the default attachLoad() method. This will add fields and call
     // hook_commerce_line_item_load().
     parent::attachLoad($queried_line_items, $revision_id);
+  }
+
+  /**
+   * Delete permanently saved line items.
+   *
+   * In case of failures, an exception is thrown.
+   *
+   * @param $line_item_ids
+   *   An array of line item IDs to delete.
+   * @param $transaction
+   *   An optional transaction object to pass thru. If passed the caller is
+   *   responsible for rolling back the transaction if something goes wrong.
+   */
+  public function delete($line_item_ids, DatabaseTransaction $transaction = NULL) {
+    $line_items = $line_item_ids ? $this->load($line_item_ids) : FALSE;
+
+    if (!$line_items) {
+      // Do nothing, in case invalid or no ids have been passed.
+      return;
+    }
+
+    if (!isset($transaction)) {
+      $transaction = db_transaction();
+      $started_transaction = TRUE;
+    }
+
+    try {
+      // First attempt to delete references for the given line items.
+      foreach ($line_items as $line_item_id => $line_item) {
+        commerce_line_item_delete_references($line_item);
+      }
+
+      return parent::delete($line_item_ids, $transaction);
+    }
+    catch (Exception $e) {
+      if (!empty($started_transaction)) {
+        $transaction->rollback();
+        watchdog_exception($this->entityType, $e);
+      }
+      throw $e;
+    }
   }
 }

@@ -20,8 +20,23 @@ function commerce_checkout_router($order, $checkout_page = NULL) {
   // If the user does not have access to checkout the order, return a 404. We
   // could return a 403, but then the user would know they've identified a
   // potentially valid checkout URL.
-  if (!commerce_checkout_access($order, $checkout_page)) {
+  if (!commerce_checkout_access($order)) {
     return drupal_not_found();
+  }
+
+  // If the user is attempting to access an inaccessible page for their order,
+  // redirect them to the proper page.
+  if (!commerce_checkout_page_access($checkout_page, $order)) {
+    $target_uri = commerce_checkout_order_uri($order);
+
+    // Only redirect if the target page is different from the page the user was
+    // trying to access. Otherwise give a 403 error.
+    if (!empty($target_uri) && $target_uri !== $_GET['q']) {
+      return drupal_goto($target_uri);
+    }
+    else {
+      return drupal_access_denied();
+    }
   }
 
   // If there are no line items on the order, redirect away.
@@ -104,6 +119,12 @@ function commerce_checkout_form($form, &$form_state, $order, $checkout_page) {
       '#type' => 'fieldset',
       '#attributes' => array('class' => array('checkout-buttons')),
     );
+    $form['buttons']['continue'] = array(
+      '#type' => 'submit',
+      '#value' => $checkout_page['submit_value'],
+      '#attributes' => array('class' => array('checkout-continue')),
+      '#submit' => array('commerce_checkout_form_submit'),
+    );
 
     // Add the cancel or back button where appropriate. We define button level
     // submit handlers because we're using hook_forms() to use this form builder
@@ -125,6 +146,7 @@ function commerce_checkout_form($form, &$form_state, $order, $checkout_page) {
         '#attributes' => array('class' => array('checkout-cancel')),
         '#submit' => array('commerce_checkout_form_cancel_submit'),
         '#limit_validation_errors' => array(),
+        '#prefix' => t('or'),
       );
     }
     elseif ($checkout_page['prev_page'] && !empty($checkout_page['back_value'])) {
@@ -134,15 +156,9 @@ function commerce_checkout_form($form, &$form_state, $order, $checkout_page) {
         '#attributes' => array('class' => array('checkout-back')),
         '#submit' => array('commerce_checkout_form_back_submit'),
         '#limit_validation_errors' => array(),
+        '#prefix' => t('or'),
       );
     }
-
-    $form['buttons']['continue'] = array(
-      '#type' => 'submit',
-      '#value' => $checkout_page['submit_value'],
-      '#attributes' => array('class' => array('checkout-continue')),
-      '#submit' => array('commerce_checkout_form_submit'),
-    );
   }
 
   return $form;

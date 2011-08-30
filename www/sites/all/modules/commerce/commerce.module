@@ -68,40 +68,37 @@ function commerce_info_fields($field_type, $entity_type = NULL) {
 /**
  * Deletes a reference to another entity from an entity with a reference field.
  *
- * @param $entity_type
- *   Entity type of the entity with the reference field.
  * @param $entity
  *   The entity that contains the reference field.
  * @param $field_name
  *   The name of the entity reference field.
+ * @param $col_name
+ *   The name of the column in the field's schema containing the referenced
+ *   entity's ID.
  * @param $ref_entity_id
  *   The ID of the entity to delete from the reference field.
- *
- * @return
- *   The updated entity with the reference deleted.
  */
-function commerce_entity_reference_delete($entity_type, $entity, $field_name, $ref_entity_id) {
-  $wrapper = entity_metadata_wrapper($entity_type, $entity);
+function commerce_entity_reference_delete($entity, $field_name, $col_name, $ref_entity_id) {
+  // Exit now if the entity does not have the expected field.
+  if (empty($entity->{$field_name})) {
+    return;
+  }
 
-  // If the reference field is multiple value...
-  if ($wrapper->{$field_name} instanceof EntityListWrapper) {
-    // Loop over every entity referenced by the specified field.
-    foreach ($wrapper->{$field_name} as $delta => $ref_entity_wrapper) {
-      // If its ID matches the specified entity...
-      if ($ref_entity_wrapper->getIdentifier() == $ref_entity_id) {
-        // Unset the referenced entity and return the containing updated entity.
-        $wrapper->{$field_name}->offsetUnset($delta);
+  // Loop over each of the field's items in every language.
+  foreach ($entity->{$field_name} as $langcode => $items) {
+    foreach ($items as $delta => $item) {
+      // If the item references the specified entity...
+      if (!empty($item[$col_name]) && $item[$col_name] == $ref_entity_id) {
+        // Unset the reference.
+        unset($entity->{$field_name}[$langcode][$delta]);
       }
     }
-  }
-  else {
-    // Otherwise check the reference value directly.
-    if ($wrapper->{$field_name}->getIdentifier() == $ref_entity_id) {
-      $wrapper->{$field_name} = NULL;
+
+    // If the reference field is empty, wipe its data altogether.
+    if (count($entity->{$field_name}[$langcode]) == 0) {
+      unset($entity->{$field_name}[$langcode]);
     }
   }
-
-  return $wrapper->value();
 }
 
 /**
@@ -289,17 +286,24 @@ function commerce_form_callback($form_id, $form_state) {
  *   The ID of the display of the View that will actually be rendered.
  * @param $arguments
  *   An array of arguments to pass to the View.
+ * @param $override_url
+ *   A url that overrides the url of the current view.
  *
  * @return
  *   The rendered output of the chosen View display.
  */
-function commerce_embed_view($view_id, $display_id, $arguments) {
+function commerce_embed_view($view_id, $display_id, $arguments, $override_url = '') {
   // Load the cart line item View.
   $view = views_get_view($view_id);
   $view->set_display($display_id);
 
   // Set the specific line items for this order.
   $view->set_arguments($arguments);
+
+  // Override the view url, if an override was provided.
+  if (!empty($override_url)) {
+    $view->override_url = $override_url;
+  }
 
   // Prepare and execute the View query.
   $view->pre_execute();
@@ -378,6 +382,7 @@ function commerce_currencies($enabled = FALSE, $reset = FALSE) {
       'symbol_placement' => '',
       'code_placement' => 'after',
       'format_callback' => '',
+      'conversion_callback' => '',
       'conversion_rate' => 1,
     );
 
@@ -558,6 +563,12 @@ function commerce_currency_round($amount, $currency) {
  */
 function commerce_currency_convert($amount, $currency_code, $target_currency_code) {
   $currency = commerce_currency_load($currency_code);
+
+  // Invoke the custom conversion callback if specified.
+  if (!empty($currency['conversion_callback'])) {
+    return $currency['conversion_callback']($amount, $currency_code, $target_currency_code);
+  }
+
   $target_currency = commerce_currency_load($target_currency_code);
 
   return $amount * ($currency['conversion_rate'] / $target_currency['conversion_rate']);
@@ -670,19 +681,19 @@ function commerce_entity_access($op, $entity, $account, $entity_type) {
   global $user;
   $account = isset($account) ? $account : $user;
 
-  $info = entity_get_info($entity_type);
+  $entity_info = entity_get_info($entity_type);
 
   if ($op == 'view') {
     if (isset($entity)) {
       // When trying to figure out access to an entity, query the base table using
       // our access control tag.
-      if (!empty($info['access arguments']['access tag']) && module_implements('query_' . $info['access arguments']['access tag'] . '_alter')) {
-        $query = db_select($info['base table']);
+      if (!empty($entity_info['access arguments']['access tag']) && module_implements('query_' . $entity_info['access arguments']['access tag'] . '_alter')) {
+        $query = db_select($entity_info['base table']);
         $query->addExpression('1');
         return (bool) $query
-          ->addTag($info['access arguments']['access tag'])
+          ->addTag($entity_info['access arguments']['access tag'])
           ->addMetaData('account', $account)
-          ->condition($info['entity keys']['id'], $entity->{$info['entity keys']['id']})
+          ->condition($entity_info['entity keys']['id'], $entity->{$entity_info['entity keys']['id']})
           ->range(0, 1)
           ->execute()
           ->fetchField();
@@ -696,12 +707,10 @@ function commerce_entity_access($op, $entity, $account, $entity_type) {
     }
   }
   else {
-    // We grant access to the entity if both of the following conditions are met:
-    // - No modules say to deny access
-    // - At least one module says to grant access
-    // If no module specified either allow or deny, we fall back to the logic
-    // below.
+    // First grant access to the entity for the specified operation if no other
+    // module denies it and at least one other module says to grant access.
     $access_results = module_invoke_all('commerce_entity_access', $op, $entity, $account, $entity_type);
+
     if (in_array(FALSE, $access_results, TRUE)) {
       return FALSE;
     }
@@ -709,30 +718,47 @@ function commerce_entity_access($op, $entity, $account, $entity_type) {
       return TRUE;
     }
 
-    // Generic administrator-level access.
+    // Grant generic administrator level access.
     if (user_access('administer ' . $entity_type . ' entities', $account)) {
       return TRUE;
     }
 
+    // Grant access based on entity type and bundle specific permissions with
+    // special handling for the create operation since the entity passed in will
+    // be initialized without ownership.
     if ($op == 'create') {
+      // Assuming an entity was passed in and we know its bundle key, perform
+      // the entity type and bundle-level access checks.
       if (isset($entity) && !empty($entity_info['entity keys']['bundle'])) {
-        // If the entity is passed in and we have a bundle, do bundle-level
-        // access control.
-        return user_access('create ' . $entity_type . ' entities of bundle ' . $entity, $account);
+        return user_access('create ' . $entity_type . ' entities', $account) || user_access('create ' . $entity_type . ' entities of bundle ' . $entity->{$entity_info['entity keys']['bundle']}, $account);
       }
       else {
-        // Else, but is that really possible? do entity type-level access control.
+        // Otherwise perform an entity type-level access check.
         return user_access('create ' . $entity_type . ' entities', $account);
       }
     }
     else {
-      if (!empty($entity_info['access arguments']['user key']) && isset($entity->{$entity_info['access arguments']['user key']}) && $entity->{$entity_info['access arguments']['user key']} == $account->uid) {
-        if (user_access('edit own ' . $entity_type . ' entities', $account)) {
+      // Next perform checks for the edit and delete operations. Begin by
+      // extracting the bundle name from the entity if available.
+      $bundle_name = '';
+
+      if (isset($entity) && !empty($entity_info['entity keys']['bundle'])) {
+        $bundle_name = $entity->{$entity_info['entity keys']['bundle']};
+      }
+
+      // For the edit and delete operations, first perform the entity type and
+      // bundle-level access check for any entity.
+      if (user_access('edit any ' . $entity_type . ' entity', $account) ||
+        user_access('edit any ' . $entity_type . ' entity of bundle ' . $bundle_name, $account)) {
+        return TRUE;
+      }
+
+      // Then check an authenticated user's access to edit his own entities.
+      if ($account->uid && !empty($entity_info['access arguments']['user key']) && isset($entity->{$entity_info['access arguments']['user key']}) && $entity->{$entity_info['access arguments']['user key']} == $account->uid) {
+        if (user_access('edit own ' . $entity_type . ' entities', $account) ||
+          user_access('edit own ' . $entity_type . ' entities of bundle ' . $bundle_name, $account)) {
           return TRUE;
         }
-      }
-      if (user_access('edit any ' . $entity_type . ' entity', $account)) {
-        return TRUE;
       }
     }
   }
@@ -767,6 +793,7 @@ function commerce_entity_access_permissions($entity_type) {
   }
   $permissions['edit any ' . $entity_type . ' entity'] = array(
     'title' => t('Edit any @entity_type of any type', array('@entity_type' => $labels['singular'])),
+    'restrict access' => TRUE,
   );
   if (!empty($entity_info['access arguments']['user key'])) {
     $permissions['view own ' . $entity_type . ' entities'] = array(
@@ -775,6 +802,7 @@ function commerce_entity_access_permissions($entity_type) {
   }
   $permissions['view any ' . $entity_type . ' entity'] = array(
     'title' => t('View any @entity_type of any type', array('@entity_type' => $labels['singular'])),
+    'restrict access' => TRUE,
   );
 
   // Per-bundle create and edit permissions.
@@ -790,6 +818,7 @@ function commerce_entity_access_permissions($entity_type) {
       }
       $permissions['edit any ' . $entity_type . ' entity of bundle ' . $bundle_name] = array(
         'title' => t('Edit any %bundle @entity_type', array('@entity_type' => $labels['singular'], '%bundle' => $bundle_info['label'])),
+        'restrict access' => TRUE,
       );
       if (!empty($entity_info['access arguments']['user key'])) {
         $permissions['view own ' . $entity_type . ' entities of bundle ' . $bundle_name] = array(
@@ -798,6 +827,7 @@ function commerce_entity_access_permissions($entity_type) {
       }
       $permissions['view any ' . $entity_type . ' entity of bundle ' . $bundle_name] = array(
         'title' => t('View any %bundle @entity_type', array('@entity_type' => $labels['singular'], '%bundle' => $bundle_info['label'])),
+        'restrict access' => TRUE,
       );
     }
   }
@@ -811,10 +841,13 @@ function commerce_entity_access_permissions($entity_type) {
 function commerce_entity_access_query_alter($query, $entity_type, $base_table = NULL, $account = NULL) {
   global $user;
 
-  // Read the meta-data from the query.
+  // Read the account from the query if available or default to the current user.
   if (!isset($account) && !$account = $query->getMetaData('account')) {
     $account = $user;
   }
+
+  // Read the base table from the query if available or default to the first
+  // table in the query's tables array.
   if (!isset($base_table) && !$base_table = $query->getMetaData('base table')) {
     // Assume that the base table if the first table if not set. It will result
     // in an invalid query if the first table is not the table we expect,
@@ -823,24 +856,35 @@ function commerce_entity_access_query_alter($query, $entity_type, $base_table = 
     $base_table = key($tables);
   }
 
-  // Blanket access control.
+  // Do not apply any conditions for users with administrative view permissions.
   if (user_access('administer ' . $entity_type . ' entities', $account)
-   || user_access('view any ' . $entity_type . ' entity', $account)) {
+    || user_access('view any ' . $entity_type . ' entity', $account)) {
     return;
   }
 
+  // Get the entity type info array for the current access check and prepare a
+  // conditions object.
   $entity_info = entity_get_info($entity_type);
-
   $conditions = db_or();
 
-  // Perform 'view entities of type x and bundle y'.
+  // Perform bundle specific permission checks for the specified entity type.
   $really_restricted = FALSE;
+
+  // Loop over every possible bundle for the given entity type.
   foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
-    if (user_access('view any ' . $entity_type . ' entities of bundle ' . $bundle_name, $account)) {
+    // If the user has access to view entities of the current bundle...
+    if (user_access('view any ' . $entity_type . ' entity of bundle ' . $bundle_name, $account)) {
+      // Add a condition granting access if the entity specified by the view
+      // query is of the same bundle.
       $conditions->condition($base_table . '.' . $entity_info['entity keys']['bundle'], $bundle_name);
     }
-    else if (!empty($entity_info['access arguments']['user key']) && user_access('view own ' . $entity_type . ' entity of bundle ' . $bundle_name, $account)) {
+    elseif ($account->uid && !empty($entity_info['access arguments']['user key']) && user_access('view own ' . $entity_type . ' entities of bundle ' . $bundle_name, $account)) {
+      // Otherwise if an authenticated user has access to view his own entities
+      // of the current bundle and the given entity type has a user ownership key...
       $really_restricted = TRUE;
+
+      // Add an AND condition group that grants access if the entity specified
+      // by the view query matches the same bundle and belongs to the user.
       $conditions->condition(db_and()
         ->condition($base_table . '.' . $entity_info['entity keys']['bundle'], $bundle_name)
         ->condition($base_table . '.' . $entity_info['access arguments']['user key'], $account->uid)
@@ -851,34 +895,47 @@ function commerce_entity_access_query_alter($query, $entity_type, $base_table = 
     }
   }
 
-  // Don't bother, the user has the permission to view all the bundles of the entity.
+  // No further conditions need to be added to the query if we determined above
+  // that the user has an administrative view permission for any entity of the
+  // type and bundles represented by the query.
   if (!$really_restricted) {
     return;
   }
 
+  // If the given entity type has a user ownership key...
   if (!empty($entity_info['access arguments']['user key'])) {
-    // Perform 'view own' access control.
-    if (user_access('view own ' . $entity_type . ' entities', $account)) {
+    // Perform 'view own' access control for the entity in the query if the user
+    // is authenticated.
+    if ($account->uid && user_access('view own ' . $entity_type . ' entities', $account)) {
       $conditions->condition($base_table . '.' . $entity_info['access arguments']['user key'], $account->uid);
     }
   }
 
+  // Prepare an array of condition alter hooks to invoke and an array of context
+  // data for the current query.
   $hooks = array(
     'commerce_entity_access_condition_' . $entity_type,
     'commerce_entity_access_condition'
   );
+
   $context = array(
     'account' => $account,
     'entity_type' => $entity_type,
     'base_table' => $base_table
   );
+
+  // Allow other modules to add conditions to the array as necessary.
   drupal_alter($hooks, $conditions, $context);
 
+  // If we have more than one condition based on the entity access permissions
+  // and any hook implementations...
   if (count($conditions)) {
+    // Add the conditions to the query.
     $query->condition($conditions);
   }
   else {
-    // No condition can match.
+    // Otherwise, since we don't have any possible conditions to match against,
+    // we falsify this query. View checks are access grants, not access denials.
     $query->where('1 = 0');
   }
 }
