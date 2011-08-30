@@ -14,6 +14,12 @@ if(isset($fields['entity_id_2'])){
 if (isset($fields['comment_count'])){
   echo " - ".$fields['comment_count']->content;
 }
+if(isset($fields['nid']) && $fields['status']->content == 'Open'){
+	$result = db_query('SELECT COUNT(*) as result FROM {signup_log} sl WHERE sl.nid = :nid', array('nid' => $fields['nid']->content));
+	$signcount = $result->fetchAssoc();
+	
+	echo ' - Tilmeldinger: '.$signcount['result'];
+}
    echo "</span>";
 ?>
 	<div class='picture'>

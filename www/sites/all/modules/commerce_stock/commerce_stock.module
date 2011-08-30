@@ -1,0 +1,347 @@
+<?php
+
+/**
+ * @file
+ * Allow commerce products to have stock levels associated with their SKU
+ *
+ * Commerce Stock enables Commerce to manage stock for products. Store admins
+ * can set the stock levels and a threshold on a product edit page.
+ * When that threshold is reached admins can be optionally notified about the
+ * current stock level. Store admins can view all stock levels using views.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function commerce_stock_menu() {
+  $items = array();
+
+  $items['admin/commerce/config/stock'] = array(
+    'title' => 'Stock management',
+    'description' => 'Configure stock management.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('commerce_stock_admin_form'),
+    'access arguments' => array('administer commerce_product entities'),
+    'file' => 'includes/commerce_stock.admin.inc',
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Alters the add-to-cart form to show out-of-stock items and add a validator.
+ */
+function commerce_stock_form_alter(&$form, &$form_state, $form_id){
+  if (strpos($form_id, "commerce_cart_add_to_cart_form") === 0) {
+    $stock = array();
+    // Check to see if product has options (multiple products using
+    // the default dropdown)
+    if(isset($form['product_id']['#options']) ){
+      $form['#after_build'][] = 'commerce_stock_form_after_build';
+      $options = $form['product_id']['#options'];
+      foreach ($options as $key=>$value) {
+        $product = commerce_product_load($key);
+        if(!empty($product->commerce_stock['und'])){
+          $stock[$key] = $product->commerce_stock['und'][0]['value'];
+          if(($product->commerce_stock['und'][0]['value'] <= 0) && ($product->commerce_stock['und'])){
+            $form['product_id']['#options'][$key]  .= ' - ' . t('Out of Stock');
+          }
+        }
+      }
+      $form['product_id']['#element_validate'] = array ('commerce_stock_option_validate');
+      $form['product_id']['#stock'] = $stock;
+      // @todo: should really be $form['product_id']['#stock'] = $stock[$key];
+      // Code will need updating in all places ['#stock'] is used
+    }
+    // A single product or uses attributes (like colour & size).
+    else {
+      $product = commerce_product_load($form['product_id']['#value']);
+      // Add validation to the add to cart
+      $form['#validate'][] = 'commerce_stock_add_to_cart_validate';
+      if(isset($product->commerce_stock['und']) ){
+        if($product->commerce_stock['und'][0]['value'] <= 0){
+          $form['submit']['#value'] = t('Out of Stock');
+          $form['submit']['#disabled'] = TRUE;
+          $form['submit']['#attributes'] = array('class' => array('out-of-stock'));
+        }
+      }
+    }
+  }
+  elseif ($form_id == 'commerce_checkout_form_checkout') {
+    // Add validate function to the checkout form
+    $form['#validate'][] = 'commerce_stock_checkout_form_validate';
+  }
+}
+
+/**
+ * Form validate handler: validate checkout form.
+ *
+ * Make sure all items in the cart are in stock
+ */
+function commerce_stock_checkout_form_validate($form, &$form_state) {
+  $order_wrapper = entity_metadata_wrapper('commerce_order', $form_state['order']);
+  $order_wrapper->commerce_line_items;
+  $found_errors = FALSE;
+  // Check each line item
+  foreach ($order_wrapper->commerce_line_items as $index => $line_item_wrapper) {
+    if ($line_item_wrapper->type->value() == 'product') {
+      $product_id = $line_item_wrapper->commerce_product->product_id->value();
+      $product = commerce_product_load($product_id);
+      $desired_purchase = $line_item_wrapper->quantity->value();
+      if ($remaining_stock = commerce_stock_product_check_out_of_stock($product_id, $desired_purchase)) {
+        form_set_error("out_od_stock_$index", t('Maximum quantity of %title that can be purchased is %max', array('%title' => $product->title, '%max' => $remaining_stock)));
+        $found_errors = TRUE;
+      }
+    }
+  }
+  // if out of stock items send back to the cart form
+  if ($found_errors) {
+    drupal_set_message(t('please adjust quantities before continuing to checkout') );
+    $cart_url = 'http://' . $_SERVER['HTTP_HOST'] . '/cart';
+    drupal_goto( $cart_url);
+  }
+}
+
+/**
+ * Form validate handler: validate checkout form.
+ *
+ * Make sure all items in the cart are in stock
+ */
+function commerce_stock_add_to_cart_validate($form, &$form_state) {
+  $qty = $form_state['input']['quantity'];
+  $product_id = $form_state['input']['product_id'];
+  $product = commerce_product_load($product_id);
+  if ($remaining_stock = commerce_stock_product_check_out_of_stock($product_id, $qty)) {
+      form_set_error("stock_error", t('Maximum quantity of %title that can be purchased is %max', array('%title' => $product->title, '%max' => $remaining_stock)));
+  }
+}
+
+/**
+ * Form after_build handler: validate the product is in stock.
+ */
+function commerce_stock_form_after_build($form, &$form_state) {
+  $prod_id = $form['product_id']['#value'];
+  if ( isset($form['product_id']['#stock']) && isset($form['product_id']['#stock'][$prod_id]) ) {
+    $prod_stock = $form['product_id']['#stock'][$prod_id];
+    if ($prod_stock <= 0) {
+      // remove the add to cart button
+      $form['submit']['#access'] = FALSE;
+      // remove quantity if enabled
+      if (isset($form['submit'])) {
+        $form['quantity']['#access'] = FALSE;
+      }
+    }
+  }
+  return $form;
+}
+
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Alters the cart form to provide a validator for it.
+ */
+function commerce_stock_form_views_form_commerce_cart_form_default_alter(&$form, &$form_state) {
+  $form['#validate'][] = 'commerce_stock_form_commerce_cart_validate';
+}
+
+/**
+ * Form validator function for cart form.
+ *
+ * Checks each line item to make sure that they have not requested more items
+ * than we have in stock.
+ */
+function commerce_stock_form_commerce_cart_validate($form, &$form_state) {
+  $line_item_index = array_keys($form_state['line_items']);
+  foreach ($form_state['input']['edit_quantity'] as $index => $qty) {
+    $line_item = $form_state['line_items'][$line_item_index[$index]];
+    $line_item_wrapper = entity_metadata_wrapper('commerce_line_item', $line_item);
+    $product_id = $line_item_wrapper->commerce_product->product_id->value();
+    $product = commerce_product_load($product_id);
+    if ($remaining_stock = commerce_stock_product_check_out_of_stock($product_id, $qty)) {
+      form_set_error("edit_quantity][$index", t('Maximum stock of %title that can be purchased is %max', array('%title' => $product->title, '%max' => $remaining_stock)));
+    }
+  }
+}
+
+/**
+ * Form validate handler: validate the product and quantity to add to the cart.
+ */
+function commerce_stock_option_validate($element, &$form_state) {
+  $stock = array();
+  $options = $element['#options'];
+
+  foreach ($options as $key => $value) {
+    $product = commerce_product_load($key);
+    if(!empty($product->commerce_stock['und'])){
+      $stock[$key] = $product->commerce_stock['und'][0]['value'];
+    }
+  }
+
+  $stock = $element['#stock'][$form_state['values']['product_id']];
+  if ($element['#stock'][$form_state['values']['product_id']] < 1) {
+    form_error($element, t('Product is out of stock'));
+  }
+  else if ($form_state['values']['quantity'] > $stock) {
+    form_error($element, t("you can only order a maximum of $stock for this item"));
+  }
+}
+
+/**
+ * Determine whether an order has items which are out of stock.
+ *
+ * @param $order
+ *   An order object
+ *
+ * @return
+ *   Boolean: TRUE if the order has items which are out of stock and
+ *   FALSE otherwise.
+ */
+function commerce_stock_order_has_out_of_stock($order) {
+  $line_items = $order->commerce_line_items['und'];
+  foreach ($line_items as $line_item_id ) {
+    $line_item = commerce_line_item_load($line_item_id['line_item_id']);
+    if($line_item->type == 'product') {
+      $product = commerce_product_load($line_item->commerce_product['und'][0]['product_id']);
+      if(commerce_stock_product_check_out_of_stock($line_item->commerce_product['und'][0]['product_id'],$line_item->quantity ) != FALSE) {
+        return TRUE;
+      }
+    }
+  }
+
+  return FALSE;
+}
+
+/**
+ * Check whether a purrchase quantity exceeds what is available.
+ *
+ * @param $product_id
+ *   The numeric product ID
+ * @param $quantity
+ *   Quantity to be purchased.
+ *
+ * @return
+ *   FALSE if the product request can be satisfied.
+ *   The number available otherwise.
+ */
+function commerce_stock_product_check_out_of_stock($product_id ,$quantity) {
+  $product = commerce_product_load($product_id);
+  // @todo: We shouldn't be using 'und' here should we?
+  if(isset($product->commerce_stock['und'])){
+    if($product->commerce_stock['und'][0]['value'] < $quantity) {
+      return $product->commerce_stock['und'][0]['value'];
+    }
+    else  {
+      return FALSE;
+    }
+  }
+}
+
+/**
+ * Ensures a stock field is present on a product type bundle.
+ */
+function commerce_stock_configure_product_type($type) {
+  commerce_stock_create_instance('commerce_stock', 'commerce_product', $type, t('Stock'));
+}
+
+/**
+ * Creates a required, locked instance of a stock field on the specified bundle.
+ *
+ * @param $field_name
+ *   The name of the field; if it already exists, a new instance of the existing
+ *   field will be created. For fields governed by the Commerce modules, this
+ *   should begin with commerce_.
+ * @param $entity_type
+ *   The type of entity the field instance will be attached to.
+ * @param $bundle
+ *   The bundle name of the entity the field instance will be attached to.
+ * @param $label
+ *   The label of the field instance.
+ * @param $weight
+ *   The default weight of the field instance widget and display.
+ */
+function commerce_stock_create_instance($field_name, $entity_type, $bundle, $label, $weight = 0) {
+  // If a field type we know should exist isn't found, clear the Field cache.
+//  if (!field_info_field_types('commerce_stock')) {
+//    field_cache_clear();
+//  }
+
+  // Look for or add the specified stock field to the requested entity bundle.
+  $field = field_info_field($field_name);
+  $instance = field_info_instance($entity_type, $field_name, $bundle);
+
+  if (empty($field)) {
+    $field = array(
+      'field_name' => $field_name,
+      'type' => 'number_integer',
+      'cardinality' => 1,
+      'entity_types' => array($entity_type),
+      'translatable' => FALSE,
+      'locked' => TRUE,
+    );
+    $field = field_create_field($field);
+  }
+
+  if (empty($instance)) {
+    $instance = array(
+      'field_name' => $field_name,
+      'entity_type' => $entity_type,
+      'bundle' => $bundle,
+      'label' => $label,
+      'required' => TRUE,
+      'settings' => array(),
+      'display' => array(),
+    );
+
+    $entity_info = entity_get_info($entity_type);
+
+    // Spoof the default view mode so its display type is set.
+    $entity_info['view modes']['default'] = array();
+
+    field_create_instance($instance);
+  }
+}
+
+/**
+ * Given a product type, determine whether stock management is enabled on that
+ * product type.
+ *
+ * @param $type
+ *   The product type.
+ *
+ * @return
+ *   Boolean: TRUE if stock management is enabled.
+ */
+function commerce_stock_product_type_enabled($type) {
+  $instance = field_info_instance('commerce_product', 'commerce_stock', $type);
+  return (!empty($instance));
+}
+
+/**
+ * Given a product, determine whether stock management is enabled for that
+ * product.
+ *
+ * @param $product
+ *   The product to check.
+ *
+ * @return
+ *   Boolean: TRUE if stock management is enabled on the product's product type.
+ */
+function commerce_stock_product_enabled($product) {
+  return commerce_stock_product_type_enabled($product->type);
+}
+
+/**
+ * Given a line item, determine whether stock management is enabled for that
+ * line item.
+ *
+ * @param $line_item
+ *   The line item to check.
+ *
+ * @return
+ *   Boolean: TRUE if stock management is enabled on the product's product type.
+ */
+function commerce_stock_line_item_product_enabled($line_item) {
+  return commerce_stock_product_type_enabled($line_item->product->type);
+}

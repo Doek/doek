@@ -33,8 +33,9 @@
  */
 ?>
 <div class="profile" style="clear: none;">
-  <?php if (menu_get_object('user')->uid == $user->uid)  { ?>
-    <button><a href="/user/<?php echo $user->uid; ?>/edit" title="Redigér din profil">Edit</a></button>
+  <?php if (menu_get_object('user')->uid == $user->uid || in_array('administrator', array_values($user->roles)))  { ?>
+    <a href="/user/<?php echo menu_get_object('user')->uid; ?>/edit" title="Opdater din profil">Edit</a>&nbsp;&nbsp;&nbsp;
+    <a href="/user/<?php echo menu_get_object('user')->uid; ?>/orders" title="Se dine ordre">Ordrer</a>
   <?php } ?>
   <?php print render($user_profile); ?>
 </div>

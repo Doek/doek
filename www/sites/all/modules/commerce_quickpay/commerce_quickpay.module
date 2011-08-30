@@ -18,50 +18,61 @@ function commerce_quickpay_menu() {
 }
 
 function commerce_quickpay_test() {
-	$order = commerce_order_load_by_number('36');
-	$transaction = '33695116';
+	$order = commerce_order_load_by_number('55');
+	$transaction = '33794608';
 	$amount = 129500;
 	$capture_amount = 0;
-	foreach($order->commerce_line_items['und'] as $line_item){
-		$item = commerce_line_item_load($line_item['line_item_id']);
-		$product = commerce_product_load($item->commerce_product['und'][0]['product_id']);
-		$reserve = true;
-		if(!is_array($product->field_reserve_amount['und'])){
-			$capture_amount += $product->commerce_price['und'][0]['amount'];
+	foreach($order->commerce_line_items as $line_items) {
+		foreach($line_items as $line_item) {
+			$items = commerce_line_item_load($line_item['line_item_id']);
+			foreach($items->commerce_product as $item) {
+				foreach($item as $product_entity) {
+					$product = commerce_product_load($product_entity['product_id']);
+					if ($product->field_reserve_amount[LANGUAGE_NONE][0]['value'] != '1') {
+						$capture_amount += $product->commerce_price[LANGUAGE_NONE][0]['amount'];
+					}
+				}
+			}
 		}
 	}
-	commerce_quickpay_capture($transaction, 129500, $amount == $capture_amount);
+	commerce_quickpay_capture($transaction, $capture_amount, $amount == $capture_amount);
 }
 
 function commerce_quickpay_callback() {
   $form = $_POST;
   try {
   $payment_status = commerce_quickpay_feedback_status($form['qpstat']);
-  mail('peter.joelving@gmail.com', 'Crap!', $payment_status);
 
   if ($payment_status['code'] == COMMERCE_PAYMENT_STATUS_SUCCESS) {
-	commerce_order_status_update($order, $payment_status['message']);
-	$order = commerce_order_load_by_number($form['ordernumber']);
+	$order = commerce_order_load_by_number(substr($form['ordernumber'], 5));
+        commerce_order_status_update($order, 'processing');
 	$amount = $form['amount'];
 	$transaction = $form['transaction'];
 	$capture_amount = 0;
-	foreach($order->commerce_line_items['und'] as $line_item){
-                $item = commerce_line_item_load($line_item['line_item_id']);
-                $product = commerce_product_load($item->commerce_product['und'][0]['product_id']);
-                $reserve = true;
-                if(!is_array($product->field_reserve_amount['und'])){
-                        $capture_amount += $product->commerce_price['und'][0]['amount'];
+        foreach($order->commerce_line_items as $line_items) {
+                foreach($line_items as $line_item) {
+                        $items = commerce_line_item_load($line_item['line_item_id']);
+                        foreach($items->commerce_product as $item) {
+                                foreach($item as $product_entity) {
+                                        $product = commerce_product_load($product_entity['product_id']);
+                                        if ($product->field_reserve_amount[LANGUAGE_NONE][0]['value'] != '1') {
+                                                $capture_amount += $product->commerce_price[LANGUAGE_NONE][0]['amount'];
+                                        }
+                                }
+                        }
                 }
         }
-	mail('peter.joelving@gmail.com', 'Crap!', "cap cm = $capture_amount, finalize = ".($amount == $capture_amount));
+
 	if ($capture_amount > 0) {
 	        commerce_quickpay_capture($transaction, $capture_amount, $amount == $capture_amount);
 	}
+	 commerce_order_status_update($order, 'completed');
   }
   } catch (Exception $ex) {
-    mail('peter.joelving@gmail.com', 'Quickpay Exception Message', $ex->getMessage());
+    mail('peter.joelving@gmail.com', 'Quickpay Exception Message', "Vi faar en grim fejl: ".$ex->getMessage());
   }
 }
+
 
 function commerce_quickpay_capture($transaction, $amount, $finalize = false) {
   $data = array(
@@ -85,9 +96,7 @@ function commerce_quickpay_capture($transaction, $amount, $finalize = false) {
   $data['md5check'] = $md5;
 
   $options = array('headers' => array('Content-Type' => 'application/x-www-form-urlencoded'), 'method' => 'POST', 'data' => http_build_query($data));
-  mail('peter.joelving@gmail.com', 'Lol-crime', 'Det her stinker');
   $result = drupal_http_request('https://secure.quickpay.dk/api/', $options);
-  mail('peter.joelving@gmail.com', 'Quickpay Capture Request', 'Naar vi overhovedet hertil?');
 }
 
 

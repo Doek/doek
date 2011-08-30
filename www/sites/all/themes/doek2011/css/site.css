@@ -222,3 +222,45 @@ div.megamenu ul li a {
 #block-user-login label {
 	font-size: 0.7em;
 }
+.introbutton {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	color: #ffffff;
+	padding: 4px 10px;
+	background-color: #5292C9;
+	background: -moz-linear-gradient(
+		top,
+		#337e99 0%,
+		#337e99 50%,
+		#006187 50%,
+		#006187);
+	background: -webkit-gradient(
+		linear, left top, left bottom, 
+		from(#337e99),
+		color-stop(0.50, #337e99),
+		color-stop(0.50, #006187),
+		to(#006187));
+	border-radius: 8px;
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+	border: 1px solid #171717;
+	-moz-box-shadow:
+		0px 1px 3px rgba(000,000,000,0.5),
+		inset 0px 0px 2px rgba(255,255,255,1);
+	-webkit-box-shadow:
+		0px 1px 3px rgba(000,000,000,0.5),
+		inset 0px 0px 2px rgba(255,255,255,1);
+	text-shadow:
+		0px -1px 0px rgba(000,000,000,0.4),
+		0px 1px 0px rgba(255,255,255,0.3);
+}
+
+.block-commerce-cart {
+	color: white;
+}
+.block-commerce-cart input {
+	color: black;
+}
+.cart-contents .views-table td, .cart-contents .views-table td a {
+	color: black !important;
+}

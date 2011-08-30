@@ -1,0 +1,328 @@
+<?php
+function gdl_menu() {
+	$items['gdl/execute'] = array('page callback' => 'gdl_execute', 'access callback' => true);
+	$items['gdl/test'] = array('page callback' => 'gdl_test', 'access callback' => true);
+	return $items;
+}
+
+function gdl_test() {
+	$fraggler = array();
+	$tjanser = array();
+	for($i = 1; $i <= 80; $i++) {
+		array_push($fraggler, array('id' => $i, 'tjanser' => array()));
+	}
+	for($i = 1; $i <= 5; $i++) {
+		switch($i) {
+			case 1:
+				$dag = 'sunday';
+				break;
+
+                        case 2:
+                                $dag = 'monday';
+                                break;
+
+                        case 3:
+                                $dag = 'tuesday';
+                                break;
+
+                        case 4:
+                                $dag = 'wednesday';
+                                break;
+
+                        case 5:
+                                $dag = 'thursday';
+                                break;
+		}
+		for($j = 0; $j < 10; $j++) {
+			array_push($tjanser, array('type' => 'kitchen', 'dag' => $dag));
+		}
+		for($j = 0; $j < 6; $j++) {
+			array_push($tjanser, array('type' => 'frokost', 'dag' => $dag));
+		}
+                for($j = 0; $j < 6; $j++) {
+                        array_push($tjanser, array('type' => 'opvask', 'dag' => $dag));
+                }
+	}
+        foreach($tjanser as $tkey => $tjans) {
+                uasort($fraggler, 'cmp');
+		foreach($fraggler as $fkey => $fraggle) {
+	                if (isFraggleEligeble($fraggle, $tjans)) {
+				array_push($fraggler[$fkey]['tjanser'], $tjans);
+				break;
+			}
+                }
+        }
+	uasort($fraggler, 'cmp');
+        die(var_dump($fraggler));
+}
+
+function pushTjans(&$tjanser, $type, $dag, $title, $count) {
+	for($i = 0; $i < $count; $i++) {
+		array_push($tjanser, array('title' => $title, 'type' => $type, 'dag' => $dag));
+	}
+}
+
+function getTjanser() {
+	$tjanser = array();
+        for($i = 1; $i <= 5; $i++) {
+                switch($i) {
+                        case 1:
+                                $dag = 'Soendag';
+                                pushTjans($tjanser, 'Kiosk', $dag, 'Kiosk Opfyldning', 2);
+                                break;
+
+                        case 2:
+                                $dag = 'Mandag';
+                                pushTjans($tjanser, 'Rengoering', $dag, 'Rengoering A', 5);
+                                pushTjans($tjanser, 'Rengoering', $dag, 'Rengoering C', 5);
+                                pushTjans($tjanser, 'Rengoering', $dag, 'Rengoering E', 5);
+                                pushTjans($tjanser, 'Morgenmad', $dag, 'Morgenmad', 6);
+                                pushTjans($tjanser, 'Opvask', $dag, 'Frokost Opvask', 6);
+                                pushTjans($tjanser, 'Koekkenhold', $dag, 'Aftensmad Tilberedning', 14);
+                                pushTjans($tjanser, 'Opvask', $dag, 'Aftensmad Opvask', 10);
+                                pushTjans($tjanser, 'Kiosk', $dag, 'Kiosk Opfyldning', 2);
+                                break;
+
+                        case 3:
+                                $dag = 'Tirsdag';
+                                pushTjans($tjanser, 'Rengoering', $dag, 'Rengoering A', 5);
+                                pushTjans($tjanser, 'Rengoering', $dag, 'Rengoering C', 5);
+                                pushTjans($tjanser, 'Rengoering', $dag, 'Rengoering E', 5);
+                                pushTjans($tjanser, 'Morgenmad', $dag, 'Morgenmad', 6);
+                                pushTjans($tjanser, 'Opvask', $dag, 'Frokost Opvask', 6);
+                                pushTjans($tjanser, 'Koekkenhold', $dag, 'Aftensmad Tilberedning', 13);
+                                pushTjans($tjanser, 'Opvask', $dag, 'Aftensmad Opvask', 10);
+                                pushTjans($tjanser, 'Kiosk', $dag, 'Kiosk Opfyldning', 2);
+                                break;
+
+                        case 4:
+                                $dag = 'Onsdag';
+                                pushTjans($tjanser, 'Rengoering', $dag, 'Rengoering A', 5);
+                                pushTjans($tjanser, 'Rengoering', $dag, 'Rengoering C', 5);
+                                pushTjans($tjanser, 'Rengoering', $dag, 'Rengoering E', 5);
+                                pushTjans($tjanser, 'Morgenmad', $dag, 'Morgenmad', 6);
+                                pushTjans($tjanser, 'Opvask', $dag, 'Frokost Opvask', 6);
+                                pushTjans($tjanser, 'Koekkenhold', $dag, 'Aftensmad Tilberedning', 13);
+                                pushTjans($tjanser, 'Opvask', $dag, 'Aftensmad Opvask', 10);
+                                pushTjans($tjanser, 'Kiosk', $dag, 'Kiosk Opfyldning', 2);
+                                break;
+
+                        case 5:
+                                $dag = 'Torsdag';
+                                pushTjans($tjanser, 'Morgenmad', $dag, 'Morgenmad', 6);
+                                break;
+                }
+	}
+	return $tjanser;
+}
+function getWorkers($fraggler, $title, $dag) {
+	$workers = array();
+	foreach ($fraggler as $fraggle) {
+		foreach ($fraggle['tjanser'] as $tjans) {
+			if ($tjans['title'] == $title && $tjans['dag'] == $dag) {
+				array_push($workers, $fraggle['navn']);
+			}
+		}
+	}
+	return $workers;
+}
+
+function getFraggler($productId) {
+        $orders = commerce_order_load_multiple(array(), array('status' => 'completed'));
+        $uids = array();
+        foreach($orders as $order) {
+                foreach($order->commerce_line_items as $line_items) {
+                        foreach($line_items as $line_item) {
+                                $items = commerce_line_item_load($line_item['line_item_id']);
+                                foreach($items->commerce_product as $item) {
+                                        foreach($item as $product_entity) {
+						if ($product_entity['product_id'] == $productId) {
+	                                                $product = commerce_product_load($product_entity['product_id']);
+							$name = field_get_items('user', user_load($order->uid), 'field_name');
+                                                        array_push($uids, array('id' => $order->uid, 'tjanser' => array(), 'navn' => $name[0]['value']));
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }
+	return $uids;
+}
+
+function gdl_execute() {
+	$tjanser = getTjanser();
+	$fraggler = getFraggler(1);
+        foreach($tjanser as $tkey => $tjans) {
+                uasort($fraggler, 'cmp');
+                foreach($fraggler as $fkey => $fraggle) {
+                        if (isFraggleEligeble($fraggle, $tjans)) {
+                                array_push($fraggler[$fkey]['tjanser'], $tjans);
+                                break;
+                        }
+                }
+        }
+        uasort($fraggler, 'cmp');
+	printGDL($fraggler);
+}
+
+function isFraggleEligeble($fraggle, $tjans) {
+	$eligeble = true;
+	foreach ($fraggle['tjanser'] as $fraggletjans) {
+		if ($fraggletjans['type'] == $tjans['type'] || $fraggletjans['dag'] == $tjans['dag']) {
+			$eligeble = false;
+			break;
+		}
+	}
+	return $eligeble;
+}
+
+function cmp($a, $b) {
+    if (count($a['tjanser']) == count($b['tjanser'])) {
+        return 0;
+    }
+    return (count($a['tjanser']) < count($b['tjanser'])) ? -1 : 1;
+}
+
+function printGDL($fraggler) {
+echo <<<END
+<html>
+<head>
+<title>Boarding Pass</title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<style>
+* {
+	margin:			0px;
+	padding:		0px;
+}
+#container {
+}
+.ticket {
+	position: 		relative;
+	width: 			680px;
+	height:			340px;
+}
+.ticket img {
+	width:			680px;
+	height:			340px;
+}
+.t_class {
+	position:		absolute;
+	top:			84px;
+	left:			35px;
+	font-family: 	Courier;
+	font-size: 		13px;
+	text-transform: uppercase;
+	font-weight: 	normal;
+}
+.t_name {
+	position:		absolute;
+	top:			139px;
+	left:			35px;
+	font-family: 	Courier;
+	font-size: 		13px;
+	text-transform: uppercase;
+}
+.t_date {
+	position:		absolute;
+	top:			140px;
+	left:			252px;
+	font-family: 	Courier;
+	font-size: 		12px;
+	letter-spacing: -2px;
+	text-transform: uppercase;
+}
+.t_boarding {
+	position:		absolute;
+	top:			188px;
+	left:			68px;
+	font-family: 	Courier;
+	font-size: 		13px;
+	letter-spacing: -2px;
+}
+.t_arrival {
+	position:		absolute;
+	top:			188px;
+	left:			216px;
+	font-family: 	Courier;
+	font-size: 		13px;
+	letter-spacing: -2px;
+}
+.t_from {
+	position:		absolute;
+	top:			231px;
+	left:			35px;
+	font-family: 	Courier;
+	font-size: 		13px;
+	text-transform: uppercase;
+}
+.t_to {
+	position:		absolute;
+	top:			269px;
+	left:			35px;
+	font-family: 	Courier;
+	font-size: 	13px;
+	text-transform: uppercase;
+}
+@media all {
+	.page-break:	display:none;
+}
+@media print {
+	.page-break:	display:block;
+	page-break-before:always;
+}
+</style>
+</head>
+<body>
+<div id="container">
+END;
+
+echo 'Ialt '.sizeof($fraggler).' fraggler.';
+	$i = 0;
+	foreach($fraggler as $fraggle) {
+		if ($i == 3) {
+			echo '<div class="page-break"></div>';
+			$i = 0;
+		}
+		$navn = $fraggle['navn'];
+echo <<<END
+			<div class="ticket">
+				<img src="http://www.danielfrom.dk/ticket/boardingpass.png">
+				<div class="t_class">Monkeyclass</div>
+				<div class="t_name">$navn</div>
+				<div class="t_date">14/08-2011 - 18/08-2011</div>
+				<div class="t_boarding">12:00ish SUN 14 AUG</div>
+				<div class="t_arrival">14:30ish SUN 14 AUG</div>
+				<div class="t_from">DIT-Lab - Howitzvej 60 - Frederiksberg</div>
+				<div class="t_to">Sunny Beach - Bulgaria</div>
+			</div>
+END;
+		$i++;
+	}
+
+echo <<<END
+</div>
+<div class="page-break"></div>
+</body>
+</html>
+END;
+$tja = array('Kiosk Opfyldning', 'Rengoering A', 'Rengoering C', 'Rengoering E', 'Morgenmad', 'Frokost Opvask', 'Aftensmad Tilberedning', 'Aftensmad Opvask');
+$dage = array('Soendag', 'Mandag', 'Tirsdag', 'Onsdag', 'Torsdag');
+echo '<div>';
+foreach($dage as $dag) {
+echo "<h2>$dag</h2>";
+foreach($tja as $tjans) {
+$workers = getWorkers($fraggler, $tjans, $dag);
+if (sizeof($workers) > 0) {
+echo "<h3>$tjans</h3>";
+echo '<p>';
+foreach($workers as $worker) {
+	echo $worker.'<br />';
+}
+echo '</p>';
+}
+}
+}
+echo '</div>';
+}
+
+?>

@@ -87,7 +87,7 @@
         <?php endif; ?>
     
         <div class="home-block-area first">
-            <?php print render($page['home_area_1']);?> 		
+		TEST            <?php print render($page['home_area_1']);?> 		
         </div>
         <div class="home-block-area">
             <?php print render($page['home_area_2']);?> 
@@ -106,7 +106,8 @@
     
     	<div id="footer-left">
     		<div id="footer-left-1">
-    			<?php print render($page['footer_left_1']);?>
+    			TEST
+			<?php print render($page['footer_left_1']);?>
     		</div>
     		<div id="footer-left-2">
     			<?php print render($page['footer_left_2']);?>
