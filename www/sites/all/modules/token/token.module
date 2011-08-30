@@ -40,7 +40,7 @@ function token_system_info_alter(&$info, $file, $type) {
  * Return an array of the core modules supported by token.module.
  */
 function _token_core_supported_modules() {
-  return array('book', 'menu', 'profile');
+  return array('book', 'field', 'menu', 'profile');
 }
 
 /**
@@ -165,10 +165,54 @@ function token_form_alter(&$form, $form_state, $form_id) {
     case 'profile_field_delete':
     // User picture form.
     case 'user_admin_settings':
+    // System date type form.
+    // @todo Remove when http://drupal.org/node/1173706 is fixed.
+    case 'system_add_date_format_type_form':
+    case 'system_delete_date_format_type_form':
       $form += array('#submit' => array());
       array_unshift($form['#submit'], 'token_clear_cache');
       break;
   }
+}
+
+/**
+ * Implements hook_field_info_alter().
+ */
+function token_field_info_alter(&$info) {
+  $defaults = array(
+    'taxonomy_term_reference' => 'taxonomy_term_reference_plain',
+    'number_integer' => 'number_unformatted',
+    'number_decimal' => 'number_unformatted',
+    'number_float' => 'number_unformatted',
+    'file' => 'file_url_plain',
+    'image' => 'file_url_plain',
+  );
+  foreach ($defaults as $field_type => $default_token_formatter) {
+    if (isset($info[$field_type])) {
+      $info[$field_type] += array('default_token_formatter' => $default_token_formatter);
+    }
+  }
+}
+
+/**
+ * Implements hook_field_create_instance().
+ */
+function token_field_create_instance($instance) {
+  token_clear_cache();
+}
+
+/**
+ * Implements hook_field_update_instance().
+ */
+function token_field_update_instance($instance) {
+  token_clear_cache();
+}
+
+/**
+ * Implements hook_field_delete_instance().
+ */
+function token_field_delete_instance($instance) {
+  token_clear_cache();
 }
 
 /**
@@ -178,8 +222,12 @@ function token_clear_cache() {
   cache_clear_all('*', 'cache_token', TRUE);
   drupal_static_reset('token_get_info');
   drupal_static_reset('token_get_global_token_types');
+  drupal_static_reset('token_get_entity_mapping');
   drupal_static_reset('token_build_tree');
   drupal_static_reset('_token_profile_fields');
+  drupal_static_reset('token_menu_link_load');
+  drupal_static_reset('token_book_link_load');
+  drupal_static_reset('_token_field_info');
 }
 
 /**
@@ -750,6 +798,14 @@ function _token_build_tree($token_type, array $options) {
       // parent.
       $token_parents[] = $token_type;
     }
+    elseif (in_array($token, array_slice($token_parents, 1))) {
+      // Prevent duplicate recursive tokens. For example, this will prevent
+      // the tree from generating the following tokens or deeper:
+      // [comment:parent:parent]
+      // [comment:parent:root:parent]
+      continue;
+    }
+
     $token_parents[] = $token;
     if (!empty($token_info['dynamic'])) {
       $token_parents[] = '?';
