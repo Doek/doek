@@ -1,6 +1,5 @@
 <?php
 
-// $Id: domain_views_plugin_access.inc,v 1.2 2010/09/30 15:32:17 agentken Exp $
 
 /**
  * @file
@@ -26,13 +25,17 @@ class domain_views_plugin_access extends views_plugin_access {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['domains'] = array('default' => -1);
+    // Handle 7.x.2 and 7.x.3.
+    $default = domain_default_id();
+    if ($default == 0) {
+      $default = -1;
+    }
+    $options['domains'] = array('default' => array($default => $default));
     $options['domain_strict'] = array('default' => FALSE);
     $options['domain_member'] = array('default' => FALSE);
 
     return $options;
-   }
-
+  }
 
   function options_form(&$form, &$form_state) {
     $domains = domain_domains();

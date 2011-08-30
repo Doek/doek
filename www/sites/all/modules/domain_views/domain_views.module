@@ -1,5 +1,4 @@
 <?php
-// $Id: domain_views.module,v 1.2 2010/09/30 15:32:17 agentken Exp $
 
 /**
  * @defgroup domain_views Domain Views: provides views integration.
@@ -52,7 +51,7 @@ function domain_views_theme() {
 function theme_domain_views_view_multiple_field($items, $field, $values) {
   $output = '';
   foreach ($items as $item) {
-    $output .= '<div class="field-item">'. $item .'</div>';
+    $output .= '<div class="field-item">' . $item . '</div>';
   }
   return $output;
 }
@@ -92,7 +91,7 @@ function domain_views_access($domains, $strict = TRUE, $member = FALSE) {
     return FALSE;
   }
   // None of the above, just match the current domain.
-  else if (!$check) {
+  elseif (!$check) {
     $grants['domain_id'] = array($_domain['domain_id']);
   }
   // Otherwise, convert and check.
@@ -146,7 +145,7 @@ function _domain_views_alter_grants(&$grants) {
   if (!empty($_modules)) {
     foreach ($_modules as $module) {
       // Cannot use module_invoke_all() since these are passed by reference.
-      $function = $module .'_domaingrants';
+      $function = $module . '_domaingrants';
       $function($grants, $account, $op);
     }
   }

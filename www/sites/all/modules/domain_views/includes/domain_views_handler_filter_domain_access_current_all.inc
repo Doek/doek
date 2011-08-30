@@ -1,5 +1,4 @@
 <?php
-// $Id: domain_views_handler_filter_domain_access_current_all.inc,v 1.2 2010/09/30 15:32:17 agentken Exp $
 
 /**
  * @file
@@ -15,10 +14,10 @@ class domain_views_handler_filter_domain_access_current_all extends views_handle
   function query() {
     $table = $this->ensure_my_table();
     if (empty($this->value)) {
-      $this->query->add_where($this->options['group'], "(($table.realm = 'domain_id' AND $table.$this->real_field ". '<>' ." ***CURRENT_DOMAIN***))", array(), 'formula');
+      $this->query->add_where($this->options['group'], "(($table.realm = 'domain_id' AND $table.$this->real_field " . '<>' . " ***CURRENT_DOMAIN***))", array(), 'formula');
     }
     else {
-      $this->query->add_where($this->options['group'], "(($table.realm = 'domain_id' AND $table.$this->real_field ". '=' ." ***CURRENT_DOMAIN***) OR ($table.realm = 'domain_site' AND $table.$this->real_field = 0))", array(), 'formula');
+      $this->query->add_where($this->options['group'], "(($table.realm = 'domain_id' AND $table.$this->real_field " . '=' . " ***CURRENT_DOMAIN***) OR ($table.realm = 'domain_site' AND $table.$this->real_field = 0))", array(), 'formula');
     }
   }
 }

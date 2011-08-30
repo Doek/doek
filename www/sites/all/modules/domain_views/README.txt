@@ -1,4 +1,3 @@
-// $Id: README.txt,v 1.2 2010/09/30 18:00:11 agentken Exp $
 
 /**
  * @file

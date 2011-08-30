@@ -1,5 +1,4 @@
 <?php
-// $Id: domain_views_handler_field_domain_subdomain.inc,v 1.1 2010/09/30 15:32:17 agentken Exp $
 /**
  * @file
  * Interface between domain_views.module and views.module.

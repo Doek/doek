@@ -1,5 +1,4 @@
 <?php
-// $Id: domain_views_handler_field_domain_access_sitename.inc,v 1.1 2010/09/30 15:32:17 agentken Exp $
 /**
  * @file
  * Interface between domain_views.module and views.module.
@@ -77,7 +76,7 @@ class domain_views_handler_field_domain_access_sitename extends views_handler_fi
         $query = "SELECT node.nid AS nid, domain.sitename AS domain_sitename, domain.domain_id AS domain_domain_id
           FROM node node  LEFT JOIN domain_access domain_access ON node.nid = domain_access.nid
           INNER JOIN domain domain ON domain_access.gid = domain.domain_id AND (domain_access.realm = 'domain_id')
-          WHERE node.nid  IN (". implode(',', $nids) .")";
+          WHERE node.nid  IN (" . implode(',', $nids) . ")";
         $result = db_query($query);
         foreach ($result as $data) {
           $this->field_values[$data->nid][$data->domain_domain_id] = $data->domain_sitename;
@@ -108,7 +107,7 @@ class domain_views_handler_field_domain_access_sitename extends views_handler_fi
     $data = $domain['sitename'];
     $node_path = '';
     if (!empty($nid)) {
-      $node_path = drupal_get_path_alias('node/'. $nid);
+      $node_path = drupal_get_path_alias('node/' . $nid);
     }
     // Determine the link path.
     if (!empty($this->options['link_to_default_domain']) && $data !== NULL && $data !== '') {
@@ -135,7 +134,7 @@ class domain_views_handler_field_domain_access_sitename extends views_handler_fi
     }
     $node_path = '';
     if (!empty($nid)) {
-      $node_path = drupal_get_path_alias('node/'. $nid);
+      $node_path = drupal_get_path_alias('node/' . $nid);
     }
     $link_options = array('absolute' => TRUE);
     // Now write the links.
@@ -159,7 +158,7 @@ class domain_views_handler_field_domain_access_sitename extends views_handler_fi
       if (count($items) > 1) {
         return theme('domain_views_view_multiple_field', $items, $field, $values);
       }
-      else if (count($items) == 1) {
+      elseif (count($items) == 1) {
         return $items[0];
       }
       else {

@@ -1,5 +1,4 @@
 <?php
-// $Id: domain_views_handler_filter_domain_access_realm.inc,v 1.1 2010/09/30 18:28:14 agentken Exp $
 /**
  * @file
  * Interface between domain_views.module and views.module.

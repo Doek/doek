@@ -1,5 +1,4 @@
 <?php
-// $Id: domain_views.views.inc,v 1.5 2011/01/16 16:02:08 agentken Exp $
 
 /**
  * @file
@@ -119,9 +118,13 @@ function domain_views_views_data() {
   // Define the {domain_access} table.
   $data['domain_access']['table']['group'] = t('Domain Access');
   // Define the joins.
+  // Note that we only JOIN on domain_id records.
   $data['domain_access']['table']['join']['node'] = array(
     'left_field' => 'nid',
     'field' => 'nid',
+    'extra' => array(
+      array('field' => 'realm', 'value' => 'domain_id', 'numeric' => FALSE),
+    ),
   );
   // Define the joins between {node_revision} and {domain_access}.
   $data['domain_access']['table']['join']['node_revision'] = array(
@@ -129,6 +132,7 @@ function domain_views_views_data() {
     'field' => 'nid',
   );
   // Join the two domain tables.
+  // Note that we only JOIN on domain_id records.
   $data['domain_access']['table']['join']['domain'] = array(
     'left_field' => 'domain_id',
     'field' => 'gid',
@@ -211,7 +215,7 @@ function domain_views_views_data() {
       'label' => t('Available on current domain'),
     ),
   );
-  /*TODO: make this sortable.
+  /* TODO: make this sortable.
   $data['domain_access']['sitename'] = array(
     'title' => t('Site name'),
     'help' => t('The display string that identifies a domain.'),
@@ -219,10 +223,14 @@ function domain_views_views_data() {
       'handler' => 'domain_views_handler_field_domain_access_sitename',
       'click sortable' => FALSE,
     ),
-  );*/
+  ); */
   // Define the {domain_editor} table.
   $data['domain_editor']['table']['group'] = t('Domain Editor');
   // Define the joins.
+  $data['domain_editor']['table']['join']['domain'] = array(
+    'left_field' => 'domain_id',
+    'field' => 'domain_id',
+  );
   $data['domain_editor']['table']['join']['users'] = array(
     'left_field' => 'uid',
     'field' => 'uid',
@@ -288,7 +296,7 @@ function domain_views_views_data() {
  * Implements hook_views_plugins().
  */
 function domain_views_views_plugins() {
-  $path = drupal_get_path('module', 'domain_views') .'/includes';
+  $path = drupal_get_path('module', 'domain_views') . '/includes';
   return array(
     'access' => array(
       'domain' => array(
@@ -308,7 +316,7 @@ function domain_views_views_plugins() {
       ),
     ),
     'cache' => array(
-      'time_per_domain' =>array(
+      'time_per_domain' => array(
         'title' => t('Time-based Per Domain'),
         'help' => t('Time-based caching of views on a per domain basis. This is necessary if you want to cache a view that filters on "current domain".'),
         'handler' => 'domain_views_plugin_cache_time',

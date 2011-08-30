@@ -1,5 +1,4 @@
 <?php
-// $Id: domain_views_handler_filter_domain_domain_id.inc,v 1.2 2010/09/30 18:00:12 agentken Exp $
 
 /**
  * @file
