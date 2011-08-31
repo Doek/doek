@@ -4,9 +4,9 @@ description = Shades of grey and white.
 version = 2.x
 base style = naked
 
-; Information added by drupal.org packaging script on 2011-07-01
-version = "7.x-2.0-alpha2"
+; Information added by drupal.org packaging script on 2011-08-05
+version = "7.x-2.0-alpha3"
 core = "7.x"
 project = "advanced_forum"
-datestamp = "1309511215"
+datestamp = "1312537915"
 
