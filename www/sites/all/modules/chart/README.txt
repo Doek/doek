@@ -12,8 +12,8 @@ DOCUMENATION
  * chart_build() in chart.module
  * chart.api.php
 
-EXAMPLE
--------
+EXAMPLE USING THEME()
+---------------------
 
 $chart = array(
   '#chart_id' => 'test_chart',
@@ -26,3 +26,20 @@ $chart['#data']['meats']  = 2;
 $chart['#data']['dairy']  = 5;
 
 echo theme('chart', array('chart' => $chart));
+
+EXAMPLE USING RENDERABLE ARRAYS
+-------------------------------
+Render Arrays in Drupal 7: http://drupal.org/node/930760
+
+$page['chart'] = array(
+  '#theme' => 'chart',
+  '#chart_id' => 'test_chart',
+  '#title' => t('Servings'),
+  '#type' => CHART_TYPE_PIE_3D,
+  '#data' => array(
+    'fruits' => 3,
+    'meats' => 2,
+    'dairy' => 5,
+  );
+);
+

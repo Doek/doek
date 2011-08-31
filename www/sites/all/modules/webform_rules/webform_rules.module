@@ -1,0 +1,44 @@
+<?php
+// $Id: webform_rules.module,v 1.2 2010/11/26 22:49:41 stborchert Exp $
+
+/**
+ * @file
+ * Adds rules integration for webform submissions.
+ */
+
+/**
+ * Implements of hook_form_alter().
+ */
+function webform_rules_form_alter(&$form, $form_state, $form_id) {
+  if (strpos($form_id, 'webform_client_form_') !== FALSE) {
+    // Add custom submit handler to webform form.
+    $form['#submit'][] = 'webform_rules_client_form_submit';
+  }
+}
+
+/**
+ * Custom submit handler for webform submissions.
+ */
+function webform_rules_client_form_submit($form, &$form_state) {
+  global $user;
+  // Check if user is submitting as a draft.
+  $is_draft = $form_state['values']['op'] == t('Save Draft');
+  // Get webform node.
+  $node = $form['#node'];
+  // Get submitted data from webform.
+  $submission_data = webform_submission_data($node, $form_state['values']['submitted']);
+  $data = array();
+  // Map values to field names.
+  foreach ($submission_data as $cid => $value) {
+    $component = $node->webform['components'][$cid];
+    $data[$component['form_key']]['name'] = $component['name'];
+    $data[$component['form_key']]['value'] = $value['value'];
+  }
+  // Invoke the rules event.
+  if ($is_draft) {
+    rules_invoke_event('webform_rules_submit_as_draft', $user, $node, $data);
+  }
+  else {
+    rules_invoke_event('webform_rules_submit', $user, $node, $data);
+  }
+}

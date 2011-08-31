@@ -11,12 +11,13 @@
 /*
  * Misc
  */
-define('CHART_URI', 'http://chart.apis.google.com/chart');
+define('CHART_URI', '//chart.googleapis.com/chart');
 
 /*
  * Chart types.
  */
 define('CHART_TYPE_LINE', 'lc');
+define('CHART_TYPE_LINE_NO_AXIS', 'ls');
 define('CHART_TYPE_LINE_XY', 'lxy');
 define('CHART_TYPE_BAR_H', 'bhs');
 define('CHART_TYPE_BAR_V', 'bvs');
@@ -24,9 +25,12 @@ define('CHART_TYPE_BAR_H_GROUPED', 'bhg');
 define('CHART_TYPE_BAR_V_GROUPED', 'bvg');
 define('CHART_TYPE_PIE', 'p');
 define('CHART_TYPE_PIE_3D', 'p3');
+define('CHART_TYPE_PIE_CONCENTRIC', 'pc');
 define('CHART_TYPE_VENN', 'v');
 define('CHART_TYPE_SCATTER', 's');
 define('CHART_TYPE_MAP', 't');
+define('CHART_TYPE_RADAR', 'r');
+define('CHART_TYPE_RADAR_FILLED', 'rs');
 define('CHART_TYPE_GMETER', 'gom');
 define('CHART_TYPE_QR', 'qr');
 
@@ -38,8 +42,8 @@ define('CHART_MARKER_CROSS', 'c');
 define('CHART_MARKER_DIAMOND', 'd');
 define('CHART_MARKER_CIRCLE', 'o');
 define('CHART_MARKER_SQUARE', 's');
-define('CHART_MARKER_VIRTICAL_LINE_X', 'v');
-define('CHART_MARKER_VIRTICAL_LINE_TOP', 'V');
+define('CHART_MARKER_VERTICAL_LINE_X', 'v');
+define('CHART_MARKER_VERTICAL_LINE_TOP', 'V');
 define('CHART_MARKER_HORIZONTAL_LINE', 'h');
 define('CHART_MARKER_X', 'x');
 
@@ -145,7 +149,7 @@ function theme_chart($variables) {
  */
 function chart_url($chart) {
   if ($data = chart_build($chart)) {
-    return url(CHART_URI, array('query' => $data));
+    return url(CHART_URI, array('query' => $data, 'external' => TRUE));
   }
   return FALSE;
 }
@@ -171,7 +175,8 @@ function chart_url($chart) {
  *     - FILE_EXISTS_RENAME: Appends _{incrementing number} until the filename is unique
  *     - FILE_EXISTS_ERROR: Do nothing and return FALSE.
  *
- * @return bool
+ * @return bool/string
+ *   Returns FALSE on failure, and file path on success.
  */
 function chart_copy($chart, $name = NULL, $dest = 'charts', $replace = FILE_EXISTS_REPLACE) {
   if (!chart_build($chart)) {
@@ -199,9 +204,10 @@ function chart_copy($chart, $name = NULL, $dest = 'charts', $replace = FILE_EXIS
       // Remove temp image
       fclose($fh);
     }
+    return $filename;
   }
 
-  return TRUE;
+  return FALSE;
 }
 
 /**
@@ -230,9 +236,10 @@ function chart_copy($chart, $name = NULL, $dest = 'charts', $replace = FILE_EXIS
  *   - #mixed_axis_labels: (chxt) (Optional) An array of mixed axis labels.
  *   - #mixed_axis_label_styles: (chxs) (Optional) An array of mixed axis label
  *       styles.
- *   - #bar_size: (chbh) (Optional) An array of bar sizes.
+ *   - #bar_size: (chbh) (Optional) 'a' for automatic, 'r' for relative, or an
+         array using keys: #size and #spacing.
  *   - #countries: (chld) (Optional) An array of countries.
- *   - #georange: (chtm) (Optional) The goegraphical scope.
+ *   - #georange: (chtm) (Optional) The geographical scope.
  *
  * @return mixed
  *   Associative array of query data, otherwise FALSE.
@@ -384,7 +391,7 @@ function _chart_encode_data($data) {
         $output .= _chart_encode_data($v);
       }
       else {
-        if ($v !== FALSE) {
+        if (is_numeric($v)) {
           $output .= $v . ',';
         }
         else {
@@ -409,6 +416,7 @@ function _chart_adjust_resolution($chart_id, &$data, $max_value = NULL) {
     // Set max data value
     if (!isset($max[$chart_id])) {
       $max[$chart_id] = isset($max_value) ? $max_value : _chart_get_max($data);
+      $max[$chart_id] += $max[$chart_id] * 0.05; // Add a margin.
     }
 
     // Encoding resolution
@@ -417,10 +425,10 @@ function _chart_adjust_resolution($chart_id, &$data, $max_value = NULL) {
     // When the max is larger than the resolution
     // we need to scale down the values
     if ($max[$chart_id] > $resoluton) {
-      $divider = round($max[$chart_id] / $resoluton, 1);
+      $divider = $max[$chart_id] / $resoluton;
     }
-    else {
-      $multiplier = round($resoluton / $max[$chart_id], 1);
+    elseif ($max[$chart_id] > 0) {
+      $multiplier = $resoluton / $max[$chart_id];
     }
 
     foreach ($data as $k => $v) {
@@ -428,7 +436,7 @@ function _chart_adjust_resolution($chart_id, &$data, $max_value = NULL) {
         _chart_adjust_resolution($chart_id, $data[$k]);
       }
       else {
-        if ($v != 'NULL' && $v > 0) {
+        if (is_numeric($v)) {
           // Adjust values
           if ($v >= $max) {
             $data[$k] = $resoluton;
@@ -505,6 +513,9 @@ function _chart_append($attr, $value, &$data) {
     case 'chtt':
       if (is_array($value)) {
         $data[$attr]   = $value['#title'];
+        if (!isset($data['chts'])) {
+          $data['chts'] = '';
+        }
         $data['chts'] .= isset($value['#color']) ? $value['#color'] : '000000';
         $data['chts'] .= ',';
         $data['chts'] .= isset($value['#size']) ? $value['#size'] : 14;
@@ -578,7 +589,13 @@ function _chart_append($attr, $value, &$data) {
       if (!isset($data[$attr])) {
         $data[$attr] = '';
       }
-      $data[$attr] .= implode(',', array($value['#size'], $value['#spacing']));
+      //If not array, use as is.
+      if (!is_array($value)) {
+        $data[$attr] .= $value;
+      }
+      else {
+        $data[$attr] .= implode(',', array($value['#size'], $value['#spacing']));
+      }
       break;
 
       // Mixed axis positions, labels and styles
@@ -629,6 +646,9 @@ function _chart_append($attr, $value, &$data) {
       if (count($regular)) {
         foreach ($regular as $axis => $indices) {
           if (count($indices)) {
+            if (!isset($data['chxl'])) {
+              $data['chxl'] = '';
+            }
             foreach ($indices as $i => $labels) {
               $types[] = $axis;
               $data['chxl'] .= $index . ':';
@@ -650,7 +670,10 @@ function _chart_append($attr, $value, &$data) {
       // Generate positions
       if (count($positions)) {
         foreach ($positions as $i => $position) {
-          if ($position['set'] == TRUE) {
+          if (isset($position['set']) && $position['set'] == TRUE) {
+            if (!isset($data['chxp'])) {
+              $data['chxp'] = '';
+            }
             $data['chxp'] .= $i . ',' . implode(',', $position['data']) .  '|';
           }
         }
@@ -752,11 +775,15 @@ function _chart_error($message, $admin = TRUE) {
  * Check if chart data is below size limit.
  */
 function _chart_is_valid_size($size) {
+  if (!empty($value)) {
+    return FALSE;
+  }
   if (!is_numeric($size['#width']) && !is_numeric($size['#height'])) {
     return FALSE;
   }
 
   if (($size['#width'] * $size['#height']) >= 300000) {
+    watchdog('chart', '#width X #height of chart is greater than or equal to 300,000 pixels, chart size set to default.');
     return FALSE;
   }
 
@@ -1004,8 +1031,8 @@ function chart_grid_lines($x_step, $y_step, $segment_length = 1, $blank_segment_
  *   - CHART_MARKER_DIAMOND
  *   - CHART_MARKER_CIRCLE
  *   - CHART_MARKER_SQUARE
- *   - CHART_MARKER_VIRTICAL_LINE_X
- *   - CHART_MARKER_VIRTICAL_LINE_TOP
+ *   - CHART_MARKER_VERTICAL_LINE_X
+ *   - CHART_MARKER_VERTICAL_LINE_TOP
  *   - CHART_MARKER_HORIZONTAL_LINE
  *   - CHART_MARKER_X
  *
@@ -1191,24 +1218,30 @@ function chart_unique_color($content_id, $scheme = 'default') {
   return '000000';
 }
 
-/*
- * Returns an array of Google chart types and human-readable names.
- * The source of this data is http://code.google.com/apis/chart/types.html .
+/**
+ * Get a map of chart types to human-readable names.
+ *
+ * @return
+ *   An associative array of chart types.
  */
 function chart_types() {
   return array(
-    'bhs' => t('Bar - Horizontal'),
-    'bvs' => t('Bar - Vertical'),
-    'bhg' => t('Bar - Grouped Horizontal'),
-    'bvg' => t('Bar - Grouped Vertical'),
-    'p' => t('Pie'),
-    'p3' => t('Pie - 3D'),
-    'pc' => t('Pie - Concentric pie charts'),
-    'v' => t('Venn Diagram'),
-    's' => t('Scatter plot'),
-    'r' => t('Radar'),
-    'rs' => t('Radar with filled areas'),
-    'gom' => t('Goole-o-meter'),
-    'qr' => t('QR code'),
+    CHART_TYPE_LINE => t('Line'),
+    CHART_TYPE_LINE_NO_AXIS => t('Line - no axis'),
+    CHART_TYPE_LINE_XY => t('Line - XY'),
+    CHART_TYPE_BAR_H => t('Bar - Horizontal'),
+    CHART_TYPE_BAR_V => t('Bar - Vertical'),
+    CHART_TYPE_BAR_H_GROUPED => t('Bar - Grouped Horizontal'),
+    CHART_TYPE_BAR_V_GROUPED => t('Bar - Grouped Vertical'),
+    CHART_TYPE_PIE => t('Pie'),
+    CHART_TYPE_PIE_3D => t('Pie - 3D'),
+    CHART_TYPE_PIE_CONCENTRIC => t('Pie - Concentric'),
+    CHART_TYPE_VENN => t('Venn Diagram'),
+    CHART_TYPE_SCATTER => t('Scatter plot'),
+    CHART_TYPE_MAP => t('Map'),
+    CHART_TYPE_RADAR => t('Radar'),
+    CHART_TYPE_RADAR_FILLED => t('Radar - filled'),
+    CHART_TYPE_GMETER => t('Goole-o-meter'),
+    CHART_TYPE_QR => t('QR code'),
   );
 }

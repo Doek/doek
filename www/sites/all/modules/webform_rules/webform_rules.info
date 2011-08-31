@@ -1,0 +1,16 @@
+; $Id: webform_rules.info,v 1.2 2010/11/26 22:49:41 stborchert Exp $
+name = Webform Rules
+core = 7.x
+description = "Adds rules integration for webform submissions."
+package = Webform
+files[] = webform_rules.module
+files[] = webform_rules.rules.inc
+dependencies[] = webform
+dependencies[] = rules
+
+; Information added by drupal.org packaging script on 2010-11-26
+version = "7.x-1.0"
+core = "7.x"
+project = "webform_rules"
+datestamp = "1290812613"
+
