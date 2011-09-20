@@ -125,8 +125,13 @@ function shoutbox_cron() {
   // Check if expiration is turned on
   if ($expiration > 0) {
     // Fetch shouts that have passed the expiration date
-    $shouts = db_query("SELECT * FROM {shoutbox} WHERE created < :created", array(':created' => REQUEST_TIME - (60 * 60 * 24 * $expiration)));
-    while ($shout = db_fetch_object($shouts)) {
+    $expiration_val = REQUEST_TIME - (60 * 60 * 24 * $expiration);
+    $query = db_select('shoutbox', 's')
+      ->condition('s.created', $expiration_val, '<');
+    // $shouts = db_query("SELECT * FROM {shoutbox} WHERE created < :created", array(':created' => REQUEST_TIME - (60 * 60 * 24 * $expiration)));
+    // while ($shout = db_fetch_object($shouts)) {
+    $result = $query->execute();
+    foreach ($result as $shout) {
       // Delete the shout
       shoutbox_delete_shout($shout);
     }
@@ -506,13 +511,6 @@ function shoutbox_add_form_submit($form, &$form_state) {
 
   // Add shout to the database.
   drupal_write_record('shoutbox', $shout);
-
-  // Pull shout out of db and display.
-  // We are pulling it out because thats the only way to get the shout_id
-  // which is need for edit, hook, etc.
-  // $shout = db_fetch_object(db_query("SELECT * FROM {shoutbox} WHERE uid = :uid AND shout = :shout 
-  // AND created = :created AND sid = :sid", array(':uid' => $shout->uid, ':shout' => $shout->shout, 
-  // ':created' => $shout->created, ':sid' => $shout->sid)) );
 
   // Alert other modules about the new shout via hook
   shoutbox_invoke('insert', $shout, $a1, $form_state);

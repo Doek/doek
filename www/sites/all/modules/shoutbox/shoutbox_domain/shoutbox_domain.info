@@ -7,9 +7,9 @@ dependencies[] = domain
 files[] = shoutbox_domain.install
 files[] = shoutbox_domain.module
 
-; Information added by drupal.org packaging script on 2011-08-15
-version = "7.x-1.0-alpha1"
+; Information added by drupal.org packaging script on 2011-09-17
+version = "7.x-1.0-alpha2"
 core = "7.x"
 project = "shoutbox"
-datestamp = "1313435520"
+datestamp = "1316239307"
 

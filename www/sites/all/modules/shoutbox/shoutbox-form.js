@@ -135,6 +135,13 @@ Drupal.shoutbox.loadShouts = function(restoreForm) {
       // Hide any errors
       $('#shoutbox-error').hide();
       
+      // Invoke a hook for other modules to act on the added shout.
+      $.each(Drupal.shoutbox.afterPost, function (func) {
+        if ($.isFunction(this.execute)) {
+          this.execute();
+        }
+      });
+      
       // Restore the button
       if (restoreForm) {
         $('#shoutbox-add-form input#edit-submit').show();

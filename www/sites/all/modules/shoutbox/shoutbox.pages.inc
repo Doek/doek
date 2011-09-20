@@ -77,6 +77,7 @@ function shoutbox_admin_settings($form, &$form_state) {
 
   // Generate choices for profile fields
   if (module_exists('profile')) {
+    // TODO: Make this work in D7
     $choices = array();
     $fields = db_query("SELECT name FROM {profile_fields} ORDER BY name ASC");
     while ($field = db_fetch_object($fields)) {
