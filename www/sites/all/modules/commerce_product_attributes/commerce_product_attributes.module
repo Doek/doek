@@ -5,6 +5,21 @@
  * This module adds some improvements to the Drupal Commerce core.
  */
 
+/**
+ * Implementation of hook_enable()
+ */
+function commerce_product_attributes_enable() {
+  $weight = db_select('system', 's')
+  ->condition('s.name', 'commerce_cart')
+  ->fields('s', array('weight'))
+  ->execute()->fetchField();
+  
+  db_update('system')
+  ->fields(array('weight' => ($weight - 1)))
+  ->condition('name', 'commerce_product_attributes')
+  ->execute();
+}
+
 
 /**
  * Implementation of hook_entity_info_alter
@@ -19,6 +34,8 @@ function commerce_product_attributes_entity_info_alter(&$entity_info) {
     'custom settings' => FALSE,
   );
 }
+
+
 
 /**
  * Implements hook_views_api().
@@ -38,16 +55,17 @@ function commerce_product_attributes_attribute_field(&$element, &$line_item) {
   if ($line_item->type != 'product') {
     return;
   }
-  
+
   // Add displayed attributes on product page also in shopping cart:
   $line_item_wrapper = entity_metadata_wrapper('commerce_line_item', $line_item);
-  $product = $line_item_wrapper->commerce_product;
+  $product = $line_item_wrapper->commerce_product->value();
+  $product->bundle = 'product';
   
-  $output = field_attach_view('commerce_product', $product->value(), 'attribute_view');
+  field_attach_prepare_view('commerce_product', array($product->product_id => $product), 'attribute_view');
+  $output = field_attach_view('commerce_product', $product, 'attribute_view');
   $element['attributes'][] = array(
     '#markup' => '<div class="commerce-product-attributes-wrapper">' . drupal_render($output) . '</div>',
-  );  
-  
+  );
 }
 
 
@@ -61,7 +79,6 @@ function commerce_product_attributes_theme() {
     ),
   );
 }
-
 
 
 function theme_commerce_product_attributes_item_title($variables) {
@@ -87,7 +104,7 @@ function theme_commerce_product_attributes_item_title($variables) {
 /**
  * Alternative implementation of commerce_cart_add_to_cart_form_attributes_refresh()
  *
- * We need this because, the given hook (hook_commerce_cart_attributes_refresh) alows you to change
+ * We need this because, the given hook (hook_commerce_cart_attributes_refresh) allows you to change
  * each single element. We can't change the $commands, it is to complicated. So we 
  * need to hook earlier.
  *
@@ -135,93 +152,99 @@ function commerce_product_attributes_add_to_cart_form_attributes_refresh($form, 
   return array('#type' => 'ajax', '#commands' => $commands);
 }
 
-
 /**
- * Implements hook_forms().
- *
- * To provide distinct form IDs for add to cart forms, the product IDs
- * referenced by the form are appended to the base ID,
- * commerce_cart_add_to_cart_form. When such a form is built or submitted, this
- * function will return the proper callback function to use for the given form.
- *//*
-function commerce_product_attributes_forms($form_id, $args) {
-  $forms = array();
-
-  // Construct a valid cart form ID from the arguments.
-  if (strpos($form_id, 'commerce_cart_add_to_cart_form_') === 0) {
-    $forms[$form_id] = array(
-      'wrapper_callback' => 'commerce_product_attributes_add_to_cart_form_wrapper',
-    );
-    
-  }
-  
-
-  return $forms;
+ * Implements hook_field_attach_view_alter().
+ * 
+ * We use this hook to replace the default line item.
+ */
+function commerce_product_attributes_field_attach_view_alter(&$output, $context) {
+  foreach ($output as $field_name => $element) {
+    if (!empty($element['#formatter']) && $element['#formatter'] == 'commerce_cart_add_to_cart_form') {
+      foreach (element_children($element) as $key) {
+        if (!isset($element[$key]['#arguments'])) {
+          continue;
+        }
+        $arguments = $element[$key]['#arguments'];
+        $line_item = $arguments['line_item'];
+        
+        if (isset($_GET['line_item_id'])) {
+          $new_line_item = commerce_line_item_load($_GET['line_item_id']);
+          if (!empty($new_line_item) && commerce_product_attributes_access_to_line_item($new_line_item)) {
+            $new_line_item->data['context']['product_ids'] = $line_item->data['context']['product_ids'];
+            $new_line_item->data['context']['add_to_cart_combine'] = $line_item->data['context']['add_to_cart_combine'];
+            $output[$field_name][$key]['#arguments']['line_item'] = $new_line_item;
+          }
+        }       
+      }
+    }
+  }	
 }
 
 
-
-function commerce_product_attributes_add_to_cart_form_wrapper($form, &$form_state, $line_item, $show_quantity = FALSE, $default_quantity = 1, $context = array(), $display_uri = NULL) {
+/**
+ * This function is used to check if a user has access to update an
+ * line item. The access depends on the fact that the order is related
+ * to the user and the order is in "cart" state.
+ */
+function commerce_product_attributes_access_to_line_item($line_item, $account = NULL) {
+  global $user;
+  static $access = array();
   
-  if (isset($_GET['line_item_id'])) {
-    $form_state['pre_selected_line_item'] = entity_metadata_wrapper('commerce_line_item', commerce_line_item_load($_GET['line_item_id']));
-    if (!isset($form_state['values']['product_id']) && isset($form_state['line_item']->commerce_product) && is_object($form_state['line_item']->commerce_product)) {
-      $form_state['values']['product_id'] = $form_state['line_item']->commerce_product->product_id->value();
+  $account = isset($account) ? $account : clone($user);
+  
+  $key = NULL;
+  if (isset($line_item->line_item_id) && isset($account->uid)) {
+    $key = $line_item->line_item_id . '__' . $account->uid;
+    if (isset($access[$key])) {
+      return $access[$key];
     }
-    
+  }
+
+  // If the user has the administration permission, return TRUE now.
+  if (user_access('administer line items', $account)) {
+    $access[$key] = TRUE;
+    return $access[$key];
   }
   
-  return $form;
-}*/
+  if (!empty($line_item->order_id) && module_exists('commerce_order')) {
+    $order = commerce_order_load($line_item->order_id);
+    if ($order->status == 'cart' && ($order->uid === 0 || $order->uid == $account->uid)) {
+      $access[$key] = TRUE;
+      return $access[$key];
+    }
+  }
+  
+  $access[$key] = FALSE;
+  return $access[$key];
 
+}
 
 /**
  * Implementation of hook_form_alter()
  *
  * Here we modify the add to cart form. 
- *//*
+ */
 function commerce_product_attributes_form_alter(&$form, &$form_state, $form_id) {    
   if (strstr($form_id, 'commerce_cart_add_to_cart_form')) {
-    if (isset($form_state['pre_selected_line_item'])) {
+    $line_item = $form_state['line_item'];
+    if (isset($line_item->line_item_id) && $line_item->line_item_id > 0) {
       $form['submit'] = array(
         '#type' => 'submit',
         '#value' => t('Update cart'),
         '#weight' => 10,
       );
-      
-    
-      // Try to set the quantity from the line item (comes from the URL):
-      if (isset($form_state['pre_selected_line_item'])) {
-        $line_item = $form_state['pre_selected_line_item'];
-        
-        if (!$line_item instanceof EntityMetadataWrapper) {
-          $line_item = entity_metadata_wrapper('commerce_line_item', $line_item);
-        }
-        
-        
-        $properties = $line_item->getPropertyInfo();
-        
-        if (isset($properties['quantity'])) {
-          if ($form['quantity']['#type'] == 'textfield') {
-            $form['quantity']['#default_value'] = (float)$line_item->quantity->value();
-          }
-          else {
-            $form['quantity']['#value'] = (float)$line_item->quantity->value();
-          }
-        }      
-      }
-      
-      // Remove the default submit handler, we need a update handler
+           
+      // Replace the default submit handler. We need also an update action.
       foreach ($form['#submit'] as $handler_id => $handler) {
         if ($handler == 'commerce_cart_add_to_cart_form_submit') {
-        //  unset($form['#submit'][$handler_id]);
+          unset($form['#submit'][$handler_id]);
         }
         // Ensure that our handler is only assign once
         elseif ($handler == 'commerce_product_attributes_add_to_cart_form_submit') {
           unset($form['#submit'][$handler_id]);
         }
         
-        //$form['#submit'][] = 'commerce_product_attributes_add_to_cart_form_submit';
+        $form['#submit'][] = 'commerce_product_attributes_add_to_cart_form_submit';
       }
       
     }
@@ -230,118 +253,71 @@ function commerce_product_attributes_form_alter(&$form, &$form_state, $form_id) 
 
 }
 
-
-function commerce_product_attributes_add_to_cart_form_submit($form, &$form_state) {
-  
-  if (isset($form_state['pre_selected_line_item'])) {
-    $line_item = $form_state['pre_selected_line_item'];
-
-    if (!$line_item instanceof EntityMetadataWrapper) {
-      $line_item = entity_metadata_wrapper('commerce_line_item', $line_item);
-    }
-
-    $product_id = $form_state['values']['product_id'];
-    if (isset($form_state['products'])) {
-      $product = $form_state['products'][$product_id];
-
-      // Add the product to the specified shopping cart.
-      $form_state['line_item'] = commerce_attribute_cart_product_update(
-        $form_state['values']['uid'],
-        $product_id,
-        $form_state['values']['quantity'],
-        $form_state['values']['display_uri'],
-        $line_item->line_item_id->value()
-      );
-    }
-
-    drupal_goto('cart');
-  
-  }
-  else {
-    commerce_cart_add_to_cart_form_submit($form, $form_state);
-  }
-}*/
-
-
-
 /**
- * Adds the specified product to a customer's shopping cart.
- *
- * @param $uid
- *   The uid of the user whose cart you are adding the product to.
- * @param $product_id
- *   The ID of the product to add to the cart.
- * @param $quantity
- *   The quantity of this product to add to the cart.
- * @param $line_item_id
- *   The line item to update
- * @param $display_uri
- *   A URI array as returned by entity_uri() indicating the display to link the
- *     product line item to; defaults to NULL for no display.
- *
- * @return
- *   The new or updated line item object or FALSE on failure.
- *//*
-function commerce_attribute_cart_product_update($uid, $product_id, $quantity, $display_uri = NULL, $line_item_id) {
-  // Load and validate the specified product ID.
+ * Submit callback function for the add to cart function.
+ */ 
+function commerce_product_attributes_add_to_cart_form_submit($form, &$form_state) {
+  $product_id = $form_state['values']['product_id'];
   $product = commerce_product_load($product_id);
 
-  // Fail if the product does not exist or is disabled.
-  if (empty($product) || !$product->status) {
-    return FALSE;
+  // If the line item passed to the function is new, then
+  // use the default handler.
+  if (empty($form_state['line_item']->line_item_id)) {
+    commerce_cart_add_to_cart_form_submit($form, $form_state);
   }
+  else {
+    $order = commerce_order_load($form_state['line_item']->order_id);
+   
+    // Remove the line item.
+    commerce_cart_order_product_line_item_delete($order, $form_state['line_item']->line_item_id);
+   
+    // Create the new product line item of the same type.
+    $line_item = commerce_product_line_item_new($product, $form_state['values']['quantity'], 0, $form_state['line_item']->data, $form_state['line_item']->type);
+    
+    // Remove line item field values the user didn't have access to modify.
+    foreach ($form_state['values']['line_item_fields'] as $field_name => $value) {
+      // Note that we're checking the Commerce Cart settings that we inserted
+      // into this form element array back when we built the form. This means a
+      // module wanting to alter a line item field widget to be available must
+      // update both its form element's #access value and the field_access value
+      // of the #commerce_cart_settings array.
+      if (empty($form['line_item_fields'][$field_name]['#commerce_cart_settings']['field_access'])) {
+        unset($form_state['values']['line_item_fields'][$field_name]);
+      }
+    }
 
-  // First attempt to load the customer's shopping cart order.
-  $order = commerce_cart_order_load($uid);
+    // Unset the line item field values array if it is now empty.
+    if (empty($form_state['values']['line_item_fields'])) {
+      unset($form_state['values']['line_item_fields']);
+    }
 
-  // If no order existed, create one now.
-  if (empty($order)) {
-    $order = commerce_cart_order_new($uid);
+    // Add field data to the line item.
+    field_attach_submit('commerce_line_item', $line_item, $form['line_item_fields'], $form_state);
+
+    // Process the unit price through Rules so it reflects the user's actual
+    // purchase price.
+    rules_invoke_event('commerce_product_calculate_sell_price', $line_item);
+
+    // Only attempt an Add to Cart if the line item has a valid unit price.
+    $line_item_wrapper = entity_metadata_wrapper('commerce_line_item', $line_item);
+
+    if (!is_null($line_item_wrapper->commerce_unit_price->value())) {
+      // Add the product to the specified shopping cart.
+      $form_state['line_item'] = commerce_cart_product_add(
+        $form_state['values']['uid'],
+        $line_item,
+        isset($line_item->data['context']['add_to_cart_combine']) ? $line_item->data['context']['add_to_cart_combine'] : TRUE
+      );
+
+      // TODO: Accommodate multiple product Add to Cart forms better; i.e. should it
+      // display the product title or the product display node title?
+      drupal_set_message(t('%title is updated in <a href="!cart-url">your cart</a>.', array('%title' => $product->title, '!cart-url' => url('cart'))));
+    }
+    else {
+      drupal_set_message(t('%title could not be updated.', array('%title' => $product->title)), 'error');
+    }
   }
-  $line_item = commerce_line_item_load($line_item_id);
-  $line_item_wrapper = entity_metadata_wrapper('commerce_line_item', $line_item);
-  
-  if (empty($line_item_wrapper)) {
-    return;
-  }
-
-  // Wrap the order for easy access to field data.
-  $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
-
-  // Invoke the product prepare event with the shopping cart order.
-  rules_invoke_all('commerce_cart_product_prepare', $order, $product, $quantity);
-  
-  $line_item_wrapper->quantity = $quantity;
-  $line_item_wrapper->commerce_product = $product_id;
-  
-  commerce_line_item_save($line_item);
-  
-  entity_get_controller('commerce_line_item')->resetCache(array($line_item->line_item_id));
-
-  // Invoke the product add event with the newly saved or updated line item.
-  // TODO: Implement this rule event:
-  //rules_invoke_all('commerce_cart_product_update', $order, $product, $quantity, $line_item);
-
-  // Return the line item.
-  return $line_item;
 }
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

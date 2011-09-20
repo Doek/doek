@@ -59,7 +59,6 @@ class commerce_product_attributes_handler_field_attributes extends views_handler
       $options = array(
         'query' => array(
           'line_item_id' => $line_item_id,
-
         )
       );
     }
