@@ -3,9 +3,9 @@ description = Adds Google +1 button to your site. Enable it per node, or as a bl
 core = 7.x
 configure = admin/config/services/google-plusone
 
-; Information added by drupal.org packaging script on 2011-07-21
-version = "7.x-1.1"
+; Information added by drupal.org packaging script on 2011-09-19
+version = "7.x-1.2"
 core = "7.x"
 project = "google_plusone"
-datestamp = "1311231117"
+datestamp = "1316459804"
 
