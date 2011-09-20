@@ -1,7 +1,7 @@
 <?php
 
 class CommerceOptionSet extends Entity {
-
+  public $id;
   public $set_id;
   public $status;
   public $name;

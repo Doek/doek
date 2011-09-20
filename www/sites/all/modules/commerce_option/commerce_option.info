@@ -1,9 +1,9 @@
 name = Product Option
 description = This module enables the define user input fields (aka options) in the add to card form. 
-package = Commerce
+package = "Commerce Product Enhancements"
 core = 7.x
-version = 7.x-1.0
 dependencies[] = commerce
+dependencies[] = commerce_product_attributes
 
 
 files[] = commerce_option.module
@@ -17,9 +17,9 @@ files[] = includes/views/commerce_option.views.inc
 files[] = includes/views/handlers/commerce_option_handler_field_option_list.inc
 
 
-; Information added by drupal.org packaging script on 2011-05-15
-version = "7.x-1.x-dev"
+; Information added by drupal.org packaging script on 2011-09-18
+version = "7.x-1.0-beta1"
 core = "7.x"
 project = "commerce_option"
-datestamp = "1305418276"
+datestamp = "1316386601"
 
