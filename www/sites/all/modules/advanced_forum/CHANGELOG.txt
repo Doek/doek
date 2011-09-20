@@ -1,6 +1,19 @@
 
 ****************************** DRUPAL 7 - 2.x BRANCH ********************************
 
+August 12, 2011
+---------------
+Issue #1264676 by troky: Added Image module existance check on settings page.
+
+August 12, 2011
+---------------
+Issue #1109114 by troky: Fixed core template overrides.
+Issue #1254866 by troky: Added 'forum_description' template variable to forum topic list page.
+
+August 10, 2011
+---------------
+Issue #1243292 by troky: Added fallback to default style if current style doesnt exist anymore.
+
 July 11, 2011
 -------------
 Issue #1197940 by a.ross: Added forum image option (was taxonomy image in D6).
