@@ -74,7 +74,8 @@ function addressfield_format_address_generate(&$format, $address, $context = arr
     unset($format['locality_block']['postal_code']);
 
     // Remove the prefix from the first widget of the block.
-    $first_child = reset(element_children($format['locality_block']));
+    $element_children = element_children($format['locality_block']);
+    $first_child = reset($element_children);
     unset($format['locality_block'][$first_child]['#prefix']);
   }
 
@@ -304,9 +305,28 @@ function addressfield_format_address_generate(&$format, $address, $context = arr
       'TO' => t('Tocantins'),
     );
   }
+  else if ($address['country'] == 'CA') {
+    $format['locality_block']['administrative_area']['#options'] = array(
+      ''   => t('--'),
+      'AB' => t('Alberta'),
+      'BC' => t('British Columbia'),
+      'MB' => t('Manitoba'),
+      'NB' => t('New Brunswick'),
+      'NL' => t('Newfoundland'),
+      'NT' => t('Northwest Territories'),
+      'NS' => t('Nova Scotia'),
+      'NU' => t('Nunavut'),
+      'ON' => t('Ontario'),
+      'PE' => t('Prince Edward Island'),
+      'QC' => t('Quebec'),
+      'SK' => t('Saskatchewan'),
+      'YT' => t('Yukon Territory'),
+    );
+    $format['locality_block']['administrative_area']['#title'] = t('Province');
+  }
 
   // Those countries tend to put the postal code after the locality.
-  if (in_array($address['country'], array('AU', 'BD', 'BF', 'BH', 'BM', 'BN', 'BT', 'CA', 'FM', 'ID', 'IE', 'IN', 'JM', 'JO', 'KH', 'LB', 'LS', 'LV', 'MM', 'MN', 'MV', 'MW', 'NG', 'NP', 'NZ', 'PE', 'PK', 'PR', 'PW', 'SA', 'SG', 'SO', 'TH', 'US', 'VI', 'VG', 'VN'))) {
+  if (in_array($address['country'], array('AU', 'BD', 'BF', 'BH', 'BM', 'BN', 'BT', 'CA', 'FM', 'GB', 'ID', 'IE', 'IN', 'JM', 'JO', 'KH', 'LB', 'LS', 'LV', 'MM', 'MN', 'MV', 'MW', 'NG', 'NP', 'NZ', 'PE', 'PK', 'PR', 'PW', 'SA', 'SG', 'SO', 'TH', 'US', 'VI', 'VG', 'VN'))) {
     // Take the widget out of the array.
     $postal_code_widget = $format['locality_block']['postal_code'];
     $postal_code_widget['#prefix'] = ' ';
@@ -316,7 +336,8 @@ function addressfield_format_address_generate(&$format, $address, $context = arr
     $format['locality_block']['postal_code'] = $postal_code_widget;
 
     // Remove the prefix from the first widget of the block.
-    $first_child = reset(element_children($format['locality_block']));
+    $element_children = element_children($format['locality_block']);
+    $first_child = reset($element_children);
     unset($format['locality_block'][$first_child]['#prefix']);
   }
 
