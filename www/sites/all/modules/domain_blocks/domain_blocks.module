@@ -1,5 +1,4 @@
 <?php
-// $Id: domain_blocks.module,v 1.6 2011/02/11 20:38:19 nonsie Exp $
 
 /**
  * @file
@@ -98,14 +97,13 @@ function domain_blocks_save($module, $delta, $current_domains, $previous_domains
       // Unset previously checked values that are now unchecked
       $domains_to_be_removed = array_diff($previous_domains, $current_domains);
       if (!empty($domains_to_be_removed)) {
-        $domains_to_be_removed = implode(',', $domains_to_be_removed);
         $realm = 'domain_id';
         if (isset($domains_to_be_removed)) {
           db_delete('domain_blocks')
           ->condition('module', $module)
           ->condition('delta', $delta)
           ->condition('realm', $realm)
-          ->condition('domain_id', $domains_to_be_removed, 'IN')
+          ->condition('domain_id', $domains_to_be_removed)
           ->execute();
         }
       }

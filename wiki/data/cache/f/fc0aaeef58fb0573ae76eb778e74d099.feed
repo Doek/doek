@@ -11,7 +11,7 @@
         <description></description>
         <link>http://wiki.doek.dk/</link>
         <image rdf:resource="http://wiki.doek.dk/lib/images/favicon.ico" />
-       <dc:date>2011-09-18T14:04:04+02:00</dc:date>
+       <dc:date>2011-10-10T15:36:16+02:00</dc:date>
         <items>
             <rdf:Seq>
                 <rdf:li rdf:resource="http://wiki.doek.dk/doku.php?id=start&amp;rev=1312466646&amp;do=diff"/>
