@@ -17,10 +17,8 @@ function media_gallery_list_galleries($term) {
     drupal_add_library('system', 'ui.sortable');
     drupal_add_js(drupal_get_path('module', 'media_gallery') . '/media_gallery.dragdrop.js');
     drupal_add_css(drupal_get_path('module', 'media_gallery') . '/media_gallery.dragdrop.css');
-    drupal_add_js(array(
-        'mediaGalleryTid' => $term->tid,
-        'mediaGalleryToken' => drupal_get_token('media_gallery'),
-      ), array('type' => 'setting'));
+    $sort_collection_url = url('media-gallery/sort/collection/' . $term->tid . '/' . drupal_get_token('media_gallery'));
+    drupal_add_js(array('mediaGallerySortCollectionUrl' => $sort_collection_url), array('type' => 'setting'));
   }
   // Build breadcrumb based on the hierarchy of the term.
   $current = (object) array(
