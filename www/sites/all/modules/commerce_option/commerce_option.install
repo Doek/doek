@@ -119,7 +119,11 @@ function commerce_option_schema() {
   return $schema;
 }
 
-
+/**
+ * Add new field, which are used to track the line item with the exact option
+ * value on the view page.
+ *
+ */
 function commerce_option_update_7100() {
   db_add_field('commerce_option', 'product_id', array(
     'description' => 'The {commerce_product}.product_id which is linked with this option.',
@@ -150,14 +154,6 @@ function commerce_option_update_7100() {
     'description' => 'A serialized array of additional data related to this option set.',
   ));
   
-  db_add_field('commerce_option_set', 'data', array(
-    'type' => 'text',
-    'not null' => FALSE,
-    'size' => 'big',
-    'serialize' => TRUE,
-    'description' => 'A serialized array of additional data related to this option set.',
-  ));
-
   return t('Add new fields to the product option entity.');
 }
 

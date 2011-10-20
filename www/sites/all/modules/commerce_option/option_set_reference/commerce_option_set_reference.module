@@ -245,25 +245,28 @@ function commerce_option_set_reference_form_alter(&$form, &$form_state, $form_id
              
           if ($type == 'commerce_option_set_reference') {
             $lang_code = field_language('commerce_product', $sub_product, $field_name);
-                    
-            foreach($field[$lang_code] as $delta => $set_id) {
             
-              if (count($options) > 0 && isset($options[$set_id['set_id']][$current_product->product_id][$field_name][$delta])) {
-                $option = $options[$set_id['set_id']][$sub_product->product_id][$field_name][$delta];
-              }
-              else {
-                $option = entity_create('commerce_option', $set_id);
-              }
+            if (isset($field[$lang_code])) {
+                    
+              foreach($field[$lang_code] as $delta => $set_id) {
+            
+                if (count($options) > 0 && isset($options[$set_id['set_id']][$current_product->product_id][$field_name][$delta])) {
+                  $option = $options[$set_id['set_id']][$sub_product->product_id][$field_name][$delta];
+                }
+                else {
+                  $option = entity_create('commerce_option', $set_id);
+                }
           
-              $form_state[$id]['commerce_option'][$field_name][$delta]['option'] = $option;
+                $form_state[$id]['commerce_option'][$field_name][$delta]['option'] = $option;
+                
+                $form[$id][$field_name][$delta] = array(
+                  '#parents' => array($id, $field_name, $delta),
+                );
               
-              $form[$id][$field_name][$delta] = array(
-                '#parents' => array($id, $field_name, $delta),
-              );
+                field_attach_form('commerce_option', $option, $form[$id][$field_name][$delta], $form_state);
               
-              field_attach_form('commerce_option', $option, $form[$id][$field_name][$delta], $form_state);
-              
-              $someFieldIsAdded = true;
+                $someFieldIsAdded = true;
+              }
             }
           }
         }
