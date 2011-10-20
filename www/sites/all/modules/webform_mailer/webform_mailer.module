@@ -1,0 +1,75 @@
+<?php
+
+/**
+ * This module provides a simple way to create send out notifications and reminders (emails) to users about the webform.
+ *
+ * The initial development of this module was sponsered by IT-Kartellet ApS
+ * http://www.it-kartellet.dk
+ *
+ * @author Henrik Thorn <henrikthorn@it-kartellet.dk>
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function webform_mailer_menu() {
+  $items = array();
+
+  // Node e-mail forms.
+  $items['node/%webform_menu/webform/mailer'] = array(
+    'title' => 'Webform Mailer - Settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('webform_mailer_settings_form', 1),
+    'access callback' => 'node_access',
+    'access arguments' => array('update', 1),
+    'file' => 'includes/webform_mailer.settings.inc',
+    'weight' => 1,
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  // Node users forms.
+  $items['node/%webform_menu/webform/users'] = array(
+    'title' => 'Webform Mailer - Users',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('webform_mailer_users_form', 1),
+    'access callback' => 'node_access',
+    'access arguments' => array('update', 1),
+    'file' => 'includes/webform_mailer.users.inc',
+    'weight' => 2,
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  $items['node/%webform_menu/webform/users/%webform_mailer_menu_role'] = array(
+    'title' => 'Webform Mailer - Users Select',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('webform_mailer_users_roles_form', 1, 4),
+    'load arguments' => array(1, 4),
+    'access callback' => 'node_access',
+    'access arguments' => array('update', 1),
+    'file' => 'includes/webform_mailer.users.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['node/%webform_menu/token/%'] = array(
+    'title' => 'Webform Token',
+    'page callback' => 'get_confirm',
+    'page arguments' => array(1, 3),
+    'file' => 'includes/webform_mailer.token.inc',
+    'access callback' => 'node_access',
+    'access arguments' => array('update', 1),
+    'type' => MENU_CALLBACK,
+  );
+
+return $items;
+}
+
+function webform_mailer_menu_role_load($roles){
+
+	$roles = explode('-', $roles);
+
+	foreach($roles as $role){
+		$export[] = user_role_load($role); 
+	}
+	return $export;
+}
+

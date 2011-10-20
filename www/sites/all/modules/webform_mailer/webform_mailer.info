@@ -1,0 +1,6 @@
+; $Id: $
+name = 'Webform Mailer'
+description = Enables the webform module to send mails to users, who should respond to the form and remind them.
+core = 7.x
+package = Webform
+
