@@ -1,0 +1,151 @@
+<?php
+
+/**
+ * @file
+ *   Webform module install/schema hooks.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function webform_mailer_schema() {
+  $schema = array();
+  $schema['webform_mailer'] = array(
+    'description' => 'Table for storing information about the webform_mailer module.',
+    'fields' => array(
+      'nid' => array(
+        'description' => 'The node identifier of a webform.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'sendmail' => array(
+ 	'description' => 'If the module should be enabled on this webform', 
+	'type' => 'int',
+	'size' => 'tiny',
+	'not null' => TRUE,
+	'default' => 0,
+      ),
+      'notify' => array(
+	'description' => 'Boolean to allow users to select wether or not users should be notified about the new webform',
+	'type' => 'int',
+	'size' => 'tiny',
+	'not null' => TRUE,
+	'default' => 0,
+      ),
+      'reminders' => array(
+	'description' => 'Number of reminders to be sent in total',
+	'type' => 'int',
+	'not null' => TRUE,
+	'default' => 0,
+      ),
+      'reminders_time' => array(
+	'description' => 'Interval showing how long the system should wait until sending out reminders',
+	'type' => 'int',
+	'not null' => FALSE, 
+      ),
+    ), 
+    'primary key' => array('nid'),
+  );
+
+  $schema['webform_mailer_users'] = array(
+    'description' => 'Table for storing information about the webform_mailer module.',
+    'fields' => array(
+      'nid' => array(
+        'description' => 'the node identifier of a webform.',
+        'type' => 'int',
+        'unsigned' => true,
+        'not null' => true,
+      ),
+      'uid' => array(
+        'description' => 'the user identifier. NOT the uid from the users table, since these users are added on the fly.',
+        'type' => 'int',
+        'unsigned' => true,
+        'not null' => true,
+      ),
+      'token' => array(
+        'description' => 'the token for a user on this nid.',
+        'type' => 'varchar',
+	'length' => 255,
+        'not null' => true,
+      ),
+      'firstname' => array(
+        'description' => 'Firstname for the user.',
+        'type' => 'varchar',
+	'length' => 255,
+        'not null' => true,
+      ),
+      'lastname' => array(
+        'description' => 'Lastname for the user.',
+        'type' => 'varchar',
+	'length' => 255,
+        'not null' => true,
+      ),
+      'email' => array(
+        'description' => 'The users email.',
+        'type' => 'varchar',
+	'length' => 255,
+        'not null' => true,
+      ),
+      'status' => array(
+        'description' => 'Status for the users submission. Can be pending, started, finished .',
+        'type' => 'varchar',
+	'length' => 255,
+        'not null' => true,
+        'default' => 'pending',
+      ),
+     ),
+     'primary key' => array('nid'),
+   );
+  $schema['webform_mailer_messages'] = array(
+    'description' => 'Table for storing information about the webform_mailer module.',
+    'fields' => array(
+      'mid' => array(
+        'description' => 'The id for the message',
+        'type' => 'int',
+        'unsigned' => true,
+        'not null' => true,
+      ),
+      'nid' => array(
+        'description' => 'the node identifier of a webform.',
+        'type' => 'int',
+        'unsigned' => true,
+        'not null' => true,
+      ),
+      'uid' => array(
+        'description' => 'the user identifier. NOT the uid from the users table, since these users are added on the fly.',
+        'type' => 'int',
+        'unsigned' => true,
+        'not null' => true,
+      ),
+      'message_time' => array(
+        'description' => 'unix timestamp for the message',
+        'type' => 'int',
+        'not null' => true,
+      ),
+      'type' => array(
+        'description' => 'the type identifier of a webform.',
+        'type' => 'varchar',
+	'length' => 255,
+        'not null' => true,
+      ),
+     ),
+     'primary key' => array('mid')
+   );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function webform_mailer_install() {
+  module_load_include('inc', 'node', 'content_types');
+  db_update('system')
+    ->condition('name', 'webform_mailer')
+    ->condition('type', 'module')
+    ->fields(array('weight' => -1))
+    ->execute();
+
+}
+
