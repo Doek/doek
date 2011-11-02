@@ -11,10 +11,16 @@
         <description></description>
         <link>http://wiki.doek.dk/</link>
         <image rdf:resource="http://wiki.doek.dk/lib/images/favicon.ico" />
-       <dc:date>2011-10-10T15:36:16+02:00</dc:date>
+       <dc:date>2011-10-28T17:43:19+02:00</dc:date>
         <items>
             <rdf:Seq>
-                <rdf:li rdf:resource="http://wiki.doek.dk/doku.php?id=start&amp;rev=1312466646&amp;do=diff"/>
+                <rdf:li rdf:resource="http://wiki.doek.dk/doku.php?id=wiki:pagename&amp;rev=1319547397&amp;do=diff"/>
+                <rdf:li rdf:resource="http://wiki.doek.dk/doku.php?id=wiki:syntax&amp;rev=1319544854&amp;do=diff"/>
+                <rdf:li rdf:resource="http://wiki.doek.dk/doku.php?id=wiki:nonexisting&amp;rev=1319544808&amp;do=diff"/>
+                <rdf:li rdf:resource="http://wiki.doek.dk/doku.php?id=wiki:dokuwiki&amp;rev=1319544457&amp;do=diff"/>
+                <rdf:li rdf:resource="http://wiki.doek.dk/doku.php?id=some:namespaces&amp;rev=1319544155&amp;do=diff"/>
+                <rdf:li rdf:resource="http://wiki.doek.dk/doku.php?id=playground:playground&amp;rev=1319462326&amp;do=diff"/>
+                <rdf:li rdf:resource="http://wiki.doek.dk/doku.php?id=start&amp;rev=1319462042&amp;do=diff"/>
             </rdf:Seq>
         </items>
     </channel>
@@ -23,12 +29,53 @@
         <link>http://wiki.doek.dk/</link>
         <url>http://wiki.doek.dk/lib/images/favicon.ico</url>
     </image>
-    <item rdf:about="http://wiki.doek.dk/doku.php?id=start&amp;rev=1312466646&amp;do=diff">
+    <item rdf:about="http://wiki.doek.dk/doku.php?id=wiki:pagename&amp;rev=1319547397&amp;do=diff">
         <dc:format>text/html</dc:format>
-        <dc:date>2011-08-04T16:04:06+02:00</dc:date>
-        <dc:creator>admin</dc:creator>
-        <title>start - created</title>
-        <link>http://wiki.doek.dk/doku.php?id=start&amp;rev=1312466646&amp;do=diff</link>
-        <description>FRONT PAGE!</description>
+        <dc:date>2011-10-25T14:56:37+02:00</dc:date>
+        <title>wiki:pagename - quXnGmQbiZcCLMshJgw</title>
+        <link>http://wiki.doek.dk/doku.php?id=wiki:pagename&amp;rev=1319547397&amp;do=diff</link>
+        <description>9J74DT , [url=&lt;http://ehzvgojuxbtc.com/&gt;]ehzvgojuxbtc[/url], [link=&lt;http://kbhswkbpwfrh.com/&gt;]kbhswkbpwfrh[/link], &lt;http://qaaiknmlfnox.com/&gt;</description>
+    </item>
+    <item rdf:about="http://wiki.doek.dk/doku.php?id=wiki:syntax&amp;rev=1319544854&amp;do=diff">
+        <dc:format>text/html</dc:format>
+        <dc:date>2011-10-25T14:14:14+02:00</dc:date>
+        <title>wiki:syntax - FvMJIvUWmrERP</title>
+        <link>http://wiki.doek.dk/doku.php?id=wiki:syntax&amp;rev=1319544854&amp;do=diff</link>
+        <description>hFruCp , [url=&lt;http://fxjdtcyyvwqt.com/&gt;]fxjdtcyyvwqt[/url], [link=&lt;http://qomfonxwhoht.com/&gt;]qomfonxwhoht[/link], &lt;http://jfhtdvpxlozy.com/&gt;</description>
+    </item>
+    <item rdf:about="http://wiki.doek.dk/doku.php?id=wiki:nonexisting&amp;rev=1319544808&amp;do=diff">
+        <dc:format>text/html</dc:format>
+        <dc:date>2011-10-25T14:13:28+02:00</dc:date>
+        <title>wiki:nonexisting - jchILPaqxT</title>
+        <link>http://wiki.doek.dk/doku.php?id=wiki:nonexisting&amp;rev=1319544808&amp;do=diff</link>
+        <description>Lrg5Ot , [url=&lt;http://gnnsbivdamig.com/&gt;]gnnsbivdamig[/url], [link=&lt;http://ggmsrbihfrez.com/&gt;]ggmsrbihfrez[/link], &lt;http://iugiabtvxlio.com/&gt;</description>
+    </item>
+    <item rdf:about="http://wiki.doek.dk/doku.php?id=wiki:dokuwiki&amp;rev=1319544457&amp;do=diff">
+        <dc:format>text/html</dc:format>
+        <dc:date>2011-10-25T14:07:37+02:00</dc:date>
+        <title>wiki:dokuwiki - ruqSKIxTCzRcgXu</title>
+        <link>http://wiki.doek.dk/doku.php?id=wiki:dokuwiki&amp;rev=1319544457&amp;do=diff</link>
+        <description>1SNg6z , [url=&lt;http://ygmvgjtziliu.com/&gt;]ygmvgjtziliu[/url], [link=&lt;http://bbgzdcexhszx.com/&gt;]bbgzdcexhszx[/link], &lt;http://dguimupnasmx.com/&gt;</description>
+    </item>
+    <item rdf:about="http://wiki.doek.dk/doku.php?id=some:namespaces&amp;rev=1319544155&amp;do=diff">
+        <dc:format>text/html</dc:format>
+        <dc:date>2011-10-25T14:02:35+02:00</dc:date>
+        <title>some:namespaces - SYvTaAZnOChARlI</title>
+        <link>http://wiki.doek.dk/doku.php?id=some:namespaces&amp;rev=1319544155&amp;do=diff</link>
+        <description>ZmmNjs , [url=&lt;http://izrexhhtbhwi.com/&gt;]izrexhhtbhwi[/url], [link=&lt;http://hlxhsigctumw.com/&gt;]hlxhsigctumw[/link], &lt;http://bnhcmrbgakbg.com/&gt;</description>
+    </item>
+    <item rdf:about="http://wiki.doek.dk/doku.php?id=playground:playground&amp;rev=1319462326&amp;do=diff">
+        <dc:format>text/html</dc:format>
+        <dc:date>2011-10-24T15:18:46+02:00</dc:date>
+        <title>playground:playground - rYmDFpJACcfXKCrZ</title>
+        <link>http://wiki.doek.dk/doku.php?id=playground:playground&amp;rev=1319462326&amp;do=diff</link>
+        <description>8OWPmD , [url=&lt;http://thhedtlljgdh.com/&gt;]thhedtlljgdh[/url], [link=&lt;http://spretwvwtwvs.com/&gt;]spretwvwtwvs[/link], &lt;http://phzigysdrtsh.com/&gt;</description>
+    </item>
+    <item rdf:about="http://wiki.doek.dk/doku.php?id=start&amp;rev=1319462042&amp;do=diff">
+        <dc:format>text/html</dc:format>
+        <dc:date>2011-10-24T15:14:02+02:00</dc:date>
+        <title>start - DDIrroRvBnBQiIJWs</title>
+        <link>http://wiki.doek.dk/doku.php?id=start&amp;rev=1319462042&amp;do=diff</link>
+        <description>DI6gv1 , [url=&lt;http://mozoxlwsctqz.com/&gt;]mozoxlwsctqz[/url], [link=&lt;http://ercktrynjfdn.com/&gt;]ercktrynjfdn[/link], &lt;http://tmlquadarinm.com/&gt;</description>
     </item>
 </rdf:RDF>

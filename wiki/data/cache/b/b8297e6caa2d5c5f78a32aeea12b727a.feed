@@ -11,10 +11,10 @@
         <description></description>
         <link>http://wiki.doek.dk/</link>
         <image rdf:resource="http://wiki.doek.dk/lib/images/favicon.ico" />
-       <dc:date>2011-10-10T15:36:16+02:00</dc:date>
+       <dc:date>2011-10-29T04:14:58+02:00</dc:date>
         <items>
             <rdf:Seq>
-                <rdf:li rdf:resource="http://wiki.doek.dk/doku.php?id=start&amp;rev=1312466646&amp;do=diff"/>
+                <rdf:li rdf:resource="http://wiki.doek.dk/doku.php?id=start&amp;rev=1319462042&amp;do=diff"/>
             </rdf:Seq>
         </items>
     </channel>
@@ -23,11 +23,11 @@
         <link>http://wiki.doek.dk/</link>
         <url>http://wiki.doek.dk/lib/images/favicon.ico</url>
     </image>
-    <item rdf:about="http://wiki.doek.dk/doku.php?id=start&amp;rev=1312466646&amp;do=diff">
+    <item rdf:about="http://wiki.doek.dk/doku.php?id=start&amp;rev=1319462042&amp;do=diff">
         <dc:format>text/html</dc:format>
-        <dc:date>2011-08-04T16:04:06+02:00</dc:date>
+        <dc:date>2011-10-24T15:14:02+02:00</dc:date>
         <title>start</title>
-        <link>http://wiki.doek.dk/doku.php?id=start&amp;rev=1312466646&amp;do=diff</link>
-        <description>FRONT PAGE!</description>
+        <link>http://wiki.doek.dk/doku.php?id=start&amp;rev=1319462042&amp;do=diff</link>
+        <description>DI6gv1 , [url=&lt;http://mozoxlwsctqz.com/&gt;]mozoxlwsctqz[/url], [link=&lt;http://ercktrynjfdn.com/&gt;]ercktrynjfdn[/link], &lt;http://tmlquadarinm.com/&gt;</description>
     </item>
 </rdf:RDF>

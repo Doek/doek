@@ -253,7 +253,7 @@ function commerce_quickpay_build_redirect_form($form, &$form_state, $order, $set
     'cancelurl'		=> $settings['cancel_return'],
     'callbackurl'	=> $settings['callback'],
     'autocapture'	=> '0',
-    'cardtypelock'	=> '',
+    'cardtypelock'	=> 'dankort',
     'group'		=> '11111',
     'splitpayment'	=> '1',
   );
