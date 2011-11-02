@@ -229,8 +229,8 @@ function oauth_common_user_delete($account) {
   // Delete all tokens and consumers related to a user
   module_load_include('inc', 'oauth_common');
 
-  $consumer_condition = db_select('oauth_common_consumer', 'c')->condition($condition)->fields('c', array('csid'));
-  $token_condition = db_or()->condition('uid', $$account->uid)->condition('csid', $consumer_condition, 'IN');
+  $consumer_condition = db_select('oauth_common_provider_consumer', 'c')->condition('uid', $account->uid)->fields('c', array('csid'));
+  $token_condition = db_or()->condition('uid', $account->uid)->condition('csid', $consumer_condition, 'IN');
 
   db_delete('oauth_common_provider_token')
     ->condition('tid', db_select('oauth_common_token', 't')->condition($token_condition)->fields('t', array('tid')), 'IN')
@@ -240,11 +240,11 @@ function oauth_common_user_delete($account) {
     ->condition($token_condition)
     ->execute();
 
-  db_delete('oauth_common_provider_consumer')
+  db_delete('oauth_common_consumer')
     ->condition('csid', $consumer_condition, 'IN')
     ->execute();
 
-  db_delete('oauth_common_consumer')
+  db_delete('oauth_common_provider_consumer')
     ->condition('uid', $account->uid)
     ->execute();
 }
@@ -484,7 +484,7 @@ function oauth_common_context_from_request($request) {
     $consumer = DrupalOAuthConsumer::loadProviderByKey($consumer_key);
   }
 
-  if ($consumer) {
+  if (!empty($consumer)) {
     $context = oauth_common_context_load($consumer->context);
   }
 

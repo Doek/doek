@@ -1,3 +1,12 @@
+OAuth 7.x-3.0-alpha2, 2011-10-25
+------------------------------
+#1155760 by deviantintegral, voxpelli: Catching more exceptions, eg. when the consumer key is incorrect
+#1199360 by Sepehr Lajevardi, voxpelli: Fixed E_NOTICE in OAuth request context loader
+#1199346 by Sepehr Lajevardi: Fixed E_NOTICE in oauth_common_form_consumer_submit()
+#1134444 by grendzy, voxpelli: Warn if Autoload 2.x isn't used
+#1141658 by grendzy, voxpelli: Clear Autoload cache on install
+#1201166 by voxpelli: Fixed error on deletion of accounts
+
 OAuth 7.x-3.0-alpha1, 2011-06-21
 ------------------------------
 by voxpelli: Initial port to Drupal 7

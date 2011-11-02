@@ -211,10 +211,10 @@ function oauth_common_form_consumer_submit($form, &$form_state) {
   $consumer->write();
 
   if ($update) {
-    drupal_set_message(t('Updated the consumer @name', array('@name' => $v['name'])));
+    drupal_set_message(t('Updated the consumer @name', array('@name' => $values['name'])));
   }
   else {
-    drupal_set_message(t('Added the consumer @name', array('@name' => $v['name'])));
+    drupal_set_message(t('Added the consumer @name', array('@name' => $values['name'])));
   }
 
   drupal_goto(sprintf('user/%d/oauth/consumers', $consumer->uid));

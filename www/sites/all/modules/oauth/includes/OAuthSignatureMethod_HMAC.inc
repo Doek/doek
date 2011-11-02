@@ -36,7 +36,7 @@ class OAuthSignatureMethod_HMAC extends OAuthSignatureMethod {
     }
     // Throw a exception if no matching algorithm can be found
     if (empty($this->algo)) {
-      throw new Exception(t('None of the suggested hash algorithms (@cand) were '
+      throw new OAuthException(t('None of the suggested hash algorithms (@cand) were '
         . 'supported by the server. Try one of the following: !algos.', array(
           '@cand' => join($algo, ', '),
           '!algos' => join($algos, ', '),
