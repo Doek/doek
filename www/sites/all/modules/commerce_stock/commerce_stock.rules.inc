@@ -97,9 +97,11 @@ function commerce_stock_decrease_by_line_item($line_item) {
     $sku = $line_item->line_item_label;
     $product = commerce_product_load_by_sku($sku);
     if (commerce_stock_product_type_enabled($product->type)) {
-      $qty = (int) $line_item->quantity;
-      // Subtract the sold amount from the available stock level.
-      commerce_stock_adjust($product, -$qty);
+      if (!(commerce_stock_product_type_override_enabled($product->type) && $product->commerce_stock_override['und'][0]['value'] == 1)) {
+        $qty = (int) $line_item->quantity;
+        // Subtract the sold amount from the available stock level.
+        commerce_stock_adjust($product, -$qty);
+      }
     }
   }
 }
@@ -129,9 +131,11 @@ function commerce_stock_increase_by_line_item($line_item) {
     $sku = $line_item->line_item_label;
     $product = commerce_product_load_by_sku($sku);
     if (commerce_stock_product_type_enabled($product->type)) {
-      $qty = (int) $line_item->quantity;
-      // Subtract the sold amount from the available stock level.
-      commerce_stock_adjust($product, $qty);
+      if (!(commerce_stock_product_type_override_enabled($product->type) && $product->commerce_stock_override['und'][0]['value'] == 1)) {
+        $qty = (int) $line_item->quantity;
+        // Subtract the sold amount from the available stock level.
+        commerce_stock_adjust($product, $qty);
+      }
     }
   }
 }
@@ -150,11 +154,13 @@ function commerce_stock_adjust($product, $qty) {
   if (!commerce_stock_product_type_enabled($product->type)) {
     return;
   }
-//drupal_set_message(var_export($product,true));
-  //TODO: dynamically get stock field,
-  // can't remain a hardcoded untranslated field name, I guess
-  $product->commerce_stock['und'][0]['value'] += intval($qty);
-  $result = commerce_product_save($product);
+
+  $wrapper = entity_metadata_wrapper('commerce_product', $product);
+
+  $new_stock = $wrapper->commerce_stock->value() + intval($qty);
+  $wrapper->commerce_stock->set($new_stock);
+  $result = $wrapper->save();
+
   if ($result) {
     watchdog('commerce_stock', 'Modified stock level of product %sku by %amount', array('%sku' => $product->sku, '%amount' => $qty));
   } else {
