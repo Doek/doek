@@ -1,0 +1,9 @@
+- Gør det muligt at opdatere webform_settings når den første gang er valgt til db'en.
+
+- Gør det muligt at fjerne brugere efter de er tilføjet, samt se en liste af brugere. 
+
+- Side til oprettelse af brugerbeskeder med tokens, så man kan have en "flette" funktion. 
+
+- Få webform_settings til at stå sammen.  
+
+-
