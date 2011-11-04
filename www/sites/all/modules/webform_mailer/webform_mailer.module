@@ -72,4 +72,47 @@ function webform_mailer_menu_role_load($roles){
 	}
 	return $export;
 }
+function webform_mailer_webform_submission_presave($node, &$submission) {
+  	// Update some component's value before it is saved.
+  	global $user;
+	
+	        $query = db_update('webform_mailer_users')
+                ->fields(array(
+                  'status' => 'finished'
+                ))
+                ->condition('nid', $node->nid)
+                ->condition('uid', $user->uid)
+                ->execute();
 
+}
+
+function webform_mailer_cron(){
+
+	$db_mailer = db_query("SELECT DISTINCT * FROM webform_mailer WHERE sendmail = 1");
+	
+	foreach($db_mailer as $webform_mailer){
+		$count = 0;
+		$nid = $webform_mailer->nid;		
+
+		if($webform_mailer->notify == 1 AND $webform_mailer->status == null){
+			$status = "notified";
+		}
+		if(($webform_mailer->status == "notified" && $webform_mailer->reminders >= 1) || ($webform_mailer->status == 'reminded' && $webform_mailer->reminders >=2)){
+			$db_users = db_query("SELECT DISTINCT * FROM webform_mailer_users u INNER JOIN webform_mailer_messages m ON u.uid = m.uid WHERE u.nid = ".$nid);
+
+			foreach($db_users as $account){
+
+				$count++;
+			}
+
+			$status = "reminded_".$count;
+		}
+		
+		$query = db_update('webform_mailer')
+			->fields(array(
+				'status' => $status,
+			))
+			->condition('nid', $nid)
+			->execute();
+	}
+}

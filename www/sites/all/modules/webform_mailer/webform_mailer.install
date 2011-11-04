@@ -44,6 +44,12 @@ function webform_mailer_schema() {
 	'type' => 'int',
 	'not null' => FALSE, 
       ),
+      'status' => array(
+	'description' => 'Status on which type of message should be sent next',
+	'type' => 'varchar',
+	'length' => 255,
+	'not null' => FALSE, 
+      ),
     ), 
     'primary key' => array('nid'),
   );
@@ -51,6 +57,13 @@ function webform_mailer_schema() {
   $schema['webform_mailer_users'] = array(
     'description' => 'Table for storing information about the webform_mailer module.',
     'fields' => array(
+      'id' => array(
+        'description' => 'the identifier of a webform_user.',
+        'type' => 'serial',
+        'unsigned' => true,
+        'not null' => true,
+	'size' => big,
+      ),
       'nid' => array(
         'description' => 'the node identifier of a webform.',
         'type' => 'int',
@@ -69,24 +82,6 @@ function webform_mailer_schema() {
 	'length' => 255,
         'not null' => true,
       ),
-      'firstname' => array(
-        'description' => 'Firstname for the user.',
-        'type' => 'varchar',
-	'length' => 255,
-        'not null' => true,
-      ),
-      'lastname' => array(
-        'description' => 'Lastname for the user.',
-        'type' => 'varchar',
-	'length' => 255,
-        'not null' => true,
-      ),
-      'email' => array(
-        'description' => 'The users email.',
-        'type' => 'varchar',
-	'length' => 255,
-        'not null' => true,
-      ),
       'status' => array(
         'description' => 'Status for the users submission. Can be pending, started, finished .',
         'type' => 'varchar',
@@ -95,7 +90,7 @@ function webform_mailer_schema() {
         'default' => 'pending',
       ),
      ),
-     'primary key' => array('nid'),
+     'primary key' => array('id'),
    );
   $schema['webform_mailer_messages'] = array(
     'description' => 'Table for storing information about the webform_mailer module.',

@@ -7,7 +7,6 @@
  */
 
 function get_confirm($node, $token){
-
 	drupal_set_title($node->title);
 
 	$extra = array('nid' => $node->nid, 'token' => $token);

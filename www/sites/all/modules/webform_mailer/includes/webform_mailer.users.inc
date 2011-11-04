@@ -116,7 +116,19 @@ function webform_mailer_users_roles_form_submit($form, &$form_state){
                           array_values($form_state['values']['users']['user']));
 
 	$count = 0;
+	$nid = $form_state['values']['nid'];
+	
 	foreach($users as $user){
+		$account = user_load($user, TRUE);
+		$token = md5('doek12'.$account->name);
+
+		$query = db_insert('webform_mailer_users')
+		->fields(array(
+		  'nid' => $nid,
+		  'uid' => $user,
+		  'token' => $token,
+		))->execute();
+
 		$count++;
 	}
 	
