@@ -1,6 +1,39 @@
 
 ****************************** DRUPAL 7 - 2.x BRANCH ********************************
 
+November 05, 2011
+-----------------
+Issue #1309966 by troky: Fixed panel initialization code.
+
+October 09, 2011
+------------------
+Issue #1303882 by cburschka: Fixed dangling </div> tag in forum list
+Issue #1298272 by heymjo: Fixed strict warning in advanced_forum_process_forum()
+
+October 01, 2011
+------------------
+Issue #1291556 by dloone: Fixed SQL exception when using "Mark all topics as read" when multiple revisions exist.
+
+September 25, 2011
+------------------
+Issue #1286696 by troky: Fixed default topic sort order.
+Issue #1286696 by troky: Changed default topic list sorting to desc (last_updated).
+Issue #1287512 by troky: Fixed topic list view to display 0 replies instead of empty string.
+
+September 17, 2011
+------------------
+Issue #1270710 by bxc, troky: Fixed error when AF doesn't include its files if Drupal installed in non-default folder.
+Issue #1280736 by Scyther: Fixed default value for advanced_forum_style variable.
+
+September 05, 2011
+------------------
+by troky: Fixed bugs in Panels and CTools plugins related code and re-exported panel handlers.
+by troky: Removed duplicate forum_node_create_links content from forum panel.
+
+September 01, 2011
+------------------
+7.x-2.0-BETA1 RELEASE
+
 August 12, 2011
 ---------------
 Issue #1264676 by troky: Added Image module existance check on settings page.
