@@ -1,0 +1,6 @@
+name = DØK Alumni
+description = Makes it possible to add new fields to profile fields
+package = DØK
+core = 7.x
+php = 5.2
+files[] = doek_alumni.module

@@ -1,0 +1,43 @@
+<?php
+
+function doek_alumni_form_alter(&$form, &$form_state, $form_id){
+
+	if(!($form_id == 'user_register_form' || $form_id == 'user_profile_form')){
+		return;
+	}
+	global $user;
+
+	if(is_array($user->roles) && in_array('administrator', $user->roles)){
+
+		$form['alumni'] = array(
+				'#type' 	=> 'fieldset', 
+				'#title' 	=> t('DØK Alumni Oplysninger'),
+				'#collapsible'	=> TRUE, 
+				'#collapsed'	=> FALSE,
+				'#weight'	=> 10,
+				);
+/*
+		$form['alumni']['membership'] = array(
+				'#type'		=> 'checkbox',
+				'#options'	=> array('aktiv' => 1, 'inaktiv' => 2),
+				'#title'	=> t('Alumni medlem'),
+				'#description'	=> t('Om personen er medlem af Alumni'),
+				);
+*/
+		$form['alumni']['payment_date'] = array(
+				'#type'		=> 'date',
+				'#title'	=> t('Betalingsdag'),
+				'#description'	=> t('Data hvor personen har betalt for medlemsskab'),
+				);
+		
+		$form['alumni']['member_id'] = array(
+				'#type'		=> 'textfield',
+				'#title'	=> t('Medlemsnummer'),
+				'#description'	=> t('Brugerens medlemsnummer fra den gamle database'),
+				'#maxlength'	=> 30,
+				'#size'		=> 30,
+				);
+
+	}
+		return $form;
+}

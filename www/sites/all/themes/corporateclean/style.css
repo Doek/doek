@@ -29,7 +29,9 @@ a, li a.active { color:#1487d4; text-decoration:none; }
 
 a img { border:none; outline: none; display:block; overflow:hidden; }
 
-img.masked, .field-type-image img { background:transparent url('images/pattern.png'); border:1px solid #d8d8d8; padding:10px; margin:10px 0; }
+img.masked, .image-wrapper img, .field-type-image img { background:transparent url('images/pattern.png'); border:1px solid #d8d8d8; padding:10px; margin:10px 0; }
+
+.image-wrapper { float: left; padding: 0 30px 0 0; }
 
 code { font-family: "Courier New", Courier, monospace; }
 
