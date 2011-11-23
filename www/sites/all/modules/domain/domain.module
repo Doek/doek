@@ -339,11 +339,15 @@ function domain_theme($existing, $type, $theme, $path) {
  */
 function domain_block_info() {
   $blocks = array();
-  $blocks['switcher'] = array(
-    'info' => t('Domain switcher'),
-  );
   $blocks['information'] = array(
     'info' => t('Domain access information'),
+  );
+  $blocks['server'] = array(
+    'info' => t('Domain access server information'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['switcher'] = array(
+    'info' => t('Domain switcher'),
   );
   return $blocks;
 }
@@ -356,77 +360,13 @@ function domain_block_view($delta = '') {
   if (empty($delta)) {
     return;
   }
+  module_load_include('inc', 'domain', 'domain.blocks');
   $function = 'domain_block_view_' . $delta;
   if (function_exists($function)) {
     return $function();
   }
 }
 
-/**
- * A nifty little domain-switcher block, useful during debugging.
- *
- * @see domain_block_view()
- */
-function domain_block_view_switcher() {
-  $output = '';
-  $list = array();
-  $domains = domain_domains();
-  $msg = FALSE;
-  foreach ($domains as $domain) {
-    if ($domain['valid']) {
-      $title = $domain['sitename'];
-      $allow = TRUE;
-    }
-    else {
-      $title = $domain['sitename'] . ' *';
-      $allow = FALSE;
-      if (user_access('access inactive domains')) {
-        $msg = TRUE;
-        $allow = TRUE;
-      }
-    }
-    if ($allow) {
-      $list[] = l($title, domain_get_uri($domain), array('absolute' => TRUE));
-    }
-  }
-  $items = array('items' => $list);
-  $output = theme('item_list', $items);
-  return array(
-    'subject' => t('Domain switcher'),
-    'content' => $output,
-  );
-}
-
-/**
- * Prints information about the current node.
- *
- * @see domain_block_view()
- */
-function domain_block_view_information() {
-  $output = '';
-  $node = menu_get_object();
-  if (empty($node->nid)) {
-    return;
-  }
-  // Print the assigned domains.
-  if (!empty($node->subdomains)) {
-    $output .= theme('item_list', array('items' => $node->subdomains, 'title' => t('Assigned domains')));
-  }
-  // Print the link source domain.
-  $this_domain = domain_get_node_match($node->nid);
-  $output .= theme('item_list', array('items' => array(check_plain($this_domain['sitename'])), 'title' => t('Source domain')));
-  if (empty($output)) {
-    $output = t('This node is not assigned to a domain.');
-  }
-  else {
-    $output = '<p>' . t('%node is published with the following Domain Access rules:', array('%node' => $node->title)) . '</p>' . $output;
-  }
-
-  return array(
-    'subject' => t('Domain access information'),
-    'content' => $output,
-  );
-}
 
 /**
  * Implements hook_user_load()
@@ -1370,19 +1310,27 @@ function domain_domainload(&$domain) {
 function domain_get_path($domain) {
   global $base_url;
   if (empty($base_url)) {
-    return domain_check_scheme($domain['scheme']) . '://' . $domain['subdomain'];
+    return domain_check_scheme($domain['scheme']) .'://'. $domain['subdomain'];
   }
-  $_url = parse_url($base_url);
+  // Badly malfored HTTP_HOST values can cause problems with PHP < 5.3.3,
+  // so we have to suppress error warnings for parse_url here.
+  // See php.net/manual/en/function.parse-url.php.
+  // See http://drupal.org/node/848856.
+  // With PHP > 5.1.2 we can pass a component parameter, too, but Drupal 6
+  // still supports PHP 4 and this code was originally tested there.
+  $url = array();
+  if ($_url = @parse_url($base_url)) {
+    $url = $_url;
+  }
   // PHP 5 does not return an empty path element.
-  if (!isset($_url['path'])) {
-    $_url['path'] = '/';
+  if (!isset($url['path'])) {
+    $url['path'] = '/';
   }
   // We need a trailing slash at the end of the path
-  if (substr($_url['path'], -1) != '/') {
-    $_url['path'] .= '/';
+  if (substr($url['path'], -1) != '/') {
+    $url['path'] .= '/';
   }
-
-  $path = domain_check_scheme($domain['scheme']) . '://' . $domain['subdomain'] . $_url['path'];
+  $path = domain_check_scheme($domain['scheme']) .'://'. $domain['subdomain'] . $url['path'];
   return $path;
 }
 
@@ -1539,6 +1487,9 @@ function domain_node_presave($node) {
   // Build $domains array based on domains checked in the generate form
   // and shuffle for randomization
   $checked = array_filter($node->devel_generate['domains']);
+  if (empty($checked)) {
+    return;
+  }
   shuffle($checked);
   $domains = array_combine(array_values($checked), array_values($checked));
   // Add the domains and supporting data to the node
@@ -2411,9 +2362,8 @@ function domain_resolve_host($name = '') {
 /**
  * Determines current, fully qualified domain name.
  *
- * Relies on $_SERVER['HTTP_HOST'] being set. Note
- * that this value has already been security checked by
- * Drupal core. Otherwise, we never get this far.
+ * Relies on $_SERVER['HTTP_HOST'] being set. Note that this value has already
+ * been security checked by Drupal core. Otherwise, we never get this far.
  *
  * @see conf_init()
  *
@@ -2421,14 +2371,16 @@ function domain_resolve_host($name = '') {
  * The current (host) domain name as a String.
  */
 function domain_request_name() {
-  if (!empty($_SERVER['HTTP_HOST'])) {
-    // We lower case this, since EXAMPLE.com == example.com.
-    return strtolower(rtrim($_SERVER['HTTP_HOST']));
-  }
-  else {
+  // An empty host (provided by some bots) always fails, so don't bother
+  // trying to resolve it.
+  if (empty($_SERVER['HTTP_HOST'])) {
     $domain = domain_default(FALSE, FALSE);
     return $domain['subdomain'];
   }
+  // Otherwise, trim and return the HTTP_HOST value for checking against
+  // registered domains. Note that we lower case this, since the RFC states
+  // that EXAMPLE.com == example.com.
+  return strtolower(rtrim($_SERVER['HTTP_HOST']));
 }
 
 /**
@@ -2492,7 +2444,7 @@ function domain_invalid_domain_requested() {
     $extra = '.';
   }
   // Log the access attempt.
-  watchdog('domain', 'Invalid domain requested by %user on %domain, redirected to %redirect', array('%user' => $user->name, '%domain' => $_domain['sitename'], '%redirect' => $redirect['sitename'] . $extra), WATCHDOG_WARNING);
+  watchdog('domain', 'Invalid domain requested by %user on %domain, redirected to %redirect', array('%user' => isset($user->name) ? $user->name : variable_get('anonymous', t('Anonymous')), '%domain' => $_domain['sitename'], '%redirect' => $redirect['sitename'] . $extra), WATCHDOG_WARNING);
   drupal_goto($redirect['path'] . drupal_get_path_alias($path));
 }
 
