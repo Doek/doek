@@ -33,6 +33,12 @@ function webform_mailer_schema() {
 	'not null' => TRUE,
 	'default' => 0,
       ),
+      'notify_text' => array(
+	'description' => 'Text which will be mailed to users of the webform',
+	'type' => 'text',
+	'size' => 'big',
+	'not null' => false,
+      ),
       'reminders' => array(
 	'description' => 'Number of reminders to be sent in total',
 	'type' => 'int',
@@ -43,6 +49,12 @@ function webform_mailer_schema() {
 	'description' => 'Interval showing how long the system should wait until sending out reminders',
 	'type' => 'int',
 	'not null' => FALSE, 
+      ),
+      'reminders_text' => array(
+	'description' => 'Text which will be mailed to users as a reminder of answering the webform',
+	'type' => 'text',
+	'size' => 'big',
+	'not null' => false,
       ),
       'status' => array(
 	'description' => 'Status on which type of message should be sent next',
@@ -74,6 +86,11 @@ function webform_mailer_schema() {
         'description' => 'the user identifier. NOT the uid from the users table, since these users are added on the fly.',
         'type' => 'int',
         'unsigned' => true,
+        'not null' => true,
+      ),
+      'type' => array(
+        'description' => 'The type of the user, which can be drupal or imported. Imported users will be found in the imported users table webform_mailer_users_import',
+        'type' => 'varchar',
         'not null' => true,
       ),
       'token' => array(
@@ -126,6 +143,42 @@ function webform_mailer_schema() {
       ),
      ),
      'primary key' => array('mid')
+   );
+  $schema['webform_mailer_users_import'] = array(
+    'description' => 'A table that consists of the users who has been imported into this module.',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The id for the user',
+        'type' => 'serial',
+        'unsigned' => true,
+        'not null' => true,
+      ),
+      'nid' => array(
+        'description' => 'the node identifier of a webform.',
+        'type' => 'int',
+        'unsigned' => true,
+        'not null' => true,
+      ),
+      'name' => array(
+        'description' => 'name of the imported user',
+        'type' => 'varchar',
+	'length' => 255,
+        'not null' => true,
+      ),
+      'email' => array(
+        'description' => 'email of the imported user',
+        'type' => 'varchar',
+	'length' => 255,
+        'not null' => true,
+      ),
+      'type' => array(
+        'description' => 'the type identifier of a user or which module has been used to import the user',
+        'type' => 'varchar',
+	'length' => 255,
+        'not null' => true,
+      ),
+     ),
+     'primary key' => array('id')
    );
 
   return $schema;

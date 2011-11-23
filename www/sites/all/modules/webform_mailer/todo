@@ -6,4 +6,4 @@
 
 - Få webform_settings til at stå sammen.  
 
--
+- Validering på indstillinger, så de krydshenviser til hinanden og giver brugeren de rigtige oplysninger. For eksempel ved import af brugere, så skal webformen tillade besvarelse fra anonyme brugere. 
