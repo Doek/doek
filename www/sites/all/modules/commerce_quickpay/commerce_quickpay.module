@@ -238,6 +238,8 @@ function commerce_quickpay_build_redirect_form($form, &$form_state, $order, $set
   $currency_code = $wrapper->commerce_order_total->currency_code->value();
   $amount = $wrapper->commerce_order_total->amount->value();
 
+  $accepted_cards = array('dankort', 'visa', 'visa-dk', 'visa-electron', 'visa-electron-dk', 'mastercard', 'mastercard-dk', 'mastercard-debet-dk');
+
   // Build the data array that will be translated into hidden form values.
   // NOTE: keys should be uppercase for the SHA-1 security string
   $data = array(
@@ -253,7 +255,7 @@ function commerce_quickpay_build_redirect_form($form, &$form_state, $order, $set
     'cancelurl'		=> $settings['cancel_return'],
     'callbackurl'	=> $settings['callback'],
     'autocapture'	=> '0',
-    'cardtypelock'	=> 'dankort',
+    'cardtypelock'	=> $accepted_cards,
     'group'		=> '11111',
     'splitpayment'	=> '1',
   );
