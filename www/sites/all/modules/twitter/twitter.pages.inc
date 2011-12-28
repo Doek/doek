@@ -203,7 +203,7 @@ function twitter_account_list_form_submit($form, &$form_state) {
       drupal_set_message(t('The Twitter account settings were updated.'));
     }
     else {
-      twitter_account_delete($account['id'], $account['screen_name']);
+      twitter_account_delete($account['id']);
       drupal_set_message(t('The Twitter account was deleted.'));
     }
   }
@@ -256,8 +256,11 @@ function twitter_user_make_global_submit($form, &$form_state) {
 }
 
 /**
- * @todo Please document this function.
- * @see http://drupal.org/node/1354
+ * Form to add a Twitter account
+ *
+ * If OAuth is not enabled, a text field lets users to add their
+ * Twitter screen name. If it is, a submit button redirects to
+ * Twitter.com asking for authorisation.
  */
 function twitter_account_form($form, $form_state, $account = NULL) {
   if (empty($account)) {
@@ -308,8 +311,7 @@ function twitter_account_form_submit($form, &$form_state) {
   $name = $form_state['values']['screen_name'];
   $twitter = new Twitter($name);
   $account = $twitter->users_show($name, false);
-  $account->set_auth($form_state['values']);
-  twitter_account_save($account, TRUE);
+  twitter_account_save($account, TRUE, user_load($form_state['values']['uid']));
 }
 
 /**

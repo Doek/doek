@@ -303,6 +303,22 @@ function twitter_install() {
 }
 
 /**
+ * Implements hook_uninstall().
+ */
+function twitter_uninstall() {
+  // Remove variables
+  variable_del('twitter_import');
+  variable_del('twitter_expire');
+  variable_del('twitter_consumer_key');
+  variable_del('twitter_consumer_secret');
+  variable_del('twitter_post_types');
+  variable_del('twitter_host');
+  variable_del('twitter_post_default_format');
+  variable_del('twitter_signin_button');
+  variable_del('twitter_signin_register');
+}
+
+/**
  * Implements hook_update_last_removed().
  */
 function twitter_update_last_removed() {

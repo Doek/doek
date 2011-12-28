@@ -1,17 +1,66 @@
 <?php
-
 /**
  * @file
  * Classes to implement the full Twitter API
  */
 
+/**
+ * Class TwitterConfig
+ *
+ * Singleton which stores common configuration
+ * @see http://php.net/manual/en/language.oop5.patterns.php
+ */
+class TwitterConf {
+  private static $instance;
+  private $attributes = array(
+    'host'     => 'twitter.com',
+    'api'      => 'api.twitter.com',
+    'search'   => 'search.twitter.com',
+    'tiny_url' => 'tinyurl.com',
+  );
+
+  private function __construct() {}
+
+  public static function instance() {
+    if (!isset(self::$instance)) {
+      $className = __CLASS__;
+      self::$instance = new $className;
+    }
+    return self::$instance;
+  }
+
+  /**
+   * Generic getter
+   *
+   * @param $attribute
+   *   string attribute name to return
+   * @return
+   *   mixed value or NULL
+   */
+  public function get($attribute) {
+    if (array_key_exists($attribute, $this->attributes)) {
+      return $this->attributes[$attribute];
+    }
+  }
+
+  /**
+   * Generic setter
+   * @param $attribute
+   *   string attribute name to be set
+   * @param $value
+   *   mixed value
+   */
+  public function set($attribute, $value) {
+    if (array_key_exists($attribute, $this->attributes)) {
+      $this->attributes[$attribute] = $value;
+    }
+  }
+}
 
 /**
  * Exception handling class.
  */
-class TwitterException extends Exception {
-
-}
+class TwitterException extends Exception {}
 
 /**
  * Primary Twitter API implementation class
@@ -23,11 +72,6 @@ class Twitter {
    * @var $format API format to use: can be json or xml
    */
   protected $format = 'json';
-
-  /**
-   * @var $host The host to query against
-   */
-  protected $host = 'twitter.com';
 
   /**
    * @var $source the twitter api 'source'
@@ -59,16 +103,6 @@ class Twitter {
   public function set_auth($username, $password) {
     $this->username = $username;
     $this->password = $password;
-  }
-
-  /**
-   * Set the current host. This is good for using laconi.ca instances
-   * and anything else that utilizes the Twitter API
-   *
-   * @param $host the hostname to set.
-   */
-  public function set_host($host) {
-    $this->host = $host;
   }
 
   /**
@@ -269,8 +303,8 @@ class Twitter {
     if (is_null($format)) {
       $format = $this->format;
     }
-
-    $url =  'http://'. $this->host .'/'. $path;
+    $conf = TwitterConf::instance();
+    $url =  'http://'. $conf->get('api') .'/'. $path;
     if (!empty($format)) {
       $url .= '.'. $this->format;
     }
@@ -348,13 +382,11 @@ class TwitterOAuth extends Twitter {
 
 }
 
+/**
+  * Twitter search is not used in this module yet
+  */
 class TwitterSearch extends Twitter {
-
-  protected $host = 'search.twitter.com';
-
-  public function search($params = array()) {
-
-  }
+  public function search($params = array()) {}
 }
 
 /**

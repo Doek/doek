@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Exposes Drupal actions for sending Twitter messages.
@@ -15,10 +14,10 @@ function twitter_actions_action_info() {
       'label' => t('Post a message to Twitter'),
       'configurable' => TRUE,
       'triggers' => array(
-        'nodeapi_view',
-        'nodeapi_insert',
-        'nodeapi_update',
-        'nodeapi_delete',
+        'node_view',
+        'node_insert',
+        'node_update',
+        'node_delete',
         'comment_view',
         'comment_insert',
         'comment_update',
@@ -28,64 +27,69 @@ function twitter_actions_action_info() {
         'user_update',
         'user_delete',
         'user_login',
-        'cron_run',
+        'cron',
       ),
     ),
   );
 }
 
 /**
- * Return a form definition so the Send email action can be configured.
+ * Returns a form definition so the Twitter action can be configured.
  *
  * @param $context
  *   Default values (if we are editing an existing action instance).
  * @return
  *   Form definition.
  */
-function twitter_actions_set_status_action_form($context = array()) {
+function twitter_actions_set_status_action_form($context) {
+  $options = array();
+  $results = db_query("SELECT screen_name FROM {twitter_account}");
+  foreach ($results as $result) {
+    $options[$result->screen_name] = $result->screen_name;
+  }
   // Set default values for form.
-  $context += array(
-    'account_id' => -1,
-    'screen_name' => '',
-    'message' => '',
-  );
-
   $form['screen_name'] = array(
-    '#type' => 'textfield',
+    '#type' => 'select',
     '#title' => t('Twitter account name'),
-    '#default_value' => $context['screen_name'],
-    '#size' => 25,
+    '#options'       => $options,
+    '#default_value' => isset($context['screen_name']) ? $context['screen_name'] : '',
     '#required' => TRUE,
   );
+
+  if (!count($options)) {
+    $form['screen_name']['#description'] = t('You first need to add a Twitter account to one of ' .
+                                             'your users with rights for posting to Twitter.');
+  }
 
   $form['message'] = array(
     '#type' => 'textarea',
     '#title' => t('Message'),
-    '#default_value' => $context['message'],
+    '#default_value' => isset($context['message']) ? $context['message'] : '',
     '#cols' => '80',
     '#rows' => '3',
-    '#description' => t('The message that should be sent. You may include the following variables: %site_name, %username, %node_url, %node_type, %title, %teaser, %body, %tinyurl. Not all variables will be available in all contexts.'),
+    '#description' => t('The message that should be sent. You may include the following variables: ' .
+                        '%site_name, %username, %node_url, %node_type, %title, %summary, %body, ' .
+                        '%tinyurl. Not all variables will be available in all contexts.'),
     '#required' => TRUE,
   );
+
   return $form;
 }
 
 /**
- * @todo Please document this function.
- * @see http://drupal.org/node/1354
+ * Verifies if Oauth module has been setup and also checks the Twitter
+ * authentication against the provided screen name.
  */
 function twitter_actions_set_status_action_validate($form, $form_state) {
   if (!_twitter_use_oauth()) {
-    form_set_error('screen_name', t('Oath has not yet been setup.'));
-  }
-  if (!db_query("SELECT twitter_uid FROM {twitter_account} WHERE screen_name = :screen_name", array(':screen_name' => $form_state['values']['screen_name']))->fetchField()) {
-    form_set_error('screen_name', t('Twitter authentication failed. Please check your account name and try again.'));
+    form_set_error('screen_name', t('Oauth has not been setup yet. Please go to !link and follow steps.',
+                                     array('!link' => l(t('Twitter settings'), 'admin/settings/twitter'))));
   }
 }
 
 /**
- * @todo Please document this function.
- * @see http://drupal.org/node/1354
+ * Submits the form and sets the twitter account pulling the data from the
+ * twitter_account table.
  */
 function twitter_actions_set_status_action_submit($form, $form_state) {
   $form_values = $form_state['values'];
@@ -97,83 +101,77 @@ function twitter_actions_set_status_action_submit($form, $form_state) {
     'screen_name' => $form_values['screen_name'],
     'message' => $form_values['message'],
   );
+
   return $params;
 }
 
 /**
- * Implementation of a configurable Drupal action.
- * Sends an email.
+ * Implementation of a configurable Twitter actions.
+ * @todo Implementation for language negotiation for the body and sumary. Also
+ * need implementation for bodies with multiple values. Right now it is hard
+ * coded and it will only get body and summary for 'und' language and only
+ * the first value of the body field.
+ * If the final message is over 140 chars, there is no feedback to the user.
  */
 function twitter_actions_set_status_action($object, $context) {
   global $user;
   $variables['%site_name'] = variable_get('site_name', 'Drupal');
-
-  switch ($context['hook']) {
-    case 'nodeapi':
-    case 'workflow':
-      // Because this is not an action of type 'node' the node
-      // will not be passed as $object, but it will still be available
-      // in $context.
+  // Seting variables array depending on action's group
+  switch ($context['group']) {
+    case 'node':
       $node = $context['node'];
+      if (isset($node)) {
+        $variables = array_merge($variables, array(
+          '%uid' => $node->uid,
+          '%username' => $node->name,
+          '%node_url' => url('node/' . $node->nid, array('absolute' => TRUE)),
+          '%node_type' => node_type_get_name($node),
+          '%title' => $node->title,
+          '%summary' => isset($node->body['und'][0]['value']) ? $node->body['und'][0]['summary'] : '',
+          '%body' => isset($node->body['und'][0]['value']) ? $node->body['und'][0]['value'] : '',
+          )
+        );
+      }
       break;
-      // The comment hook provides nid, in $context.
+
     case 'comment':
-      $comment = $context['comment'];
-      $node = node_load($comment->nid);
+      $node = node_load($context['comment']->nid);
+      if (isset($node)) {
+        $variables = array_merge($variables, array(
+          '%uid' => $context['comment']->uid,
+          '%username' => $context['comment']->name,
+          '%node_url' => url('node/' . $node->nid, array('absolute' => TRUE)),
+          '%node_type' => node_type_get_name($node),
+          '%title' => $node->title,
+          '%summary' => isset($node->body['und'][0]['value']) ? $node->body['und'][0]['summary'] : '',
+          '%body' => isset($node->body['und'][0]['value']) ? $node->body['und'][0]['value'] : '',
+          )
+        );
+      }
+      break;
+
     case 'user':
-      // Because this is not an action of type 'user' the user
-      // object is not passed as $object, but it will still be available
-      // in $context.
-      $account = $context['account'];
-      if (isset($context['node'])) {
-        $node = $context['node'];
-      }
-      elseif ($context['recipient'] == '%author') {
-        // If we don't have a node, we don't have a node author.
-        watchdog('error', 'Cannot use %author token in this context.');
-        return;
-      }
+      $variables['%username'] = $context['user']->name;
       break;
-    case 'taxonomy':
-      $account = $user;
-      $vocabulary = taxonomy_vocabulary_load($object->vid);
-      $variables = array_merge($variables, array(
-        '%term_name' => $object->name,
-        '%term_description' => $object->description,
-        '%term_id' => $object->tid,
-        '%vocabulary_name' => $vocabulary->name,
-        '%vocabulary_description' => $vocabulary->description,
-        '%vocabulary_id' => $vocabulary->vid,
-      )
-      );
+
+    case 'cron':
       break;
+
     default:
       // We are being called directly.
       $node = $object;
-  }
-
-  if (isset($node)) {
-    if (!isset($account)) {
-      $account = user_load($node->uid);
-    }
-    if ($recipient == '%author') {
-      $recipient = $account->mail;
-    }
-  }
-
-  $variables['%username'] = $account->name;
-
-  // Node-based variable translation is only available if we have a node.
-  if (isset($node) && is_object($node)) {
-    $variables = array_merge($variables, array(
-      '%uid' => $node->uid,
-      '%node_url' => url('node/' . $node->nid, array('absolute' => TRUE)),
-      '%node_type' => node_type_get_name($node),
-      '%title' => $node->title,
-      '%teaser' => $node->teaser,
-      '%body' => $node->body,
-    )
-    );
+      if (isset($node)  && is_object($node)) {
+        $variables = array_merge($variables, array(
+          '%uid' => $node->uid,
+          '%username' => $node->name,
+          '%node_url' => url('node/' . $node->nid, array('absolute' => TRUE)),
+          '%node_type' => node_type_get_name($node),
+          '%title' => $node->title,
+          '%summary' => isset($node->body['und'][0]['value']) ? $node->body['und'][0]['summary'] : '',
+          '%body' => isset($node->body['und'][0]['value']) ? $node->body['und'][0]['value'] : '',
+          )
+        );
+      }
   }
 
   // Only make a tinyurl if it was asked for.
@@ -184,7 +182,6 @@ function twitter_actions_set_status_action($object, $context) {
   }
 
   $message = strtr($context['message'], $variables);
-
   module_load_include('inc', 'twitter');
   $twitter_account = twitter_account_load($context['twitter_uid']);
   twitter_set_status($twitter_account, $message);

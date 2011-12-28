@@ -8,11 +8,11 @@
  * Connect to the API using the 'proper' version (Oauth vs. standard)
  */
 function twitter_connect($account) {
-  module_load_include('lib.php', 'twitter');
   $auth = $account->get_auth();
   if (_twitter_use_oauth() && $auth['oauth_token'] && $auth['oauth_token_secret']) {
     module_load_include('lib.php', 'oauth_common');
-    return new TwitterOAuth(variable_get('twitter_consumer_key', ''), variable_get('twitter_consumer_secret', ''), $auth['oauth_token'], $auth['oauth_token_secret']);
+    return new TwitterOAuth(variable_get('twitter_consumer_key', ''), variable_get('twitter_consumer_secret', ''),
+                            $auth['oauth_token'], $auth['oauth_token_secret']);
   }
   else if ($auth['password']) {
     return new Twitter($account->screen_name, $auth['password']);
@@ -67,7 +67,6 @@ function twitter_account_save($twitter_user, $save_auth = FALSE, $account = NULL
  *
  */
 function twitter_account_load($id) {
-  module_load_include('lib.php', 'twitter');
   if ( $values = db_query("SELECT * FROM {twitter_account} WHERE twitter_uid = :twitter_uid", array(':twitter_uid' => $id))->fetchAssoc() ) {
     $values['id'] = $values['twitter_uid'];
     $account = new TwitterUser($values);
@@ -104,8 +103,6 @@ function twitter_status_save($status) {
  * Post a message to twitter
  */
 function twitter_set_status($twitter_account, $status) {
-  module_load_include('lib.php', 'twitter');
-
   $twitter = twitter_connect($twitter_account);
   $twitter->status_update($status);
 }
@@ -143,7 +140,7 @@ function twitter_fetch_user_timeline($id) {
 }
 
 /**
- * Delete a user from {twitter_account}.
+ * Delete a twitter account and its statuses.
  *
  * @param $twitter_uid
  *   An integer with the Twitter UID.
@@ -151,11 +148,22 @@ function twitter_fetch_user_timeline($id) {
  * @param $screen_name
  *   Optional string with the user name.
  */
-function twitter_account_delete($twitter_uid, $screen_name = NULL) {
+function twitter_account_delete($twitter_uid) {
+  $account = twitter_account_load($twitter_uid);
+
+  // Delete from {twitter_account}.
   $query = db_delete('twitter_account');
-  $query->condition('twitter_uid', $twitter_uid);
-  if (!empty($screen_name)) {
-    $query->condition('screen_name', $screen_name);
-  }
+  $query->conditions('twitter_uid', $twitter_uid);
+  $query->execute();
+
+  // Delete from {twitter}.
+  $query = db_delete('twitter');
+  $query->conditions('screen_name', $account->screen_name);
+  $query->execute();
+
+  // Delete from {twitter_account}.
+  $query = db_delete('authmap');
+  $query->conditions('authname', $twitter_uid);
+  $query->conditions('module', 'twitter');
   $query->execute();
 }

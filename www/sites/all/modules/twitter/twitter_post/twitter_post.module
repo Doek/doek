@@ -23,6 +23,17 @@ function twitter_post_menu() {
 }
 
 /**
+ * Implements hook_permission().
+ */
+function twitter_post_permission() {
+  return array(
+    'post to twitter' => array(
+      'title' => t('Post a message to Twitter'),
+    ),
+  );
+}
+
+/**
  * Implements hook_form_alter().
  */
 function twitter_post_form_alter(&$form, $form_state, $form_id) {
@@ -58,6 +69,7 @@ function twitter_post_form_alter(&$form, $form_state, $form_id) {
     $form['twitter'] += $twitter_form;
     $form['twitter']['status']['#default_value'] = variable_get('twitter_post_default_format', 'New post: !title !tinyurl');
     $form['twitter']['status']['#description'] = t('The given text will be posted to twitter.com. You can use !url, !url-alias, !tinyurl, !title and !user as replacement text.');
+    $form['twitter']['status']['#maxlength'] = 150;
   }
 }
 
@@ -111,10 +123,14 @@ function twitter_post_node_update($node) {
  *   A Drupal user object.
  */
 function twitter_post_form($account = NULL) {
-  drupal_add_js(drupal_get_path('module', 'twitter') . '/twitter.js');
+  drupal_add_js(drupal_get_path('module', 'twitter_post') . '/twitter_post.js');
 
   if (empty($account)) {
     $account = user_load($GLOBALS['user']->uid);
+  }
+
+  if (!user_access('post to twitter', $account)) {
+    return;
   }
 
   $options = array();
