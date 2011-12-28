@@ -1,9 +1,9 @@
-- Gør det muligt at opdatere webform_settings når den første gang er valgt til db'en.
-
 - Gør det muligt at fjerne brugere efter de er tilføjet, samt se en liste af brugere. 
 
-- Side til oprettelse af brugerbeskeder med tokens, så man kan have en "flette" funktion. 
+- Gør det muligt at tilføje andre typer af brugere - for eksempel ud fra en CSV-fil. 
 
-- Få webform_settings til at stå sammen.  
+- Gør det muligt at vælge og fravælge alle brugere, som er tilføjet.
+
+- Side til oprettelse af brugerbeskeder med tokens, så man kan have en "flette" funktion. 
 
 - Validering på indstillinger, så de krydshenviser til hinanden og giver brugeren de rigtige oplysninger. For eksempel ved import af brugere, så skal webformen tillade besvarelse fra anonyme brugere. 

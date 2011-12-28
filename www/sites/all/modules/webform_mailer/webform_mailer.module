@@ -92,17 +92,46 @@ function webform_mailer_cron(){
 	
 	foreach($db_mailer as $webform_mailer){
 		$count = 0;
-		$nid = $webform_mailer->nid;		
+		$nid = $webform_mailer->nid;
+		$reminders = $webform_mailer->reminders;		
+		$status = null;
+		$from = $webform_mailer->mail_from;
 
 		if($webform_mailer->notify == 1 AND $webform_mailer->status == null){
+			$db_users = db_query("SELECT DISTINCT * FROM webform_mailer_users u WHERE u.nid = ".$nid);
+			
+			foreach($db_users as $account){
+				$params['account'] = $account;
+				$params['webform'] = $webform_mailer;
+				$user_details = get_user_details($account);
+				drupal_mail('mailer', 'notify', $user_details->mail, user_preferred_language($account), $params, $from, TRUE);
+				$query = db_insert('webform_mailer_messages')
+				->fields(array(
+				  'nid' => $nid,
+				  'uid' => $account->uid,
+				  'message_time' => time(),
+				  'type' => 'notification',
+				))->execute();		
+			}
+			
 			$status = "notified";
 		}
 		if(($webform_mailer->status == "notified" && $webform_mailer->reminders >= 1) || ($webform_mailer->status == 'reminded' && $webform_mailer->reminders >=2)){
 			$db_users = db_query("SELECT DISTINCT * FROM webform_mailer_users u INNER JOIN webform_mailer_messages m ON u.uid = m.uid WHERE u.nid = ".$nid);
 
 			foreach($db_users as $account){
-
+				$params['account'] = $account;
+				$params['webform'] = $webform_mailer;
+				$user_details = get_user_details($account);
+				drupal_mail('webform_mailer', 'reminder', $account->mail, user_preferred_language($account), $params, $from, TRUE);
 				$count++;
+				$query = db_insert('webform_mailer_messages')
+				->fields(array(
+				  'nid' => $nid,
+				  'uid' => $account->uid,
+				  'message_time' => time(),
+				  'type' => 'reminder',
+				))->execute();		
 			}
 
 			$status = "reminded_".$count;
@@ -116,3 +145,33 @@ function webform_mailer_cron(){
 			->execute();
 	}
 }
+
+function mailer_mail($key, &$message, $params) {
+	$data['user'] = $params['account'];
+	$options['language'] = $message['language'];
+	user_mail_tokens($variables, $data, $options);
+	switch($key) {
+	case 'notify':
+		$langcode = $message['language']->language;
+		$message['subject'] = t('DØK Alumni', $variables, array('langcode' => $langcode));
+		$message['body'][] = t("Hej Frække!", $variables, array('langcode' => $langcode));
+        break;
+	case 'reminder':
+		$langcode = $message['language']->language;
+		$message['subject'] = t('Notification from !site', $variables, array('langcode' => $langcode));
+		$message['body'][] = t("Dear !username\n\nThere is new content available on the site.", $variables, array('langcode' => $langcode));
+        break;
+	}
+}
+function get_user_details($account){
+	$type = $account->type;
+
+	switch($type) {
+		case 'drupal':
+			return user_load($account->uid); 
+		break;	
+	}
+
+
+}
+
