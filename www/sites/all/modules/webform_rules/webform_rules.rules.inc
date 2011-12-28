@@ -103,7 +103,7 @@ function webform_rules_condition_webform_has_id($form_id, $selected_webform) {
  * Get an option list of all webforms.
  */
 function webform_rules_get_webforms() {
-  $result = db_query("SELECT nid, title FROM node WHERE type = :type", array(
+  $result = db_query("SELECT nid, title FROM {node} WHERE type = :type", array(
     ':type' => 'webform',
   ));
   $options = array();
