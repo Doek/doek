@@ -44,7 +44,7 @@ function theme_webform_validation_manage_overview($variables) {
       $component_info = webform_validation_rule_components_basic($rule['components']);
       $row = array();
       $row[] = array(
-        'data' => $rule['rulename'],
+        'data' => check_plain($rule['rulename']),
       );
       $row[] = array(
         'data' => $validators[$rule['validator']],

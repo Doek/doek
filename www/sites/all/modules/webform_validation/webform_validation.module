@@ -174,7 +174,8 @@ function webform_validation_get_field_keys($submitted, $node) {
   foreach (element_children($submitted) as $child) {
     if (is_array($submitted[$child]) && element_children($submitted[$child])) {
       // only keep searching recursively if it's a fieldset
-      if (_webform_validation_get_component_type($node, $child) == 'fieldset') {
+      $group_components = _webform_validation_get_group_types();
+      if (in_array(_webform_validation_get_component_type($node, $child), $group_components)) {
         webform_validation_get_field_keys($submitted[$child], $node);
       }
       else {
@@ -373,6 +374,19 @@ function _webform_validation_get_component_type($node, $component_key) {
     }
   }
   return FALSE;
+}
+
+/**
+ * Get all webform components that are defined as a group
+ */
+function _webform_validation_get_group_types(){
+  $types = array();
+  foreach(webform_components() as $name => $component){
+    if(isset($component['features']['group']) && $component['features']['group']){
+      $types[] = $name;
+    }
+  }
+  return $types;
 }
 
 /**
