@@ -1,8 +1,0 @@
-; $Id $
-core = 7.x
-description = "Process payments using QuickPay. Core module required by shop dependant modules."
-name = "QuickPay core"
-package = "QuickPay payment gateway"
-files[] = quickpay.module
-files[] = tests/quickpay.test
-
