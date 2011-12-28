@@ -1648,3 +1648,16 @@ fieldset .action {
 h2 .site a{
 	color: #a6c246;
 }
+.node-webform label {
+	font-size: 1.1em;
+	font-weight: bold;
+	padding-top: 5px;
+}
+.node-webform label.option {
+	font-size: 0.9em;
+	font-weight: normal;
+}
+.webform-grid {
+	width: 478px;
+	background-color: white;
+}
