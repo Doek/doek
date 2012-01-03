@@ -12,6 +12,9 @@
         <div id="header-top-inside-left-feed">
             <div id="topSocial">
             <ul>									
+                <li><a class="twitter" href="http://twitter.com/morethanthemes" title="Follow Us on Twitter!"></a></li>
+                <li><a class="facebook" href="http://www.facebook.com/pages/More-than-just-themes/194842423863081" title="Join Us on Facebook!"></a></li>
+                <li><a class="rss" title="RSS" href="#" title="Subcribe to Our RSS Feed"></a></li>
             </ul>
             </div>
         </div>
@@ -41,7 +44,7 @@
             <?php if ($site_name || $site_slogan): ?>
             <div class="clearfix">
 				<?php if ($site_name): ?>
-                <span id="site-name"><a href="<?php print check_url($front_page); ?>" title="<?php print t('Home'); ?>"><?php print strtoupper($site_name); ?></a></span>
+                <span id="site-name"><a href="<?php print check_url($front_page); ?>" title="<?php print t('Home'); ?>"><?php print $site_name; ?></a></span>
                 <?php endif; ?>
                 
                 <?php if ($site_slogan): ?>
@@ -66,14 +69,21 @@
         <div class="main_view">
             <div class="window">
                 <div class="image_reel">
-                	<iframe src="http://player.vimeo.com/video/27286358?title=0&amp;byline=0&amp;portrait=0" width="930" height="320" frameborder="0"></iframe><p><a href="http://vimeo.com/27286358">DØK Galla 2011 Promo</a></p>
-		</div>
+                    <a href="<?php print url('node/3'); ?>"><img src="<?php print base_path() . drupal_get_path('theme', 'bluemasters') . '/images/slide-image-3.jpg'; ?>"></a>
+                    <a href="<?php print url('node/2'); ?>"><img src="<?php print base_path() . drupal_get_path('theme', 'bluemasters') . '/images/slide-image-2.jpg'; ?>"></a>
+                    <a href="<?php print url('node/1'); ?>"><img src="<?php print base_path() . drupal_get_path('theme', 'bluemasters') . '/images/slide-image-1.jpg'; ?>"></a>
+                </div>
                 <div class="descriptions">
-                    <div class="desc" style="display: none;">DØK Galla 2011</div>
+                    <div class="desc" style="display: none;">About Bluemasters</div>
+                    <div class="desc" style="display: none;">Our Portfolio</div>
+                    <div class="desc" style="display: none;">Creation of Beaches</div>
                 </div>
             </div>
         
             <div class="paging">
+                <a rel="1" href="#">1</a>
+                <a rel="2" href="#">2</a>
+                <a rel="3" href="#">3</a>
             </div>
         </div>
     </div><!--EOF:banner-->
@@ -87,7 +97,7 @@
         <?php endif; ?>
     
         <div class="home-block-area first">
-	    <?php print render($page['home_area_1']);?> 		
+            <?php print render($page['home_area_1']);?> 		
         </div>
         <div class="home-block-area">
             <?php print render($page['home_area_2']);?> 
@@ -106,7 +116,7 @@
     
     	<div id="footer-left">
     		<div id="footer-left-1">
-			<?php print render($page['footer_left_1']);?>
+    			<?php print render($page['footer_left_1']);?>
     		</div>
     		<div id="footer-left-2">
     			<?php print render($page['footer_left_2']);?>
@@ -131,6 +141,15 @@
     	<div id="footer-bottom-inside-left">
     		<?php print render($page['footer']);?>
     	</div>
+    	<div id="footer-bottom-inside-right">
+		<?php print theme('links__system_secondary_menu', array('links' => $secondary_menu, 'attributes' => array('id' => 'secondary-menu', 'class' => array('links', 'inline', 'clearfix')))); ?>
+    	</div>
+    	<div class="credits-container" style="clear:both; padding-top:12px;">Ported to Drupal for the Open Source Community by <a href="http://www.drupalizing.com">Drupalizing</a>, a Project of <a href="http://www.morethanthemes.com">More than Themes</a></div>     
+    </div>
+    <div class="credits-container clearfix">
+        <a title="Brought To You By: www.SmashingMagazine.com" class="smashing" href="http://www.smashingmagazine.com" target="_blank">Brought to you By: www.SmashingMagazine.com</a>
+        <a title="Drupalizing" class="drupalizing" href="http://www.drupalizing.com" target="_blank">Drupalizing</a> 
+    </div>  
 </div>
 <!--EOF:footer-bottom-->
 
