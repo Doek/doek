@@ -1,0 +1,457 @@
+<?php
+
+// $Id: tetris.module,v 1.14 2011/02/11 20:12:52 skinhat Exp $
+
+/*
+ * Drupal Module: tetris
+ *
+ * @author: Glenn Linde <www.skinhat.com/contact>
+ */
+
+function tetris_menu() {
+  $items = array();
+
+
+    $items['admin/settings/tetris'] = array(
+      'title' => t('Tetris Configuration'),
+      'description' => t('Configure the game.'),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('tetris_admin_settings'),
+      'access arguments' => array('administer site configuration'),	  	  
+      'type' => MENU_NORMAL_ITEM,// optional
+    );
+
+    $items['tetris/win'] = array(
+      'title' => '',
+      'page callback' => 'tetris_win',
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
+	  'access' => TRUE
+    );
+  return $items;
+}
+
+/**
+* Display help and module information
+* @param section which section of the site we're displaying help
+* @return help text for section
+*/
+function tetris_help($path,$arg) {
+
+  $output = '';
+
+  switch ($path) {
+    case "admin/modules#description":
+      $output = t("Displays links to nodes created on this date");
+      break;
+  }
+
+  return $output;
+} // function tetris_help
+
+
+function tetris_strip($val) 
+{
+	return str_replace("'","",$val);
+}
+
+
+/**
+ * Implements hook_block_info().
+ */
+function tetris_block_info() {
+  $blocks = array();
+
+  $blocks['Tetris'] = array(
+    'info' => t('Tetris'),
+    'cache' => DRUPAL_NO_CACHE,
+    );
+
+    return $blocks;
+}
+
+
+/**
+ * Implements hook_block_view().
+ */
+function tetris_block_view($block_name = '') {
+  if ($block_name == 'Tetris') {
+    $block['subject'] = 'Tetris';
+	drupal_add_js(drupal_get_path('module', 'tetris') .'/tetris.js');
+    $content='		
+	<div>
+	    <table id="following_table" style=" border: 0px #000 solid; padding:0px; margin:0px;">
+		<tr style="padding:0px; margin:0px;">
+		<td valign="top" style="padding:0px; margin:0px;" >
+          <div id="piece_following" style="height:100px; position:relative"; >
+            Loading...
+          </div>
+		</td>
+		<td valign="top" style="padding:0px; margin:0px;">
+          <div id="tetris_pause"  onClick="javascript:pause_reanudar_game();" title="Click here to pause game">
+            Pause
+          </div>	
+		</td>
+		</tr>
+		</table>
+        <!-- zone de game: -->
+        <div id="tetris_zone_game"  style="border: 1px #000 solid; border-right: 1px #000 solid; border-left: 1px #000 solid; visibility:visible;   position:relative; padding:0px; margin:0px" oncontextmenu="return false;">
+			<img id="tetris_background_image" src="'.variable_get('tetris_background', '/'.drupal_get_path('module', 'tetris').'/img/drupal.jpg').'"/>
+		  <!-- Mapa: -->
+            <div id="tetris_map" style="iposition:absolute; visibility:visible; top:0px; width:242px; height:442px; padding:0px; border:0px;"></div>
+            <!-- Fin de Mapa. -->
+            <!-- piece: -->
+            <div id="tetris_piece" style="ibackground:transparent; color:#ffffff; visibility:hidden; left:0px; top:0px; z-index:3;"></div>
+            <!-- Fin de piece. -->
+            <!-- message: -->
+            <div id="tetris_message" style="visibility:visible; height:40px; position:absolute;  background:#eef; text-align:center;" onclick="tetris_start_game()">
+                Loading...
+            </div>
+            <!-- Fin de message. -->
+        </div>
+        <!-- Fin de zone de game. -->
+
+        <!-- Fin de piece following. -->
+        <!-- Barra de state: -->
+        <div id="tetris_state" >
+            &nbsp; Loading...
+        </div>
+		
+		';
+
+    $content.='<script language=\'javascript\' >';
+    if (variable_get('tetris_bestscore', '')!='')
+      $content.='tetris_bestscore='.tetris_strip(variable_get('tetris_bestscore', '')).'; ';
+    $content.=  'tetris_start_message=\''.tetris_strip(variable_get('tetris_start_message', 'Use arrow keys to move pieces. Click New Game to begin')).'\'; ';
+    $content.=  'tetris_gameover_message=\''.tetris_strip(variable_get('tetris_gameover_message', 'Game over.')).'\'; ';
+    $content.=  'tetris_game_begins_message=\''.tetris_strip(variable_get('tetris_game_begins_message', 'The game begins')).'\'; ';		
+    $content.=  'tetris_keyboard='.tetris_strip(variable_get('tetris_keyboard', true)).'; ';
+	if (!tetris_strip(variable_get('tetris_mouse', false)))
+		$mouse='0';
+	else
+		$mouse='1';
+    $content.=  'tetris_mouse='.$mouse.'; ';
+    $content.=  'tetris_initial_game_speed=\''.tetris_strip(variable_get('tetris_initial_game_speed', 1500)).'\'; ';
+    $content.=  'tetris_speed_increase_per_level=\''.tetris_strip(variable_get('tetris_speed_increase_per_level', 25)).'\'; ';
+	$content.=  'tetris_piece1_img=\''.tetris_strip(variable_get('tetris_piece1_img', '/'.drupal_get_path('module', 'tetris').'/img/orange.png')).'\'; ';	
+	$content.=  'tetris_piece2_img=\''.tetris_strip(variable_get('tetris_piece2_img', '/'.drupal_get_path('module', 'tetris').'/img/red.png')).'\'; ';	
+	$content.=  'tetris_piece3_img=\''.tetris_strip(variable_get('tetris_piece3_img', '/'.drupal_get_path('module', 'tetris').'/img/blue.png')).'\'; ';	
+	$content.=  'tetris_piece4_img=\''.tetris_strip(variable_get('tetris_piece4_img', '/'.drupal_get_path('module', 'tetris').'/img/purple.png')).'\'; ';	
+	$content.=  'tetris_piece5_img=\''.tetris_strip(variable_get('tetris_piece5_img', '/'.drupal_get_path('module', 'tetris').'/img/lightblue.png')).'\'; ';	
+	$content.=  'tetris_piece6_img=\''.tetris_strip(variable_get('tetris_piece6_img', '/'.drupal_get_path('module', 'tetris').'/img/green.png')).'\'; ';	
+	$content.=  'tetris_piece7_img=\''.tetris_strip(variable_get('tetris_piece7_img', '/'.drupal_get_path('module', 'tetris').'/img/yellow.png')).'\'; ';	
+	$content.=  'tetris_piece1_color=\''.tetris_strip(variable_get('tetris_piece1_color', 'orange'))."';";	
+	$content.=  'tetris_piece2_color=\''.tetris_strip(variable_get('tetris_piece2_color', 'red'))."';";	
+	$content.=  'tetris_piece3_color=\''.tetris_strip(variable_get('tetris_piece3_color', 'blue'))."';";	
+	$content.=  'tetris_piece4_color=\''.tetris_strip(variable_get('tetris_piece4_color', 'purple'))."';";	
+	$content.=  'tetris_piece5_color=\''.tetris_strip(variable_get('tetris_piece5_color', 'cyan'))."';";	
+	$content.=  'tetris_piece6_color=\''.tetris_strip(variable_get('tetris_piece6_color', 'green'))."';";	
+	$content.=  'tetris_piece7_color=\''.tetris_strip(variable_get('tetris_piece7_color', 'yellow'))."';";	
+    $content.=  'tetris_number_columns='.tetris_strip(variable_get('tetris_number_columns', 12)).'; ';
+    $content.=  'tetris_number_lines='.tetris_strip(variable_get('tetris_number_lines', 22)).'; ';
+    $content.=  'tetris_scale='.tetris_strip(variable_get('tetris_scale', 0.75)).'; ';	
+    $content.=  'tetris_leftkey='.tetris_strip(variable_get('tetris_leftkey', '37')).'; ';	
+    $content.=  'tetris_rightkey='.tetris_strip(variable_get('tetris_rightkey', '39')).'; ';	
+    $content.=  'tetris_upkey='.tetris_strip(variable_get('tetris_upkey', '38')).'; ';	
+    $content.=  'tetris_downkey='.tetris_strip(variable_get('tetris_downkey', '40')).'; ';	
+	
+	$content.=  'tetris_background=\''.tetris_strip(variable_get('tetris_background', '/'.drupal_get_path('module', 'tetris').'/img/drupal.jpg')).'\'; ';	
+    $content.=  'tetris_background_transparency=\''.tetris_strip(variable_get('tetris_background_transparency', 0.2)).'\'; ';	
+	
+	$content.=  'tetris_initialize_game(); ';
+    $content.=  '</script>';
+    $content.=  '</div><br/>';
+     $content.='<input type="button" value="New game" onClick="blur(); tetris_initialize_game(); tetris_start_game();" />';
+    $content.='&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+    $content.='<span align=\'right\' style=\'font-size:0.6em\'><a href=\'http://www.skinhat.com/drupal\'>Skinhat</a></span>';
+
+    $content.="<form id='tetris_winform' method='POST' action='tetris/win' > 
+                <input type='hidden' id='tetris_win_message' name='tetris_win_message'/>
+                <input type='hidden' id='tetris_ticker' name='tetris_ticker'/>
+                <input type='hidden' id='tetris_win'/>
+               </form>";
+    if (variable_get('tetris_bestscore', -1)>0)
+      $content.='Best: '.variable_get('tetris_bestscore', -1).' by <b>'.variable_get('tetris_bestuser', 'anon').'</b>';
+
+    $block['content'] = $content;
+    return $block;
+  }
+}
+
+
+/**
+ * Implementation of hook_settings()
+ */
+function tetris_admin_settings() {
+  $form = array();
+  $form['tetris_start_message'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Start Message'),
+    '#default_value' => variable_get('tetris_start_message', 'Use arrow keys to move pieces. Click New Game to begin'),
+    '#description' => t('When a player first starts what is the message?'), 
+    '#required' => TRUE,
+  );
+
+  $form['tetris_gameover_message'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Message when game over'),
+    '#default_value' => variable_get('tetris_gameover_message', 'Game over'),
+    '#description' => t('Message when the game is over.'), 
+    '#required' => TRUE,
+  );  
+
+  $form['tetris_game_begins_message'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Message with the game start.'),
+    '#default_value' => variable_get('tetris_game_begins_message', 'The game begins.'),
+    '#description' => t('Message after player clicks new game.'), 
+    '#required' => TRUE,
+  ); 
+
+  $form['tetris_keyboard'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use keyboard.'),
+    '#default_value' => variable_get('tetris_keyboard', true),
+    '#description' => t('Use keyboard for controls.')
+  );   
+  
+  $form['tetris_mouse'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use mouse.'),
+    '#default_value' => variable_get('tetris_mouse', false),
+    '#description' => t('Use mouse for controls. Note you can have the keyboard checked at the same time. If mouse is used left double click rotates left, right click rotates right, drag piece down will move piece down.')
+  );   
+
+  
+  $form['tetris_scale'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Scale of tetris'),
+    '#default_value' => variable_get('tetris_scale', 0.75),
+    '#description' => t('Scale factor of tetris - 1=normal size 0.5=half size 2= 2 x bigger')
+  ); 
+
+  $form['tetris_initial_game_speed'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Initial game speed'),
+    '#default_value' => variable_get('tetris_initial_game_speed', 1500),
+    '#description' => t('Initial game speed - 0 is faster, 1500 average, 3000 slower'), 
+    '#required' => TRUE,
+  );  
+   
+  $form['tetris_speed_increase_per_level'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Speed increase when a level is completed'),
+    '#default_value' => variable_get('tetris_speed_increase_per_level', 25),
+    '#description' => t('Every time a level is complete increase the speed of the blocks by this amount.'), 
+    '#required' => TRUE,
+  );
+  
+  $form['tetris_number_columns'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Number of columns'),
+    '#default_value' => variable_get('tetris_number_columns', 12),
+    '#description' => t('How many columns does the game of tetris have?'), 
+    '#required' => TRUE,
+  ); 
+
+  $form['tetris_number_lines'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Number of rows'),
+    '#default_value' => variable_get('tetris_number_lines', 22),
+    '#description' => t('How many rows does the game of tetris have?'), 
+    '#required' => TRUE,
+  ); 
+    
+  $form['tetris_background'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Background Image'),
+    '#default_value' => variable_get('tetris_background', '/'.drupal_get_path('module', 'tetris').'/img/drupal.jpg'),
+    '#description' => t('URL of image to use as background. Leave blank if no image.')
+  );
+    
+  $form['tetris_background_transparency'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Transparency of background image'),
+    '#default_value' => variable_get('tetris_background_transparency', 0.2),
+    '#description' => t('Transparency of background on page. 1 is no transparency. 0 is completely transparent.'), 
+    '#required' => TRUE,
+  );  	
+    
+  $form['tetris_piece1_img'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Image for piece 1'),
+    '#default_value' => variable_get('tetris_piece1_img', '/'.drupal_get_path('module', 'tetris').'/img/orange.png'),
+    '#description' => t('URL of image to use a piece 1. Leave blank if using color instead for piece 1')
+  );
+  
+  $form['tetris_piece2_img'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Image for piece 2'),
+    '#default_value' => variable_get('tetris_piece2_img', '/'.drupal_get_path('module', 'tetris').'/img/red.png'),
+    '#description' => t('URL of image to use a piece 2. Leave blank if using color instead for piece 2')
+  );
+
+  $form['tetris_piece3_img'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Image for piece 3'),
+    '#default_value' => variable_get('tetris_piece3_img', '/'.drupal_get_path('module', 'tetris').'/img/blue.png'),
+    '#description' => t('URL of image to use a piece 3. Leave blank if using color instead for piece 3')
+  );
+
+  $form['tetris_piece4_img'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Image for piece 4'),
+    '#default_value' => variable_get('tetris_piece4_img', '/'.drupal_get_path('module', 'tetris').'/img/purple.png'),
+    '#description' => t('URL of image to use a piece 4. Leave blank if using color instead for piece 4')
+  );
+  
+  $form['tetris_piece5_img'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Image for piece 5'),
+    '#default_value' => variable_get('tetris_piece5_img', '/'.drupal_get_path('module', 'tetris').'/img/lightblue.png'),
+    '#description' => t('URL of image to use a piece 5. Leave blank if using color instead for piece 5')
+  );
+
+  $form['tetris_piece6_img'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Image for piece 6'),
+    '#default_value' => variable_get('tetris_piece6_img', '/'.drupal_get_path('module', 'tetris').'/img/green.png'),
+    '#description' => t('URL of image to use a piece 6. Leave blank if using color instead for piece 6')
+  );
+
+  $form['tetris_piece7_img'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Image for piece 7'),
+    '#default_value' => variable_get('tetris_piece7_img', '/'.drupal_get_path('module', 'tetris').'/img/yellow.png'),
+    '#description' => t('URL of image to use a piece 7. Leave blank if using color instead for piece 7')
+  );
+
+  $form['tetris_piece1_color'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Color for piece 1'),
+    '#default_value' => variable_get('tetris_piece1_color', 'orange'),
+    '#description' => t('Color of piece 1 if not using image')
+  );
+
+  $form['tetris_piece2_color'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Color for piece 2'),
+    '#default_value' => variable_get('tetris_piece2_color', 'red'),
+    '#description' => t('Color of piece 2 if not using image')
+  );
+
+  $form['tetris_piece3_color'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Color for piece 3'),
+    '#default_value' => variable_get('tetris_piece3_color', 'blue'),
+    '#description' => t('Color of piece 3 if not using image')
+  );
+
+  $form['tetris_piece4_color'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Color for piece 4'),
+    '#default_value' => variable_get('tetris_piece4_color', 'purple'),
+    '#description' => t('Color of piece 4 if not using image')
+  );
+
+  $form['tetris_piece5_color'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Color for piece 5'),
+    '#default_value' => variable_get('tetris_piece5_color', 'cyan'),
+    '#description' => t('Color of piece 5 if not using image')
+  );
+
+  $form['tetris_piece6_color'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Color for piece 6'),
+    '#default_value' => variable_get('tetris_piece6_color', 'green'),
+    '#description' => t('Color of piece 6 if not using image')
+  );
+
+  $form['tetris_piece7_color'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Color for piece 7'),
+    '#default_value' => variable_get('tetris_piece7_color', 'yellow'),
+    '#description' => t('Color of piece 7 if not using image')
+  );  
+  
+  $form['tetris_leftkey'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Ascii keycode to press to move left'),
+    '#default_value' => variable_get('tetris_leftkey', '37'),
+    '#description' => t('Ascii keycode to move block left. Eg 90 for z or 37 left arrow')
+  );  
+ 
+  $form['tetris_rightkey'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Ascii keycode to press to move right'),
+    '#default_value' => variable_get('tetris_rightkey', '39'),
+    '#description' => t('Ascii keycode to move block right. Eg 88 for x or 39 right arrow ')
+  ); 
+
+  $form['tetris_upkey'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Ascii keycode to press to rotate block'),
+    '#default_value' => variable_get('tetris_upkey', '38'),
+    '#description' => t('Ascii keycode to rotate. Eg 74 for M')
+  ); 
+
+  $form['tetris_downkey'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Ascii keycode to press to move block down'),
+    '#default_value' => variable_get('tetris_downkey', '40'),
+    '#description' => t('Ascii keycode to move block down. Eg 77 for M')
+  ); 
+  
+  $form['tetris_bestscore'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Best score'),
+    '#default_value' => variable_get('tetris_bestscore', ''),
+    '#description' => t('Set the best game score. Set to blank to reset.')
+  );
+
+  $form['tetris_bestuser'] = array(
+    '#type' => 'textfield',
+    '#title' => t('User with best score'),
+    '#default_value' => variable_get('tetris_bestuser', ''),
+    '#description' => t('Set the user who got the best score')
+  );
+
+  return system_settings_form($form);
+}
+
+
+function tetris_win()
+{      
+  global $user;
+  $ticker=$_POST['tetris_ticker'];
+  $output='';
+  if ($ticker)
+  {
+    if ($user->name)
+    {
+	if (!isset($_POST['tetris_message']))
+	{
+	//If not isset -> set with dumy value
+	$_POST['tetris_message'] = "";
+	} 
+      $message=$_POST['tetris_message'];
+ 
+      if ($message)
+        $output=$message.'<br/>';
+      $output.='Congratulations '.$user->name.' on getting a score of '.$ticker.'.';
+      variable_set('tetris_bestscore',$ticker);
+      variable_set('tetris_bestuser',$user->name);
+    }
+    else
+      $output='Congratulations. You got the best score. If you were logged in your score would have been recorded!';
+
+  }
+    return  $output;
+  //return theme('table', $output);
+
+}
+
+
+
+?>
