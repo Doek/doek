@@ -94,9 +94,16 @@ function webform_mailer_users_roles_form($form, $form_state, $node, $roles = arr
 	$options[$user->uid] = $user->name;
   }
 
+  $selected_users = db_query("SELECT DISTINCT wmu.uid FROM {webform_mailer_users} wmu WHERE wmu.nid = :nid", array(":nid" => $node->nid));
+
+  foreach($selected_users as $account){
+	$defaults[] = $account->uid;
+  }
+
   $form['users']['user'] = array(
 	'#type' => 'checkboxes',
 	'#options' => $options,
+	'#default_value' => $defaults,
 	'#title' => t('User roles'),
 	'#description' => t('Select the roles to send mails to'),
   );
@@ -126,6 +133,7 @@ function webform_mailer_users_roles_form_submit($form, &$form_state){
 		->fields(array(
 		  'nid' => $nid,
 		  'uid' => $user,
+		  'type' => 'drupal',
 		  'token' => $token,
 		))->execute();
 
@@ -133,7 +141,5 @@ function webform_mailer_users_roles_form_submit($form, &$form_state){
 	}
 	
 	drupal_set_message($count.t(' Users have been saved to db'));
-
-
 }
 ?>

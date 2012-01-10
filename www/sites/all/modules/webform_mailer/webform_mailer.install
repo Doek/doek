@@ -19,13 +19,6 @@ function webform_mailer_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-      'sendmail' => array(
- 	'description' => 'If the module should be enabled on this webform', 
-	'type' => 'int',
-	'size' => 'tiny',
-	'not null' => TRUE,
-	'default' => 0,
-      ),
       'notify' => array(
 	'description' => 'Boolean to allow users to select wether or not users should be notified about the new webform',
 	'type' => 'int',
@@ -38,6 +31,12 @@ function webform_mailer_schema() {
 	'type' => 'text',
 	'size' => 'big',
 	'not null' => false,
+      ),
+      'mail_from' => array(
+	'description' => 'Email from adress which is used as the from adress in the outgoing mails',
+	'type' => 'varchar',
+	'length' => 255,
+	'not null' => FALSE, 
       ),
       'reminders' => array(
 	'description' => 'Number of reminders to be sent in total',
@@ -72,26 +71,25 @@ function webform_mailer_schema() {
       'id' => array(
         'description' => 'the identifier of a webform_user.',
         'type' => 'serial',
-        'unsigned' => true,
-        'not null' => true,
-	'size' => big,
+	'size' => 'big',
       ),
       'nid' => array(
         'description' => 'the node identifier of a webform.',
         'type' => 'int',
-        'unsigned' => true,
-        'not null' => true,
+        'unsigned' => TRUE,
+        'not null' => TRUE,
       ),
       'uid' => array(
         'description' => 'the user identifier. NOT the uid from the users table, since these users are added on the fly.',
         'type' => 'int',
-        'unsigned' => true,
-        'not null' => true,
+        'unsigned' => TRUE,
+        'not null' => TRUE,
       ),
       'type' => array(
         'description' => 'The type of the user, which can be drupal or imported. Imported users will be found in the imported users table webform_mailer_users_import',
         'type' => 'varchar',
-        'not null' => true,
+        'not null' => TRUE,
+	'length' => 255,
       ),
       'token' => array(
         'description' => 'the token for a user on this nid.',
@@ -114,9 +112,8 @@ function webform_mailer_schema() {
     'fields' => array(
       'mid' => array(
         'description' => 'The id for the message',
-        'type' => 'int',
-        'unsigned' => true,
-        'not null' => true,
+        'type' => 'serial',
+	'size' => 'big',
       ),
       'nid' => array(
         'description' => 'the node identifier of a webform.',

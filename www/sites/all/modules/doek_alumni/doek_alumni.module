@@ -41,3 +41,47 @@ function doek_alumni_form_alter(&$form, &$form_state, $form_id){
 	}
 		return $form;
 }
+
+function assign_membership_number(){
+
+	$query = db_query("SELECT max(field_alumnimedlem_value) max FROM field_data_field_alumnimedlem");
+	
+	$result = $query->fetchObject();
+
+	$current_number = $result->max;
+	$counter = 0;
+
+	$role_users = db_query("SELECT ur.uid FROM role r INNER JOIN users_roles ur ON r.rid = ur.rid WHERE r.name = 'Alumni'");
+
+	foreach($role_users as $account){
+		$account = user_load($account->uid);
+		//	die(var_dump($account));	
+
+		if(empty($account->field_alumnimedlem)){
+			$edit = array(
+				'field_alumnimedlem' => array(
+					'und' => array(
+						'0' => array(
+							'value' => $current_number + 1,
+							),
+						),
+					),
+				);
+			
+			user_save($account, $edit);
+			$counter++;
+		}
+	}
+	echo $counter." Users updated";
+
+	return true;
+}
+
+function doek_alumni_cron(){
+
+	$status = false;
+
+	$status = assign_membership_number();
+	
+	return $status;
+}

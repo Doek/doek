@@ -6,152 +6,328 @@
  * Simple test suite for the QuickPay module. Only tests the core API.
  */
 
-// $Id$
-class QuickPayTest extends DrupalWebTestCase {
+class QuickPayUnitTest extends DrupalUnitTestCase {
   /**
    * Implementation of get_info() for information
    */
   function getInfo() {
     return array(
       'name' => t('QuickPay'),
-      'description' => t('Tests that core QuickPay functions work. <em>WARNING:</em> This assumes that the configured QuickPay account is running in test mode. Don\'t run this on a production account.'),
+      'description' => t('Tests that core QuickPay functions work. <em>WARNING:</em> This assumes that the used QuickPay account is running in test mode. Don\'t run this on a production account.'),
       'group' => 'Quickpay Tests',
     );
   }
 
   function setUp() {
-    // setUp is called before each test. Just set these things once.
-    if (!isset($this->orderPrefix)) {
-      $this->orderPrefix = "qptest" . time() . 't';
-      $this->orderNum = 1;
-      // Save creds before DrupalWebTestCase::setUp clears the variables.
-      $this->quickpay_merchant = variable_get('quickpay_merchant', NULL);
-      $this->quickpay_secret = variable_get('quickpay_secret', NULL);
-    }
-    parent::setUp();
-    variable_set('quickpay_merchant', $this->quickpay_merchant);
-    variable_set('quickpay_secret', $this->quickpay_secret);
-    variable_set('quickpay_order_prefix', $this->orderPrefix);
-    variable_set('quickpay_debug', TRUE);
+    /* drupal_load('module', 'quickpay.transaction.inc'); */
+    $settings = variable_get('quickpay_test', array());
+    $settings['order_prefix'] .= time() . 't';
+    parent::setup('quickpay');
+    $this->qp = new Quickpay($settings);
   }
 
-  function tearDown() {
-    parent::tearDown();
-  }
-
-  function assertState($txn, $state) {
-    $code = array_search($state, _quickpay_state_codes());
-    $this->assertTrue($code !== FALSE, 'State is not unknown');
-    if ($code) {
-      $this->assertTrue($txn['state'] == $code, 'Transaction state is \'' .
-                        $state . '\'');
-    }
-  }
   function testCore() {
-    $carddata = array(
-      'number' => '4571222233334444',
-      'exp_month' => '3',
-      'exp_year' => '19',
-      'cvd' => '123',
-    );
-    $txn = quickpay_authorize($carddata, $this->orderNum++, 100, 'DKK');
+    $txn = $this->qp->authorize('4571222233334444', '0319', '123', 1, 100, 'DKK');
+    $this->assertTrue($txn->success(), "Authorize works.");
+    $this->assertTrue($txn->state == QuickpayTransaction::AUTHORIZED, "Transaction state is 'authorized'.");
 
-    $this->assertTrue($txn !== FALSE, 'Simple authorization');
-    $this->assertTrue(quickpay_successful($txn), 'Was successful');
-    $this->assertState($txn, 'Authorized');
-    $txn = quickpay_cancel($txn);
-    $this->assertTrue(quickpay_successful($txn), 'Reversing as successful');
-    $this->assertState($txn, 'Cancelled');
+    // This should fail.
+    $txn->capture(200);
+    $this->assertFalse($txn->success(), "Cannot capture more than authorized");
+    $this->assertTrue($txn->state == QuickpayTransaction::AUTHORIZED, "Transaction state is 'authorized'.");
 
-    // check that reusing orders doesn't work
+    $txn2 = $this->qp->transaction($txn->store());
+    $this->assertTrue(!empty($txn2->history), "History is not empty when asking for status.");
+
+    // But this should work.
+    $txn->capture(100);
+    $this->assertTrue($txn->success(), "Can capture authorized amount.");
+    $this->assertTrue($txn->state == QuickpayTransaction::CAPTURED, "Transaction state is 'captured'.");
+
+    $txn2 = $this->qp->transaction($txn->store());
+    $this->assertTrue(!empty($txn2->history), "History is not empty when asking for status.");
+
+    // Lets try partial capture...
+    $txn = $this->qp->authorize('4571222233334444', '0319', '123', 2, 100, 'DKK');
+    $this->assertTrue($txn->success(), "Authorize works.");
+    $this->assertTrue($txn->state == QuickpayTransaction::AUTHORIZED, "Transaction state is 'authorized'.");
+
+    // This should work.
+    $txn->capture(50);
+    $this->assertTrue($txn->success(), "Can capture less than authorized amount.");
+    $this->assertTrue($txn->state == QuickpayTransaction::CAPTURED, "Transaction state is 'captured'.");
+
+    // As we didn't specify split payments, we can't capture any more.
+    $txn->capture(50);
+    $this->assertFalse($txn->success(), "Cannot capture the rest of the authorized amount.");
+    debug($txn->history);
   }
 
-  function testCaptureCredit() {
-    $carddata = array(
-      'number' => '4571222233334444',
-      'exp_month' => '3',
-      'exp_year' => '19',
-      'cvd' => '123',
-    );
-    $txn = quickpay_authorize($carddata, $this->orderNum++, 100, 'DKK');
+  function testAutocapture() {
+    $txn = $this->qp->authorize('4571222233334444', '0319', '123', 1, 100, 'DKK', array('autocapture' => TRUE));
+    $this->assertTrue($txn->success(), "Authorize with autocapture works.");
+    $this->assertTrue($txn->state == QuickpayTransaction::CAPTURED, "Transaction state is 'captured'.");
 
-    $this->assertTrue($txn !== FALSE, 'Simple authorization');
-    $this->assertTrue(quickpay_successful($txn), 'Was successful');
-    $this->assertState($txn, 'Authorized');
-    $txn = quickpay_capture($txn, 100);
-    $this->assertTrue(quickpay_successful($txn), 'Was successful');
-    $this->assertState($txn, 'Captured');
-    $txn = quickpay_refund($txn, 100);
-    $this->assertTrue(quickpay_successful($txn), 'Was successful');
-    $this->assertState($txn, 'Refunded');
+    // This should fail.
+    $txn->capture(1);
+    $this->assertFalse($txn->success(), "Cannot capture on autocaptured transaction");
+  }
 
-    $carddata = array(
-      'number' => '4571222233334444',
-      'exp_month' => '3',
-      'exp_year' => '19',
-      'cvd' => '123',
-    );
-    $txn = quickpay_authorize($carddata, $this->orderNum++, 100,
-                              'DKK', TRUE);
+  function testSplitpayment() {
+    // Lets try partial capture...
+    $txn = $this->qp->authorize('4571222233334444', '0319', '123', 4, 100, 'DKK', array('splitpayment' => TRUE));
+    $this->assertTrue($txn->success(), "Authorize works.");
+    $this->assertTrue($txn->state == QuickpayTransaction::AUTHORIZED, "Transaction state is 'authorized'.");
 
-    $this->assertTrue($txn !== FALSE, 'Autocapture authorization');
-    $this->assertTrue(quickpay_successful($txn), 'Was successful');
-    $this->assertState($txn, 'Captured');
+    // This should work.
+    $txn->capture(50);
+    $this->assertTrue($txn->success(), "Can capture less than authorized amount.");
+    $this->assertTrue($txn->state == QuickpayTransaction::AUTHORIZED, "Transaction state is still 'authorized'.");
+
+    // Capture some more and finalize
+    $txn->capture(25, TRUE);
+    $this->assertTrue($txn->success(), "Can capture some more of the authorized amount.");
+    $this->assertTrue($txn->state == QuickpayTransaction::CAPTURED, "Transaction state is 'captured'.");
+
+    // As we've finalized the transaction, we can't capture any more.
+    $txn->capture(5);
+    $this->assertFalse($txn->success(), "Cannot capture the rest of the authorized amount.");
+
+    debug($txn->history);
+  }
+
+  function testRenew() {
+    $txn = $this->qp->authorize('4571222233334444', '0319', '123', 5, 100, 'DKK', array('splitpayment' => TRUE));
+    $this->assertTrue($txn->success(), "Authorize works.");
+    $this->assertTrue($txn->state == QuickpayTransaction::AUTHORIZED, "Transaction state is 'authorized'.");
+
+    $txn->renew();
+    // Not much we can check but that the request didn't fail.
+    $this->assertTrue($txn->success(), "Renew works.");
+    $this->assertTrue($txn->state == QuickpayTransaction::AUTHORIZED, "Transaction state is 'authorized'.");
+  }
+
+  function testCancel() {
+    $txn = $this->qp->authorize('4571222233334444', '0319', '123', 6, 100, 'DKK', array('splitpayment' => TRUE));
+    $this->assertTrue($txn->success(), "Authorize works.");
+    $this->assertTrue($txn->state == QuickpayTransaction::AUTHORIZED, "Transaction state is 'authorized'.");
+
+    $txn->cancel();
+    $this->assertTrue($txn->success(), "Cancel works.");
+    // Check that the transaction state is now cancel.
+    $this->assertTrue($txn->state == QuickpayTransaction::CANCELLED, "Transaction state is 'cancelled'.");
+  }
+
+  function testRefund() {
+    // Create a transaction.
+    $txn = $this->qp->authorize('4571222233334444', '0319', '123', 7, 100, 'DKK');
+    $this->assertTrue($txn->success(), "Authorize works.");
+    $this->assertTrue($txn->state == QuickpayTransaction::AUTHORIZED, "Transaction state is 'authorized'.");
+
+    // Capture part.
+    $txn->capture(50);
+    $this->assertTrue($txn->success(), "Can capture less than authorized amount.");
+    $this->assertTrue($txn->state == QuickpayTransaction::CAPTURED, "Transaction state is 'captured'.");
+
+    // Refund some.
+    $txn->refund(20);
+    $this->assertTrue($txn->success(), "Can refund part of captured amount.");
+    $this->assertTrue($txn->state == QuickpayTransaction::REFUNDED, "Transaction state is 'refunded'.");
+    debug($txn);
 
   }
+
   function testSubscribe() {
-    $carddata = array(
-      'number' => '4571222233334444',
-      'exp_month' => '3',
-      'exp_year' => '19',
-      'cvd' => '123',
-    );
-    $txn = quickpay_subscribe($carddata, $this->orderNum++,
-                              'Subscriptiontest');
+    // Create a transaction.
+    $sub_txn = $this->qp->subscribe('4571222233334444', '0319', '123', 8, 'test subscription');
+    $this->assertTrue($sub_txn->success(), "Subscribe works.");
+    $this->assertTrue($sub_txn->state == QuickpayTransaction::SUBSCRIBED, "Transaction state is 'subscribed'.");
 
-    $this->assertTrue($txn !== FALSE, 'Subscription authorization');
-    $this->assertTrue(quickpay_successful($txn), 'Was successful');
-    $this->assertState($txn, 'Subscribed');
-    $txn = quickpay_recurring($txn, $this->orderNum++, 100, 'DKK');
-    $this->assertTrue(quickpay_successful($txn), 'Recurring was successful');
-    $this->assertState($txn, 'Authorized');
-    $txn = quickpay_capture($txn, 100);
-    $this->assertTrue(quickpay_successful($txn), 'Capture was successful');
-    $this->assertState($txn, 'Captured');
+    // Use the subscribed transaction to authorize a payment.
+    $txn = $sub_txn->recurring(9, 100, 'DKK');
+    $this->assertTrue($txn->success(), "Recurring works.");
+    $this->assertTrue($txn->state == QuickpayTransaction::AUTHORIZED, "Transaction state is 'authorized'.");
+
+    // Capture.
+    $txn->capture(100);
+    $this->assertTrue($txn->success(), "Can capture from subscription.");
+    $this->assertTrue($txn->state == QuickpayTransaction::CAPTURED, "Transaction state is 'captured'.");
+
+    // Use the subscribed transaction to authorize another payment.
+    $txn = $sub_txn->recurring(10, 100, 'DKK', array('autocapture' => TRUE));
+    $this->assertTrue($txn->success(), "Recurring with autocapture works.");
+    $this->assertTrue($txn->state == QuickpayTransaction::CAPTURED, "Transaction state is 'captured'.");
+
+    $sub_txn->cancel();
+    debug($sub_txn);
+    $this->assertTrue($sub_txn->success(), "Cancelling subscription works.");
+    $this->assertTrue($sub_txn->state == QuickpayTransaction::CANCELLED, "Transaction state is 'cancelled'.");
+
+    $txn = $sub_txn->recurring(11, 100, 'DKK');
+    $this->assertFalse($txn->success(), "Recurring on cancelled subscription doesn't work.");
+    debug($txn);
+    /* $this->assertTrue($txn->state == QuickpayTransaction::AUTHORIZED, "Transaction state is 'subscribed'."); */
 
   }
 
-  function testCaptureLess() {
-    $carddata = array(
-      'number' => '4571222233334444',
-      'exp_month' => '3',
-      'exp_year' => '19',
-      'cvd' => '123',
-    );
-    $txn = quickpay_authorize($carddata, $this->orderNum++, 100, 'DKK');
-
-    $this->assertTrue($txn !== FALSE, 'Simple authorization');
-    $this->assertTrue(quickpay_successful($txn), 'Was successful');
-    $this->assertState($txn, 'Authorized');
-    $txn = quickpay_capture($txn, 50);
-    $this->assertTrue(quickpay_successful($txn), 'Was successful');
-    $this->assertState($txn, 'Captured');
+  function testStatus() {
+    try {
+      $txn = $this->qp->transaction('1');
+      $txn->amount();
+      $this->fail("Using non-existent transaction throws an exception.");
+    }
+    catch (QuickpayException $e) {
+      $this->pass("Using non-existent transaction throws an exception.");
+    }
   }
-  /*
-   // In test, it's just approved?
-    function testCaptureMore() {
-    $txn = quickpay_authorize(array('number' => '4571222233334444',
-                                    'exp_month' => '3',
-                                    'exp_year' => '9',
-                                    'cvd' => '123'), $this->orderNum++, 100);
-
-    $this->assertTrue($txn !== false, 'Simple authorization');
-    $this->assertTrue(quickpay_successful($txn), 'Was successful');
-    $this->assertState($txn, 'Authorized');
-    $txn = quickpay_capture($txn, 200);
-    dpm($txn);
-    $this->assertFalse(quickpay_successful($txn), 'Wasn\'t successful');
-    $this->assertState($txn, 'Capture failed');
-  }
-  */
 }
+
+/* // $Id$ */
+/* class QuickPayTest extends DrupalWebTestCase { */
+/*   /\** */
+/*    * Implementation of get_info() for information */
+/*    *\/ */
+/*   function getInfo() { */
+/*     return array( */
+/*       'name' => t('QuickPay'), */
+/*       'description' => t('Tests that core QuickPay functions work. <em>WARNING:</em> This assumes that the configured QuickPay account is running in test mode. Don\'t run this on a production account.'), */
+/*       'group' => 'Quickpay Tests', */
+/*     ); */
+/*   } */
+
+/*   function setUp() { */
+/*     // setUp is called before each test. Just set these things once. */
+/*     if (!isset($this->orderPrefix)) { */
+/*       $this->orderPrefix = "qptest" . time() . 't'; */
+/*       $this->orderNum = 1; */
+/*       // Save creds before DrupalWebTestCase::setUp clears the variables. */
+/*       $this->quickpay_merchant = variable_get('quickpay_merchant', NULL); */
+/*       $this->quickpay_secret = variable_get('quickpay_secret', NULL); */
+/*     } */
+/*     parent::setUp(); */
+/*     variable_set('quickpay_merchant', $this->quickpay_merchant); */
+/*     variable_set('quickpay_secret', $this->quickpay_secret); */
+/*     variable_set('quickpay_order_prefix', $this->orderPrefix); */
+/*     variable_set('quickpay_debug', TRUE); */
+/*   } */
+
+/*   function tearDown() { */
+/*     parent::tearDown(); */
+/*   } */
+
+/*   function assertState($txn, $state) { */
+/*     $code = array_search($state, _quickpay_state_codes()); */
+/*     $this->assertTrue($code !== FALSE, 'State is not unknown'); */
+/*     if ($code) { */
+/*       $this->assertTrue($txn['state'] == $code, 'Transaction state is \'' . */
+/*                         $state . '\''); */
+/*     } */
+/*   } */
+/*   function testCore() { */
+/*     $carddata = array( */
+/*       'number' => '4571222233334444', */
+/*       'exp_month' => '3', */
+/*       'exp_year' => '19', */
+/*       'cvd' => '123', */
+/*     ); */
+/*     $txn = quickpay_authorize($carddata, $this->orderNum++, 100, 'DKK'); */
+
+/*     $this->assertTrue($txn !== FALSE, 'Simple authorization'); */
+/*     $this->assertTrue(quickpay_successful($txn), 'Was successful'); */
+/*     $this->assertState($txn, 'Authorized'); */
+/*     $txn = quickpay_cancel($txn); */
+/*     $this->assertTrue(quickpay_successful($txn), 'Reversing as successful'); */
+/*     $this->assertState($txn, 'Cancelled'); */
+
+/*     // check that reusing orders doesn't work */
+/*   } */
+
+/*   function testCaptureCredit() { */
+/*     $carddata = array( */
+/*       'number' => '4571222233334444', */
+/*       'exp_month' => '3', */
+/*       'exp_year' => '19', */
+/*       'cvd' => '123', */
+/*     ); */
+/*     $txn = quickpay_authorize($carddata, $this->orderNum++, 100, 'DKK'); */
+
+/*     $this->assertTrue($txn !== FALSE, 'Simple authorization'); */
+/*     $this->assertTrue(quickpay_successful($txn), 'Was successful'); */
+/*     $this->assertState($txn, 'Authorized'); */
+/*     $txn = quickpay_capture($txn, 100); */
+/*     $this->assertTrue(quickpay_successful($txn), 'Was successful'); */
+/*     $this->assertState($txn, 'Captured'); */
+/*     $txn = quickpay_refund($txn, 100); */
+/*     $this->assertTrue(quickpay_successful($txn), 'Was successful'); */
+/*     $this->assertState($txn, 'Refunded'); */
+
+/*     $carddata = array( */
+/*       'number' => '4571222233334444', */
+/*       'exp_month' => '3', */
+/*       'exp_year' => '19', */
+/*       'cvd' => '123', */
+/*     ); */
+/*     $txn = quickpay_authorize($carddata, $this->orderNum++, 100, */
+/*                               'DKK', TRUE); */
+
+/*     $this->assertTrue($txn !== FALSE, 'Autocapture authorization'); */
+/*     $this->assertTrue(quickpay_successful($txn), 'Was successful'); */
+/*     $this->assertState($txn, 'Captured'); */
+
+/*   } */
+/*   function testSubscribe() { */
+/*     $carddata = array( */
+/*       'number' => '4571222233334444', */
+/*       'exp_month' => '3', */
+/*       'exp_year' => '19', */
+/*       'cvd' => '123', */
+/*     ); */
+/*     $txn = quickpay_subscribe($carddata, $this->orderNum++, */
+/*                               'Subscriptiontest'); */
+
+/*     $this->assertTrue($txn !== FALSE, 'Subscription authorization'); */
+/*     $this->assertTrue(quickpay_successful($txn), 'Was successful'); */
+/*     $this->assertState($txn, 'Subscribed'); */
+/*     $txn = quickpay_recurring($txn, $this->orderNum++, 100, 'DKK'); */
+/*     $this->assertTrue(quickpay_successful($txn), 'Recurring was successful'); */
+/*     $this->assertState($txn, 'Authorized'); */
+/*     $txn = quickpay_capture($txn, 100); */
+/*     $this->assertTrue(quickpay_successful($txn), 'Capture was successful'); */
+/*     $this->assertState($txn, 'Captured'); */
+
+/*   } */
+
+/*   function testCaptureLess() { */
+/*     $carddata = array( */
+/*       'number' => '4571222233334444', */
+/*       'exp_month' => '3', */
+/*       'exp_year' => '19', */
+/*       'cvd' => '123', */
+/*     ); */
+/*     $txn = quickpay_authorize($carddata, $this->orderNum++, 100, 'DKK'); */
+
+/*     $this->assertTrue($txn !== FALSE, 'Simple authorization'); */
+/*     $this->assertTrue(quickpay_successful($txn), 'Was successful'); */
+/*     $this->assertState($txn, 'Authorized'); */
+/*     $txn = quickpay_capture($txn, 50); */
+/*     $this->assertTrue(quickpay_successful($txn), 'Was successful'); */
+/*     $this->assertState($txn, 'Captured'); */
+/*   } */
+/*   /\* */
+/*    // In test, it's just approved? */
+/*     function testCaptureMore() { */
+/*     $txn = quickpay_authorize(array('number' => '4571222233334444', */
+/*                                     'exp_month' => '3', */
+/*                                     'exp_year' => '9', */
+/*                                     'cvd' => '123'), $this->orderNum++, 100); */
+
+/*     $this->assertTrue($txn !== false, 'Simple authorization'); */
+/*     $this->assertTrue(quickpay_successful($txn), 'Was successful'); */
+/*     $this->assertState($txn, 'Authorized'); */
+/*     $txn = quickpay_capture($txn, 200); */
+/*     dpm($txn); */
+/*     $this->assertFalse(quickpay_successful($txn), 'Wasn\'t successful'); */
+/*     $this->assertState($txn, 'Capture failed'); */
+/*   } */
+/*   *\/ */
+/* } */

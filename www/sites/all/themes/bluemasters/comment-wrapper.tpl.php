@@ -39,7 +39,7 @@
 <div id="comments" class="<?php print $classes; ?>"<?php print $attributes; ?>>
   <?php if ($content['comments'] && $node->type != 'forum'): ?>
     <?php print render($title_prefix); ?>
-    <h2 class="title"><?php print $node->comment_count . ' comments'; ?></h2>
+    <h2 class="title"><?php print $node->comment_count . t(' comments'); ?></h2>
     <?php print render($title_suffix); ?>
   <?php endif; ?>
 

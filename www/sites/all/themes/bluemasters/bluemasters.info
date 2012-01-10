@@ -27,9 +27,9 @@ stylesheets[all][] = style.css
 
 version = "7.1.1"
 project = "bluemasters"
-; Information added by drupal.org packaging script on 2011-07-20
-version = "7.x-1.2"
+; Information added by drupal.org packaging script on 2011-11-15
+version = "7.x-1.3"
 core = "7.x"
 project = "bluemasters"
-datestamp = "1311192414"
+datestamp = "1321351835"
 

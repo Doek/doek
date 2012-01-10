@@ -1,9 +1,10 @@
 name = CorporateClean
-description = CorporateClean
+description = CorporateClean: A flexible, recolorable theme with many regions.
 version = VERSION
 core = 7.x
 
 stylesheets[all][] = style.css
+stylesheets[all][] = color/colors.css
 
 regions[search_area] = Search area
 regions[highlighted] = Highlighted
@@ -25,9 +26,9 @@ settings[slideshow_effect]='scrollHorz'
 settings[slideshow_effect_time]='10'
 
 project = "corporateclean"
-; Information added by drupal.org packaging script on 2011-07-28
-version = "7.x-1.1"
+; Information added by drupal.org packaging script on 2011-12-14
+version = "7.x-1.3"
 core = "7.x"
 project = "corporateclean"
-datestamp = "1311888415"
+datestamp = "1323903339"
 

@@ -57,6 +57,7 @@ function domain_content_list() {
     array('data' => t('Id'), 'field' => 'domain_id'),
     array('data' => t('Site content'), 'field' => 'sitename'),
     array('data' => t('Content count')),
+    array('data' => t('Unpublished')),
     array('data' => t('Site'), 'field' => 'subdomain'),
   );
   // Set up the base query.
@@ -85,6 +86,7 @@ function domain_content_list() {
       $domain['domain_id'],
       l(t('@sitename content', array('@sitename' => $domain['sitename'])), 'admin/domain/content/'. $domain['domain_id']),
       number_format((int) db_query("SELECT COUNT(nid) FROM {domain_access} WHERE gid = :gid AND realm = :realm", array(':gid' => $domain['domain_id'], ':realm' => 'domain_id'))->fetchField()),
+      number_format((int) db_query("SELECT COUNT(n.nid) FROM {node} n INNER JOIN {domain_access} da ON n.nid = da.nid WHERE da.gid = :gid AND da.realm = :realm AND n.status = 0", array(':gid' => $domain['domain_id'], ':realm' => 'domain_id'))->fetchField()),
       l(t('view site'), $path),
     );
   }
@@ -94,6 +96,7 @@ function domain_content_list() {
     '-',
     l(t('Content assigned to all affiliates'), 'admin/domain/content/all'),
     number_format((int) db_query("SELECT COUNT(nid) FROM {domain_access} WHERE gid = :gid AND realm = :realm", array(':gid' => 0, ':realm' => 'domain_site'))->fetchField()),
+    number_format((int) db_query("SELECT COUNT(n.nid) FROM {node} n INNER JOIN {domain_access} da ON n.nid = da.nid WHERE da.gid = :gid AND da.realm = :realm AND n.status = 0", array(':gid' => 0, ':realm' => 'domain_site'))->fetchField()),
     '',
   );
   array_unshift($rows, $all);
@@ -101,7 +104,7 @@ function domain_content_list() {
   // Build result table for UI
   $build = array();
   if (!empty($rows)) {
-    $output = '<p>'. t('The table below shows all the affiliates sites whose content you may edit. Click on the site name link to see all content assigned to that affiliate.') .'</p>';
+    $output = '<p>' . t('The table below shows all the affiliates sites whose content you may edit. Click on the site name link to see all content assigned to that affiliate. Note that not all users may view unpublished content.') . '</p>';
     $build['header'] = array(
       '#markup' => $output,
     );
@@ -255,22 +258,39 @@ function domain_content_form() {
   node_build_filter_query($query);
 
   if (!user_access('bypass node access')) {
+    // If the user can view unpublished nodes on assigned domains, then we can
+    // continue here.
+    if (user_access('view unpublished domain content')) {
+      // Do nothing.
+    }
     // If the user is able to view their own unpublished nodes, allow them
-    // to see these in addition to published nodes. Check that they actually
-    // have some unpublished nodes to view before adding the condition.
-    if (user_access('view own unpublished content') && $own_unpublished = db_query('SELECT nid FROM {node} WHERE uid = :uid AND status = :status', array(':uid' => $GLOBALS['user']->uid, ':status' => 0))->fetchCol()) {
+    // to see these in addition to published nodes.
+    elseif (user_access('view own unpublished content')) {
+      $subselect = db_select('node', 'node')
+        ->fields('node', array('nid'))
+        ->condition('node.uid', $GLOBALS['user']->uid)
+        ->condition('node.status', 0);
       $query->condition(db_or()
         ->condition('n.status', 1)
-        ->condition('n.nid', $own_unpublished, 'IN')
+        ->condition('n.nid', $subselect, 'IN')
       );
     }
+    // If not, restrict the query to published nodes.
     else {
-      // If not, restrict the query to published nodes.
       $query->condition('n.status', 1);
     }
   }
-  // Restrict the query to the active domain.
-  domain_alter_node_query($query, FALSE);
+
+  // Write the proper query.
+  $arg = arg(3);
+  // If 'all', only show content assigned to all affiliates.
+  if ($arg == 'all') {
+    domain_content_alter_node_query($query, TRUE, FALSE);
+  }
+  else {
+    // Restrict the query to the active domain.
+    domain_content_alter_node_query($query, FALSE);
+  }
 
   $nids = $query
     ->fields('n',array('nid'))
@@ -429,5 +449,43 @@ function domain_content_filter_operations(&$operations) {
     unset($operations['demote']);
     unset($operations['sticky']);
     unset($operations['unsticky']);
+  }
+}
+
+/**
+ * Abstraction to allow query alters outside of node access.
+ *
+ * @param $query
+ *   A dynamic node query.
+ * @param $all_affiliates
+ *   Boolean value indicating whether to grant the 'domain_site' grant.
+ * @param $current_domain
+ *   Boolean value indicating whether to grant the 'domain_id' grant.
+ */
+function domain_content_alter_node_query(QueryAlterableInterface $query, $all_affiliates = TRUE, $current_domain = TRUE) {
+  $_domain = domain_get_domain();
+  $domain_id = (int) $_domain['domain_id'];
+  $tables = $query->getTables();
+  foreach ($tables as $nalias => $tableinfo) {
+    $table = $tableinfo['table'];
+    if (!($table instanceof SelectQueryInterface) && $table == 'node') {
+      $access_alias = $query->join('domain_access', 'da_admin', "da_admin.nid = {$nalias}.nid");
+      $or = db_or();
+      if ($all_affiliates) {
+        $or->condition(db_and()
+          ->condition("{$access_alias}.gid", 0)
+          ->condition("{$access_alias}.realm", 'domain_site')
+        );
+      }
+      if ($current_domain) {
+        $or->condition(db_and()
+          ->condition("{$access_alias}.gid", $domain_id)
+          ->condition("{$access_alias}.realm", 'domain_id')
+        );
+      }
+      $query->condition($or);
+      // Node module will not have run, so add the distinct.
+      $query->distinct();
+    }
   }
 }

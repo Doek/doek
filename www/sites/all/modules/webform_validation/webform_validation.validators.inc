@@ -556,6 +556,7 @@ function webform_validation_get_validator_info($validator_key) {
  * Handle translatable error messages, if available
  */
 function _webform_validation_i18n_error_message($rule) {
+  $rule['error_message'] = filter_xss($rule['error_message']);
   if (module_exists('i18nstrings')) {
     return i18nstrings('webform_validation:error_message:' . $rule['ruleid'] . ':message', $rule['error_message']);
   }
