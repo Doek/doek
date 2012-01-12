@@ -1,0 +1,31 @@
+; $Id: tetris.info,v 1.6 2011/01/29 06:58:49 skinhat Exp $
+
+name = "Tetris"
+description = "Tetris game for drupal"
+version = "$Name: DRUPAL-7--1-8 $"
+core = 7.x
+package = "Games"
+
+; Information added by drupal.org packaging script on 2007-03-04
+version = "7.x-1.0"
+project = "tetris"
+
+
+
+
+
+files[] = tetris.module
+
+; Information added by drupal.org packaging script on 2009-03-03
+version = "7.x-1.6"
+core = "7.x"
+project = "tetris"
+datestamp = "1236080464"
+
+
+; Information added by drupal.org packaging script on January 1, 1970 - 00:00
+version = "7.x-1.8"
+core = "7.x"
+project = "tetris"
+datestamp = "1297455440"
+
