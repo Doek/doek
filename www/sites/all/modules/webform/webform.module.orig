@@ -3325,31 +3325,6 @@ function webform_component_options($include_disabled = FALSE) {
 }
 
 /**
- * Retrieves a list of all component instances.
- *
- * @return array
- *   array of component instance definitions as defined in {webform_components}
- *   each cinstances is keyed by a pseuod primary key "$nid:$cid".
- */
-function webform_component_instances() {
-  static $instances;
-
-  // Build the static.
-  if (!isset($instances)) {
-    $query = db_select('webform_component', 'wc')
-              ->fields('wc')
-              ->execute();
-    while ($assoc = $query->fetchAssoc()) {
-      $key = "{$assoc['nid']}-{$assoc['cid']}";
-      $assoc['extra'] = unserialize($assoc['extra']);
-      $instances[$key] = $assoc;
-    }
-  }
-  return $instances;
-}
-
-
-/**
  * Load a component file into memory.
  *
  * @param $component_type

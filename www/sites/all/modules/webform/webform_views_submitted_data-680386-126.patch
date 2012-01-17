@@ -1,0 +1,411 @@
+diff --git a/views/webform.views.inc b/views/webform.views.inc
+index 189de18..e91f20f 100644
+--- a/views/webform.views.inc
++++ b/views/webform.views.inc
+@@ -140,6 +140,68 @@ function webform_views_data() {
+     ),
+   );
+ 
++  // Relation to webform data.
++  $data['webform_submissions']['data'] = array(
++    'title' => t('Data'),
++    'help' => t('Relates to a webform submission data'),
++    'real field' => 'sid',
++    'relationship' => array(
++      'handler' => 'webform_handler_relationship_submission_data',
++      'base' => 'webform_submitted_data',
++      'base field' => 'sid',
++      'label' => t('Submission Data'),
++    ),
++  );
++
++  // Webform submission general data.
++  $data['webform_submitted_data']['table']['group'] = t('Webform submission data');
++  $data['webform_submitted_data']['data'] = array(
++    'table' => 'webform_submitted_data',
++    'title' => t('Data field (raw)'),
++    'help' => t('The submitted data value as raw output string.'),
++    'real field' => 'data',
++    'argument' => array(
++      'handler' => 'views_handler_argument_string',
++    ),
++    'field' => array(
++      'handler' => 'views_handler_field_xss',
++    ),
++    'filter' => array(
++      'handler' => 'views_handler_filter_string',
++    ),
++    'sort' => array(
++      'handler' => 'views_handler_sort',
++    ),
++  );
++  // For each component type, we implement a custom field.
++  $data['webform_submitted_data']['data_formatted'] = array(
++    'title' => t('Data field (formatted)'),
++    'help' => t('The submitted data in component specific format.'),
++    'real field' => 'data',
++    'field' => array(
++      'handler' => 'webform_handler_field_submission_data',
++    ),
++  );
++
++  // For each component type, we implement a custom field.
++  $data['webform_submitted_data']['no'] = array(
++    'title' => t('Delta'),
++    'help' => t('The delta value of the submitted data in a multi value component.'),
++    'real field' => 'no',
++    'argument' => array(
++      'handler' => 'views_handler_argument_numeric',
++    ),
++    'field' => array(
++      'handler' => 'views_handler_field_numeric',
++    ),
++    'filter' => array(
++      'handler' => 'views_handler_filter_numeric',
++    ),
++    'sort' => array(
++      'handler' => 'views_handler_sort',
++    ),
++  );
++
+   return $data;
+ }
+ 
+@@ -233,6 +295,10 @@ function webform_views_handlers() {
+         'parent' => 'views_handler_field',
+         'file' => 'webform_handler_field_submission_link.inc',
+       ),
++      'webform_handler_field_submission_data' => array(
++        'parent' => 'views_handler_field',
++        'file' => 'webform_handler_field_submission_data.inc',
++      ),
+       'webform_handler_field_submission_count' => array(
+         'parent' => 'views_handler_field',
+         'file' => 'webform_handler_field_submission_count.inc',
+@@ -255,6 +321,10 @@ function webform_views_handlers() {
+         'parent' => 'views_handler_filter_in_operator',
+         'file' => 'webform_handler_filter_is_draft.inc',
+       ),
++      'webform_handler_relationship_submission_data' => array(
++        'parent' => 'views_handler_relationship',
++        'file' => 'webform_handler_relationship_submission_data.inc',
++      ),
+     ),
+   );
+ }
+\ No newline at end of file
+diff --git a/views/webform_handler_field_submission_data.inc b/views/webform_handler_field_submission_data.inc
+new file mode 100644
+index 0000000..cf86523
+--- /dev/null
++++ b/views/webform_handler_field_submission_data.inc
+@@ -0,0 +1,98 @@
++<?php
++
++/**
++ * @file
++ * Views handler to display data value of a webform submission component.
++ */
++
++/**
++ * Field handler to show if submission is draft or not.
++ *
++ * @ingroup views_field_handlers
++ */
++class webform_handler_field_submission_data extends views_handler_field {
++
++  protected $component_instances;
++  protected $component_type;
++
++
++  /**
++   * Field constructor to provide default data.
++   */
++  function construct() {
++    parent::construct();
++    $this->additional_fields['nid'] = 'nid';
++    $this->additional_fields['cid'] = 'cid';
++    $this->additional_fields['no'] = 'no';
++  }
++
++  /**
++   * Definition and defaults for the option form/values.
++   */
++  function option_definition() {
++    $options = parent::option_definition();
++    $options['format'] = array('default' => 'html');
++    $options['display_label'] = array('default' => FALSE);
++    return $options;
++  }
++
++
++  function options_form(&$form, &$form_state) {
++    parent::options_form($form, $form_state);
++
++    // Provide the selection for the display format.
++    $options['format'] = array(
++      '#type' => 'select',
++      '#title' => t('Display format'),
++      '#options' => array(
++        'html' => 'html',
++        'plain' => 'plain',
++        '#required' => TRUE,
++      ),
++      '#default_value' => $this->options['format'],
++    );
++
++    // Title display settings.
++    $form['display_label'] = array(
++      '#type' => 'checkbox',
++      '#title' => t('Display label'),
++      '#default_value' => $this->options['display_label'],
++      '#description' => t('Show the label of the component as it is provied by webform.'),
++    );
++  }
++
++  /**
++   * Pre render the query, to get the
++   */
++  function pre_render($values) {
++    $this->component_instances = webform_component_instances();
++    // @TODO: maybe we add a multi value pre query here?
++  }
++
++  /**
++   * Render the field.
++   *
++   * @param $row
++   *   The row retrieved
++   */
++  function render($row) {
++    $value = $this->get_value($row);
++    if (isset($value)) {
++      $nid = $this->get_value($row, 'nid');
++      $cid = $this->get_value($row, 'cid');
++      // @TODO: use a delta = 0 on every item?
++      $delta = $this->get_value($row, 'no');
++      $component = $this->component_instances["$nid-$cid"];
++
++      // Remove display label.
++      if (empty($this->options['display_label'])) {
++        $component['name'] = '';
++      }
++
++      $format = $this->options['format'];
++      $render = webform_component_invoke($component['type'], 'display', $component, array($delta => $value), $format);
++      // @TODO: add a theme layer?
++      return render($render);
++    }
++  }
++}
+\ No newline at end of file
+diff --git a/views/webform_handler_relationship_submission_data.inc b/views/webform_handler_relationship_submission_data.inc
+new file mode 100644
+index 0000000..608d535
+--- /dev/null
++++ b/views/webform_handler_relationship_submission_data.inc
+@@ -0,0 +1,154 @@
++<?php
++/**
++ * @file
++ * Views' relationship handlers.
++ */
++
++class webform_handler_relationship_submission_data extends views_handler_relationship  {
++
++  protected $component_instances;
++
++  function option_definition() {
++    $options = parent::option_definition();
++    $options['component_type'] = array('default' => NULL);
++    $options['components'] = array('default' => array());
++    return $options;
++  }
++
++  /**
++   * Extends the relationship options form.
++   */
++  function options_form(&$form, &$form_state) {
++    parent::options_form($form, $form_state);
++
++    $component_types = $this->get_webform_component_types();
++
++    $form['component_type'] = array(
++      '#title' => t('Component type'),
++      '#type' => 'select',
++      '#description' => t('Select component type for this relationship'),
++      '#required' => TRUE,
++      '#default_value' => $this->options['component_type'],
++      '#options' => $component_types,
++    );
++
++    ctools_include('dependent');
++    foreach ($component_types as $type => $label) {
++      $id = drupal_html_id('options-components-'. $type);
++
++      $options = $this->get_webform_component_instances($type);
++      // If there are no isntances, we remove the component from selection.
++      if (empty($options)) {
++        unset($form['component_type']['#options'][$type]);
++        if ($form['component_type']['#default_value'] == $type) {
++          $form['component_type']['#default_value'] = NULL;
++        }
++      }
++      else {
++        $form['components'][$type] = array(
++          '#title' => t('Components: %label', array('%label' => $label)),
++          '#prefix' => '<div id="'. $id. '">',
++          '#suffix' => '</div>',
++          '#type' => 'checkboxes',
++          '#options' => $options,
++          '#default_value' => $this->options['components'],
++          '#dependency' => array('edit-options-component-type' => array($type)),
++          '#description' => t('Choose which components you wish to relate. On no selection, all components are joined.'),
++        );
++      }
++    }
++
++    // @TODO: add delta selection.
++  }
++
++  /**
++   * Retrieve a option list of defined component types.
++   *
++   * @return array
++   *   array of componen types (key: type, value: label)
++   */
++  function get_webform_component_types() {
++    $component_types = webform_components();
++    foreach ($component_types as $key => $component) {
++      $return[$key] = check_plain($component['label']);
++    }
++    return $return;
++  }
++
++  /**
++   * Retrieve a list of defined components for the given component type.
++   *
++   * The function builds the $this->component_instances variable, with the full
++   * array data for a given instance. It outputs a flat array for usage in
++   * #options.
++   *
++   * @TODO: cids are not really exportable
++   *
++   * @return array
++   *  array of component instances keyed by primary key "nid:cid" and with a
++   *  label as value.
++   */
++  function get_webform_component_instances($component_type = NULL) {
++
++    if (!isset($this->component_instances)) {
++      $components = webform_component_instances();
++      foreach ($components as $key => $component) {
++        $this->component_instances[$key] = $component;
++      }
++    }
++
++    $components = array();
++    foreach ($this->component_instances as $data) {
++      if (!isset($component_type) || $data['type'] == $component_type) {
++        // Component primary key is (nid, cid).
++        $components["{$data['nid']}-{$data['cid']}"] = check_plain("Webform {$data['nid']}: {$data['name']} ({$data['form_key']})");
++      }
++    }
++    return $components;
++  }
++
++  /**
++   * Retrieves the selected components of the selected component type.
++   */
++  function get_selected_component_instances() {
++    // Get instances for the selected component type only.
++    if (!empty($this->options['component_type'])) {
++      $type = $this->options['component_type'];
++      // Fall back to all if there was no specific instance selected.
++      if (!isset($this->options['components'][$type]) || count(array_filter($this->options['components'][$type])) == 0) {
++        $components = array_keys($this->get_webform_component_instances($this->options['component_type']));
++      }
++      else {
++        $components = array_filter($this->options['components'][$type]);
++      }
++    }
++    // No components.
++    else {
++      $components = array();
++    }
++    return $components;
++  }
++
++
++  /**
++   * Called to implement a relationship in a query.
++   *
++   * It respects the given component ids, provided via options form.
++   */
++  function query() {
++    $components = $this->get_selected_component_instances();
++
++    // Add the extra to the definition to filter on component ids.
++    $this->definition['extra'] = array(
++      array(
++        'table' => NULL,
++        'field' => "CONCAT(%alias.nid, '-', %alias.cid)",
++        'value' => $components,
++      ),
++    );
++
++    // The rest of building the join is performed by the parent.
++    parent::query();
++  }
++
++}
+diff --git a/webform.info b/webform.info
+index 149b887..0b1e2d2 100644
+--- a/webform.info
++++ b/webform.info
+@@ -14,7 +14,9 @@ files[] = views/webform_handler_field_node_link_edit.inc
+ files[] = views/webform_handler_field_node_link_results.inc
+ files[] = views/webform_handler_field_submission_count.inc
+ files[] = views/webform_handler_field_submission_link.inc
++files[] = views/webform_handler_field_submission_data.inc
+ files[] = views/webform_handler_filter_is_draft.inc
++files[] = views/webform_handler_relationship_submission_data.inc
+ files[] = views/webform.views.inc
+ 
+ files[] = tests/components.test
+diff --git a/webform.module b/webform.module
+index ea75f0a..db3f9f0 100644
+--- a/webform.module
++++ b/webform.module
+@@ -3415,6 +3415,31 @@ function webform_component_options($include_disabled = FALSE) {
+ }
+ 
+ /**
++ * Retrieves a list of all component instances.
++ *
++ * @return array
++ *   array of component instance definitions as defined in {webform_components}
++ *   each cinstances is keyed by a pseuod primary key "$nid:$cid".
++ */
++function webform_component_instances() {
++  static $instances;
++
++  // Build the static.
++  if (!isset($instances)) {
++    $query = db_select('webform_component', 'wc')
++              ->fields('wc')
++              ->execute();
++    while ($assoc = $query->fetchAssoc()) {
++      $key = "{$assoc['nid']}-{$assoc['cid']}";
++      $assoc['extra'] = unserialize($assoc['extra']);
++      $instances[$key] = $assoc;
++    }
++  }
++  return $instances;
++}
++
++
++/**
+  * Load a component file into memory.
+  *
+  * @param $component_type
