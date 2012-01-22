@@ -199,6 +199,9 @@ function select_or_other_element_process($element, &$form_state) {
     // Also add in a custom class for each.
     $element[$sub_element]['#attributes']['class'][] = 'select-or-other-' . $sub_element;
   }
+  if (!empty($element['#maxlength'])) {
+    $element['other']['#maxlength'] = $element['#maxlength'];
+  }
 
   return $element;
 }
@@ -246,7 +249,6 @@ function select_or_other_element_validate($element, &$form_state) {
  */
 function theme_select_or_other_none($variables) {
   $instance = $variables['instance'];
-  $option = $variables['option'];
 
   $output = '';
   switch ($instance['widget']['type']) {
@@ -279,12 +281,12 @@ function theme_select_or_other_none($variables) {
  *   Boolean indicating if the key is set.
  */
 function select_or_other_multi_array_key_exists($needle, $haystack) {
-  foreach ($haystack as $key => $value) {
-    if ($needle === $key) {
-      return TRUE;
-    }
-    if (is_array($value)) {
-      if (select_or_other_multi_array_key_exists($needle, $value)) {
+  if (array_key_exists($needle, $haystack)) {
+    return TRUE;
+  }
+  else {
+    foreach ($haystack as $key => $value) {
+      if (is_array($value) && select_or_other_multi_array_key_exists($needle, $value)) {
         return TRUE;
       }
     }

@@ -72,7 +72,7 @@ function select_or_other_field_widget_form_prepare_options($field, $instance, $h
 
   $list = array_map('trim', $list);
   $list = array_filter($list, 'strlen');
-  foreach ($list as $opt) {
+  foreach ($list as $key => $opt) {
     // Sanitize the user input with a permissive filter.
     $opt = filter_xss($opt);
     if (strpos($opt, '|') !== FALSE) {
@@ -80,7 +80,7 @@ function select_or_other_field_widget_form_prepare_options($field, $instance, $h
       $options[$key] = (isset($value) && $value !== '') ? html_entity_decode($value) : $key;
     }
     else {
-      $options[$opt] = html_entity_decode($opt);
+      $options[$key] = html_entity_decode($opt);
     }
   }
 
@@ -92,7 +92,9 @@ function select_or_other_field_widget_form_prepare_options($field, $instance, $h
   // Multiple select.
   if ($multiple) {
     // Add a 'none' option for non-required fields.
-    $options = array('' => theme('select_or_other_none', array('instance' => $instance))) + $options;
+    if (!$required) {
+      $options = array('' => theme('select_or_other_none', array('instance' => $instance))) + $options;
+    }
   }
   // Single select.
   else {
@@ -135,6 +137,9 @@ function select_or_other_field_widget_form(&$form, &$form_state, $field, $instan
     '#element_validate' => array('select_or_other_field_widget_validate'),
     '#field_widget' => $instance['widget']['type'],
   );
+  if (!empty($field['settings']['max_length'])) {
+    $element['#maxlength'] = $field['settings']['max_length'];
+  }
 
   // Set select type's.
   switch ($instance['widget']['type']) {
@@ -257,10 +262,10 @@ function select_or_other_field_widget_settings_validate($element, &$form_state, 
 
 /**
  * Element validate callback for a Select (or other) field widget.
- *
- * @todo: does this function work?
  */
 function select_or_other_field_widget_validate($element, &$form_state) {
+  $field_info = field_info_field($element['#field_name']);
+
   $other_selected = FALSE;
 
   if (is_array($element['select']['#value']) && in_array('select_or_other', $element['select']['#value'])) {
@@ -293,6 +298,18 @@ function select_or_other_field_widget_validate($element, &$form_state) {
       $delta = 0;
       $values = array();
       foreach ((array)$value as $v) {
+        if ($field_info['type'] == 'number_integer' && !preg_match('/^-?\d+$/', $v)) {
+          form_error($element, t('Value must be a valid integer.'));
+          break;
+        }
+        if (($field_info['type'] == 'number_float' || $field_info['type'] == 'number_decimal') && !is_numeric($v)) {
+          form_error($element, t('Value must be a valid integer or decimal.'));
+          break;
+        }
+        elseif ($field_info['type'] == 'text' && drupal_strlen($v) > 255) {
+          form_error($element, t('Value must be a string at most 255 characters long.'));
+          break;
+        }
         $values[$delta++]['value'] = $v;
       }
       $value = $values;
@@ -305,9 +322,7 @@ function select_or_other_field_widget_validate($element, &$form_state) {
   }
 
   // Add values to available options is configured to do so.
-  $field_name = &$element['#parents'][0];
-  $language = &$element['#parents'][1];
-  $instance = &$form_state['field'][$field_name][$language]['instance'];
+  $instance = field_widget_instance($element, $form_state);
   if ($instance['widget']['settings']['other_unknown_defaults'] == 'available') {
     if (
       $element['select']['#value'] == 'select_or_other' &&
@@ -323,5 +338,56 @@ function select_or_other_field_widget_validate($element, &$form_state) {
     }
   }
 
+  //return $element;
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function select_or_other_field_formatter_info() {
+  return array(
+    'select_or_other_formatter' => array(
+      'label' => t('Select or other'),
+      'field types' => array('text', 'number_integer', 'number_decimal', 'number_float'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function select_or_other_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  $settings = $display['settings'];
+
+  $field_options = explode("\n", $instance['widget']['settings']['available_options']);
+  $pos = strpos($instance['widget']['settings']['available_options'], '|');
+
+  if ($pos !== FALSE) {
+    // There are keys.
+    foreach ($field_options as $field_item) {
+      $exploded = explode('|', $field_item);
+      $temp_options[$exploded[0]] = $exploded[1];
+    }
+    $field_options = $temp_options;
+  }
+
+  foreach ($items as $delta => $item) {
+    if (array_key_exists($item['value'], $field_options)) {
+      $element[$delta] = array('#markup' => $field_options[$item['value']]);
+    }
+    else {
+      $element[$delta] = array('#markup' => $item['value']);
+    }
+  }
+
   return $element;
+}
+
+
+/**
+ * Implements hook_field_widget_error().
+ */
+function select_or_other_field_widget_error($element, $error, $form, &$form_state) {
+  form_error($element, $error['message']);
 }
