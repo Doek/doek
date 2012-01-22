@@ -1,0 +1,13 @@
+name = No Payment Payment Method
+description = No Payment Required Payment method for testing.
+package = Commerce
+dependencies[] = commerce
+dependencies[] = commerce_payment
+core = 7.x
+
+; Information added by drupal.org packaging script on 2011-09-22
+version = "7.x-1.0-beta1"
+core = "7.x"
+project = "commerce_no_payment"
+datestamp = "1316694722"
+
