@@ -1,4 +1,3 @@
-
 <div class="node_front">
 <?php
 
