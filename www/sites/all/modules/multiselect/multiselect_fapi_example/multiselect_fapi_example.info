@@ -1,0 +1,14 @@
+; $Id: multiselect_fapi_example.info,v 1.1.2.1 2010/12/26 04:55:17 attheshow Exp $
+name = Multiselect FAPI Example
+description = Example usage of the Multiselect module via Form API calls.
+package = Example modules
+core = "7.x"
+version = VERSION
+
+files[] = multiselect_fapi_example.module
+; Information added by drupal.org packaging script on 2011-01-05
+version = "7.x-1.8"
+core = "7.x"
+project = "multiselect"
+datestamp = "1294189866"
+
