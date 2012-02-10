@@ -12,13 +12,13 @@
  * See README.txt for more details.
  *
  * Available variables:
- * - $build: Array as expected by render().
+ * - $build: Array as expected by render()
+ * - $build['#node']: The $node object
  * - $title: Node title
- * - $language: Language object
- * - $view_mode: Active view mode.
+ * - $language: Language code
+ * - $view_mode: Active view mode
  *
  * @see template_preprocess_simplenews_newsletter_body()
- * @see theme_simplenews_newsletter_body()
  */
 ?>
 <h2><?php print $title; ?></h2>

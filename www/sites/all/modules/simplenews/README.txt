@@ -12,7 +12,13 @@ REQUIREMENTS
 
  * For large mailing lists, cron is required.
  * HTML-format newsletters and/or newsletters with file attachments require the
-   mime mail or HMTL mail module. 
+   mime mail or HMTL mail module.
+ * When sending newsletters on regular cron (cron.php), it is important that
+   the base url (settings.php, variable $base_url) is set correctly or links
+   inside the newsletter will not work. See the Tips (13.) below.
+ * Additionally when using Drush to start cron, it is important to use the
+   argument --uri=http://www.example.com
+
 
 INSTALLATION
 ------------
@@ -98,9 +104,15 @@ INSTALLATION
     change their preferred language. Users with an account on the site will be
     subscribed with the preferred language as set in their account settings.
 
+    The confirmation mails can be translated by enableding the Simplenews
+    variables at:
+      Home > Administration > Configuration > Regional and language > Multilingual settings > Variables
+    Afterwards, the mail subject and body can be entered for every enabled
+    language.
+
 9.  NEWSLETTER THEMING
 
-    You can customize the theming of newsletters. Copy any of the *.tpl.php 
+    You can customize the theming of newsletters. Copy any of the *.tpl.php
     files from the simplenews module directory to your theme directory. Both
     general and by-newsletter theming can be performed.
     Theme newsletter body:
@@ -131,7 +143,6 @@ INSTALLATION
     be displayed or hidden in 'plain text', 'HTML' and 'HTML text alternative'
     format. You find these settings at: 
       Structure > Content types > Manage display > Email
-
 
 10. SEND MAILING LISTS
 
@@ -192,18 +203,23 @@ INSTALLATION
     vulnerable to Cross Site Request Forgeries. Email addresses may be
     (un)subscribed without a notice. Do not use this setting in uncontrolled
     environments (like the internet!).
- 
+
  13. TIPS
     A subscription page is available at: /newsletter/subscriptions
+
+    The Elysia Cron module (http://drupal.org/project/elysia_cron) can be used
+    to start the simplenews cron hook more often than others, so that newsletter
+    are sent faster without decreasing site performance due to long-running cron
+    hooks.
 
     If your unsubscribe URL looks like:
       http://newsletter/confirm/remove/8acd182182615t632
     instead of:
-      http://www.mysite.org/newsletter/confirm/remove/8acd182182615t632
+      http://www.example.com/newsletter/confirm/remove/8acd182182615t632
     You should change the base URL in the settings.php file from
       #  $base_url = 'http://www.example.com';  // NO trailing slash!
     to
-      $base_url = 'http://www.mysite.org';  // NO trailing slash!
+      $base_url = 'http://www.example.com';  // NO trailing slash!
 
 DOCUMENTATION
 -------------
