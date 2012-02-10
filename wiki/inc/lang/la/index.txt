@@ -1,3 +1,0 @@
-====== Forma Situs ======
-
-Haec forma situs ordinata a(b) [[doku>namespaces|namespaces]].
