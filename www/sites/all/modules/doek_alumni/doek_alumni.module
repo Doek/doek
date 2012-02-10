@@ -45,9 +45,6 @@ function doek_payment_import_users_from_file(){
 			user_save($user, $edit);
 			$count++;
 		}
-		else{
-			echo "Missing: $uid <br />";
-		}
         }
         fclose($file);
 	return true;
@@ -128,7 +125,6 @@ function assign_membership_number(){
 			$counter++;
 		}
 	}
-	echo $counter." Users updated";
 
 	return true;
 }
