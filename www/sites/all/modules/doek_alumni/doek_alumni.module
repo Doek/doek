@@ -1,5 +1,61 @@
 <?php
 
+//Put all users who are not students into alumni
+function move_user_to_alumni_role(){
+        $query = db_query("SELECT entity_id id FROM field_data_field_study_degree where field_study_degree_value != 'Bachelor-studerende'");
+
+        foreach($query as $account){
+                $user = user_load($account->id);
+                $key = array_search('Alumni', $user->roles);
+                if($key == FALSE){
+                        $role_name = 'Alumni';
+                        if($role = user_role_load_by_name($role_name)){
+                                user_multiple_role_edit(array($user->uid), 'add_role', $role->rid);
+                        }
+                }
+        }
+        echo "Moved users to Alumni Role";
+        return true;
+}
+
+//Funcktion update user role by payment info
+function update_user_role_by_payment(){
+        $query = db_query("SELECT entity_id id, field_payment__value datevalue FROM field_data_field_payment_");
+
+        //Foreach user with a regisred payment
+        foreach($query as $account){
+                $time = DateTime::createFromFormat('!d/m/y', $account->datevalue)->getTimestamp();
+                $user = user_load($account->id);
+
+                //Check if the user is an active member of Alumni
+                if($key = array_search('Alumni_aktiv', $user->roles)){
+                        echo $user->username." is member of Alumni_aktiv<br />";
+                        //If the payment is more than a year old, we remove the active role
+                        if($time >= time()+60*60*24*365){
+                                $role_name = 'Alumni_aktiv';
+                                if($role = user_role_load_by_name($role_name)){
+                                        echo "\t"." User is removed from alumni_aktiv<br />";
+                                        user_multiple_role_edit(array($user->uid), 'remove_role', $role->rid);
+                                }
+                        }
+                //If the user is not member of Alumni and the payment is less than a year old. We add the new role
+                }else{
+                        echo $user->username." is not member of Alumni_aktiv<br />";
+                        //if the member is 
+                        if($time <= time()+60*60*24*365){
+                                $role_name = 'Alumni_aktiv';
+                                if($role = user_role_load_by_name($role_name)){
+                                        echo "\t"." User is removed from alumni_aktiv<br />";
+                                        user_multiple_role_edit(array($user->uid), 'add_role', $role->rid);
+                                }
+                        }
+                }
+        }
+
+        return true;
+}
+
+
 //Insert Unique ID for a new user
 function doek_alumni_user_insert(&$edit, $account, $category){
         $query = db_query("SELECT max(field_alumnimedlem_value) max FROM field_data_field_alumnimedlem");
@@ -135,8 +191,8 @@ function doek_alumni_cron(){
 	$status = true;
 
 	//$status = assign_membership_number();
-
 	//$status = doek_payment_import_users_from_file();	
+	$status = move_user_to_alumni_role();	
 	
 	return $status;
 }
