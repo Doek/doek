@@ -132,11 +132,11 @@ function assign_membership_number(){
 
 function doek_alumni_cron(){
 
-	$status = false;
+	$status = true;
 
 	//$status = assign_membership_number();
 
-	$status = doek_payment_import_users_from_file();	
+	//$status = doek_payment_import_users_from_file();	
 	
 	return $status;
 }
