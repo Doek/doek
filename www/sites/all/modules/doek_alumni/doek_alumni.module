@@ -58,7 +58,7 @@ function update_user_role_by_payment(){
 
 //Insert Unique ID for a new user
 function doek_alumni_user_insert(&$edit, $account, $category){
-        $query = db_query("SELECT max(field_alumnimedlem_value) max FROM field_data_field_alumnimedlem");
+        $query = db_query("SELECT max(field_alumnimedlem_value) max FROM {field_data_field_alumnimedlem}");
 
         $result = $query->fetchObject();
 
