@@ -1,9 +1,8 @@
-; $Id$
-name = Commmerce QuickPay
-description = Process Commerce payments using QuickPay.
-package = QuickPay payment gateway
+name = Ubercart QuickPay
+description = Enable payments in Ubercart using QuickPay.dk
+dependencies[] = uc_payment
 dependencies[] = quickpay
-dependencies[] = commerce_payment
+package = Ubercart - payment
 core = 7.x
 
 ; Information added by drupal.org packaging script on 2012-05-13
