@@ -28,4 +28,5 @@
   </div>
 
   <?php print render($content['links']) ?>
+  
 </div>

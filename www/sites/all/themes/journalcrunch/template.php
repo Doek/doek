@@ -1,32 +1,50 @@
 <?php
 
 /**
- * Override or insert variables into the page template.
+ * Return a themed breadcrumb trail.
+ *
+ * @param $breadcrumb
+ *   An array containing the breadcrumb links.
+ * @return a string containing the breadcrumb output.
  */
-function journalcrunch_preprocess_page(&$vars) {
-  // Prepare header.
-  $site_fields = array();
-  if (!empty($vars['site_name'])) {
-    $site_fields[] = $vars['site_name'];
+function phptemplate_breadcrumb($breadcrumb) {
+  if (!empty($breadcrumb)) {
+    return '<div class="breadcrumb">'. implode(' › ', $breadcrumb) .'</div>';
   }
-  if (!empty($vars['site_slogan'])) {
-    $site_fields[] = $vars['site_slogan'];
-  }
-  $vars['site_title'] = implode(' ', $site_fields);
-  if (!empty($site_fields)) {
-    $site_fields[0] = '<span>' . $site_fields[0] . '</span>';
-  }
-  $vars['site_html'] = implode(' ', $site_fields);
+}
 
-  // Set a variable for the site name title and logo alt attributes text.
-  $slogan_text = $vars['site_slogan'];
-  $site_name_text = $vars['site_name'];
-  $vars['site_name_and_slogan'] = $site_name_text . ' ' . $slogan_text;
+/**
+ * Returns the rendered local tasks. The default implementation renders
+ * them as tabs.
+ *
+ * @ingroup themeable
+ */
+function phptemplate_menu_local_tasks() {
+  $output = '';
+
+  if ($primary = menu_primary_local_tasks()) {
+    $output .= "<ul class=\"tabs primary\">\n". $primary ."</ul>\n";
+  }
+
+  return $output;
+}
+
+/**
+ * Allow themable wrapping of all comments.
+ */
+function phptemplate_comment_wrapper($content, $type = null) {
+  static $node_type;
+  if (isset($type)) $node_type = $type;
+
+  if (!$content || $node_type == 'forum') {
+    return '<div id="comments">'. $content . '</div>';
+  }
+  else {
+    return '<div id="comments"><h2 class="comments">'. t('Comments') .'</h2>'. $content .'</div>';
+  }
 }
 
 /**
  * Define JournalCrunch variables
  */
 variable_set('isFirstNoStickyNode', false);
-
-?>

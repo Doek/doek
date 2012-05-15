@@ -1,6 +1,6 @@
-body { font: 0.8em/165% "Lucida Grande","Lucida Sans Unicode",Segoe UI,Helvetica,Arial,sans-serif; margin:0; padding:0; color: #7a7a7a; outline:0 none; vertical-align:baseline; background:#1a1a1a; }
+body { font: 0.8em/165% "Lucida Grande","Lucida Sans Unicode",Segoe UI,Helvetica,Arial,sans-serif; margin:0; padding:0; outline:0 none; vertical-align:baseline;  min-width:960px; }
 
-h1, h2, h3, h4, h5, h6 { margin:25px 0 20px 0; line-height:120%; text-shadow: 1px 1px 1px #EAF1EA; color:#1487d4; font-family: Myriad Pro,"Lucida Grande","Lucida Sans Unicode",Segoe UI,Helvetica,Arial,sans-serif; }
+h1, h2, h3, h4, h5, h6 { margin:25px 0 20px 0; line-height:120%; text-shadow: 1px 1px 1px #EAF1EA; font-family: Myriad Pro,"Lucida Grande","Lucida Sans Unicode",Segoe UI,Helvetica,Arial,sans-serif; }
 
 h1 { font-size: 32px; margin:0 0 20px 0; }
 
@@ -12,7 +12,7 @@ h4 { font-size: 110%; }
 
 .front .node h1 { font-size:30px; color:#494d4f; font-weight:normal; }
 
-.front .node h1.front-heading { margin-bottom:0; color:#1487d4; font-weight:bold; }
+.front .node h1.front-heading { margin-bottom:0; font-weight:bold; }
 
 .subtitle { padding:5px 0 15px 0; font-size:18px; color:#494d4f; font-family: Myriad Pro,"Lucida Grande","Lucida Sans Unicode",Segoe UI,Helvetica,Arial,sans-serif; }
 
@@ -21,11 +21,7 @@ h4 { font-size: 110%; }
 
 p { margin:0 0 25px 0; }
 
-a, li a.active { color:#1487d4; text-decoration:none; }
-
-#footer a, #footer li a.active, #footer-bottom a, #footer-bottom li a.active { color:#ffffff; }
-
-#footer a:hover, #footer li a.active:hover, #footer-bottom a:hover, #foote-bottom li a.active:hover { color:#1487d4; }
+a, li a.active { text-decoration:none; }
 
 a img { border:none; outline: none; display:block; overflow:hidden; }
 
@@ -45,35 +41,16 @@ blockquote { background:transparent url('images/blockquote.png') no-repeat top l
 
 .region-content { line-height:155%; } 
 
-#header a { color:#1487d4; }
-
 #site-name { font-size:130%; }
-
-#slogan { color:#d5d5d5; }
 
 /* 
 * Layout 
 */
-#header { clear:both;
-background: #2f2f2f;
-/* IE10 */ 
-background-image: -ms-linear-gradient(top, #2f2f2f 0%, #1b1a1a 100%);
-/* Mozilla Firefox */ 
-background-image: -moz-linear-gradient(top, #2f2f2f 0%, #1b1a1a 100%);
-/* Opera */ 
-background-image: -o-linear-gradient(top, #2f2f2f 0%, #1b1a1a 100%);
-/* Webkit (Safari/Chrome 10) */ 
-background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #2f2f2f), color-stop(1, #1b1a1a));
-/* Webkit (Chrome 11+) */ 
-background-image: -webkit-linear-gradient(top, #2f2f2f 0%, #1b1a1a 100%);
-/* Proposed W3C Markup */ 
-background-image: linear-gradient(top, #2f2f2f 0%, #1b1a1a 100%);
-/* IE6-9 */ 
-filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#2f2f2f', endColorstr='#1b1a1a'); }
+#header { clear:both; }
 
 #header-inside { width: 960px; margin: 0 auto; padding:40px 0; overflow:hidden; } 
 
-#header-menu { clear:both; background: #222222; border-top:1px solid #353535; border-bottom:1px solid #353535; }
+#header-menu { clear:both; }
 
 #header-menu-inside { width: 960px; margin: 0 auto; height:45px; line-height:46px;} 
 
@@ -87,39 +64,9 @@ filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#2f2f2f', end
 
 #logo img { padding:0; margin:0; display:block; overflow:hidden; }
 
-#banner  { clear:both; border-bottom:1px solid #fcfcfc; overflow: hidden;
-background: #efeeee;
-/* IE10 */ 
-background-image: -ms-linear-gradient(top, #efeeee 0%, #dadada 100%);
-/* Mozilla Firefox */ 
-background-image: -moz-linear-gradient(top, #efeeee 0%, #dadada 100%);
-/* Opera */ 
-background-image: -o-linear-gradient(top, #efeeee 0%, #dadada 100%);
-/* Webkit (Safari/Chrome 10) */ 
-background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #efeeee), color-stop(1, #dadada));
-/* Webkit (Chrome 11+) */ 
-background-image: -webkit-linear-gradient(top, #efeeee 0%, #dadada 100%);
-/* Proposed W3C Markup */ 
-background-image: linear-gradient(top, #efeeee 0%, #dadada 100%);
-/* IE6-9 */ 
-filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#efeeee', endColorstr='#dadada'); }
+#banner  { clear:both; border-bottom:1px solid #fcfcfc; overflow: hidden; }
 
-#content { clear:both; overflow:hidden;
-background: #e8e8e8;
-/* IE10 */ 
-background-image: -ms-linear-gradient(top, #e8e8e8 0%, #efefef 100%);
-/* Mozilla Firefox */ 
-background-image: -moz-linear-gradient(top, #e8e8e8 0%, #efefef 100%);
-/* Opera */ 
-background-image: -o-linear-gradient(top, #e8e8e8 0%, #efefef 100%);
-/* Webkit (Safari/Chrome 10) */ 
-background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #e8e8e8), color-stop(1, #efefef));
-/* Webkit (Chrome 11+) */ 
-background-image: -webkit-linear-gradient(top, #e8e8e8 0%, #efefef 100%);
-/* Proposed W3C Markup */ 
-background-image: linear-gradient(top, #e8e8e8 0%, #efefef 100%);
-/* IE6-9 */ 
-filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#e8e8e8', endColorstr='#efefef'); }
+#content { clear:both; overflow:hidden; }
 
 #content-inside { width: 960px; margin: 0 auto; padding:30px 0 60px; overflow:hidden; display:block; } 
 
@@ -133,7 +80,7 @@ filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#e8e8e8', end
 
 .meta-data { font-size:75%; text-transform:uppercase; color:#545454; margin:5px 0 20px 0; display:block; overflow:hidden; clear:both; }
 
-#footer { clear:both; overflow:hidden; background:#181818; padding:20px 0 50px 0;}
+#footer { clear:both; overflow:hidden; padding:20px 0 50px 0;}
 
 #footer-inside { width: 960px; margin: 0 auto; } 
 
@@ -147,22 +94,7 @@ filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#e8e8e8', end
 
 .node.node-teaser { margin-bottom:60px; }
 
-#footer-bottom { clear:both; overflow:hidden; padding:40px 0; border-top:1px solid #353535;
-background: #1a1a1a;
-/* IE10 */ 
-background-image: -ms-linear-gradient(top, #262626 0%, #1a1a1a 100%);
-/* Mozilla Firefox */ 
-background-image: -moz-linear-gradient(top, #262626 0%, #1a1a1a 100%);
-/* Opera */ 
-background-image: -o-linear-gradient(top, #262626 0%, #1a1a1a 100%);
-/* Webkit (Safari/Chrome 10) */ 
-background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #262626), color-stop(1, #1a1a1a));
-/* Webkit (Chrome 11+) */ 
-background-image: -webkit-linear-gradient(top, #262626 0%, #1a1a1a 100%);
-/* Proposed W3C Markup */ 
-background-image: linear-gradient(top, #262626 0%, #1a1a1a 100%);
-/* IE6-9 */ 
-filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#262626', endColorstr='#1a1a1a'); }
+#footer-bottom { clear:both; overflow:hidden; padding:40px 0; }
 
 #footer-bottom-inside { width: 960px; margin: 0 auto; } 
 
@@ -175,7 +107,7 @@ filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#262626', end
 */
 .region-sidebar-first .block .content { border:1px solid #ffffff; 
 -webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; 
-padding: 20px; overflow:hidden; background:#fdfdfd; margin:0 0 40px 0;
+padding: 20px; overflow:hidden; margin:0 0 40px 0;
  /* shadow */
 -webkit-box-shadow: 0 2px 6px #efefef inset;  -moz-box-shadow:0 2px 6px #efefef inset;  box-shadow:0 2px 6px #efefef inset; }
 
@@ -273,7 +205,7 @@ padding: 20px; overflow:hidden; background:#ffffff; margin:25px 0 0 0; font-styl
 
 #header-menu ul.menu li { display:inline-block; float:left; vertical-align: middle; padding:0; margin:0; }
 
-#header-menu ul.menu li a { outline:none; text-decoration: none; margin:0 35px 0 0; color:#ffffff; font-size:14px; font-weight:normal; text-align:center; text-transform:uppercase; 
+#header-menu ul.menu li a { outline:none; text-decoration: none; margin:0 35px 0 0; font-size:14px; font-weight:normal; text-align:center; text-transform:uppercase; 
 font-family: Myriad Pro,"Lucida Grande","Lucida Sans Unicode",Segoe UI,Helvetica,Arial,sans-serif; display:block; }
 
 #header-menu ul.menu li a:hover, #header-menu ul.menu li a.active { color:#1487d4; }
@@ -285,11 +217,11 @@ font-family: Myriad Pro,"Lucida Grande","Lucida Sans Unicode",Segoe UI,Helvetica
 #header-menu ul.menu li.expanded a { background:transparent url('images/main-menu-expanded.png') no-repeat center right; padding:0 15px 0 0; }
 
 /* 2nd Level */
-#header-menu ul.menu li.expanded ul.menu { width: 230px; z-index:100; padding:0; background: #222222; display: none; position: absolute; }
+#header-menu ul.menu li.expanded ul.menu { width: 230px; z-index:100; padding:0; display: none; position: absolute; }
 
 #header-menu ul.menu li.expanded:hover, #header-menu ul.menu li.expanded:hover > ul.menu { display:block; }
 
-#header-menu ul.menu li.expanded ul.menu li a { padding:10px; margin:0; display:block; width:210px; text-align:left; line-height:130%; background:none; font-size:12px; border-bottom:1px solid #353535; }
+#header-menu ul.menu li.expanded ul.menu li a { padding:10px; margin:0; display:block; width:210px; text-align:left; line-height:130%; background:none; font-size:12px; }
 
 #header-menu ul.menu li.expanded ul.menu li.expanded { background:transparent url('images/main-menu-arrow.png') no-repeat center right; }
 
@@ -309,14 +241,14 @@ font-family: Myriad Pro,"Lucida Grande","Lucida Sans Unicode",Segoe UI,Helvetica
 
 #footer .block ul.menu li { list-style:none; margin:0; padding:0; list-style-image:none; }
 
-#footer .block ul.menu li a { border-bottom: 1px solid #353535; display: block; padding:5px; }
+#footer .block ul.menu li a { display: block; padding:5px; }
 
 /* 
 * Footer-bottom menu 
 */
 ul.secondary-menu, #footer-bottom ul.menu { padding:0; margin:0 0 10px 0; display:block; overflow:hidden; }
 
-ul.secondary-menu li, #footer-bottom ul.menu li { border-right:1px solid #353535; display:block; float:left; list-style-type:none; overflow:hidden; padding:0 10px; margin:0; }
+ul.secondary-menu li, #footer-bottom ul.menu li { display:block; float:left; list-style-type:none; overflow:hidden; padding:0 10px; margin:0; }
 
 ul.secondary-menu li.first, #footer-bottom ul.menu li.first { padding:0 10px 0 0; margin:0; }
 
@@ -371,28 +303,12 @@ background:transparent url('images/comments.png') no-repeat center left; padding
 
 #comments ul.links li a { color:#fefefe; padding:5px 10px; margin:0 0 0 2px; text-shadow: 0 1px 1px #003547; font-weight:bold; border:none;
 font-family: "Lucida Grande","Lucida Sans Unicode",Segoe UI,Helvetica,Arial,sans-serif; cursor:pointer;
-/* background */
-background: #0093c5;
-/* IE10 */ 
-background-image: -ms-linear-gradient(top, #0093c5 0%, #0079a2 100%);
-/* Mozilla Firefox */ 
-background-image: -moz-linear-gradient(top, #0093c5 0%, #0079a2 100%);
-/* Opera */ 
-background-image: -o-linear-gradient(top, #0093c5 0%, #0079a2 100%);
-/* Webkit (Safari/Chrome 10) */ 
-background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #0093c5), color-stop(1, #0079a2));
-/* Webkit (Chrome 11+) */ 
-background-image: -webkit-linear-gradient(top, #0093c5 0%, #0079a2 100%);
-/* Proposed W3C Markup */ 
-background-image: linear-gradient(top, #0093c5 0%, #0079a2 100%);
-/* IE6-9 */ 
-filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#0093c5', endColorstr='#0079a2');
 /* radius */
 -webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; 
 /* shadow */
 -webkit-box-shadow: 0px 1px 2px #939da2; -moz-box-shadow: 0px 1px 2px #939da2; box-shadow: 0px 1px 2px #939da2; }
 
-#comments ul.links li a:hover {  background: #008ab8; text-decoration:none; }
+#comments ul.links li a:hover { text-decoration:none; }
 
 /*
 * Poll
@@ -519,28 +435,12 @@ ol.search-results { padding:0; }
 
 .links ul li a, a.more, #edit-submit, #edit-preview, input.form-submit { color:#fefefe; padding:7px 15px; text-shadow: 0 1px 1px #003547; font-weight:bold; border:none;
 font-family: "Lucida Grande","Lucida Sans Unicode",Segoe UI,Helvetica,Arial,sans-serif; cursor:pointer;
-/* background */
-background: #0093c5;
-/* IE10 */ 
-background-image: -ms-linear-gradient(top, #0093c5 0%, #0079a2 100%);
-/* Mozilla Firefox */ 
-background-image: -moz-linear-gradient(top, #0093c5 0%, #0079a2 100%);
-/* Opera */ 
-background-image: -o-linear-gradient(top, #0093c5 0%, #0079a2 100%);
-/* Webkit (Safari/Chrome 10) */ 
-background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #0093c5), color-stop(1, #0079a2));
-/* Webkit (Chrome 11+) */ 
-background-image: -webkit-linear-gradient(top, #0093c5 0%, #0079a2 100%);
-/* Proposed W3C Markup */ 
-background-image: linear-gradient(top, #0093c5 0%, #0079a2 100%);
-/* IE6-9 */ 
-filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#0093c5', endColorstr='#0079a2');
 /* radius */
 -webkit-border-radius: 15px; -moz-border-radius: 15px; border-radius: 15px; 
 /* shadow */
 -webkit-box-shadow: 0px 1px 2px #939da2; -moz-box-shadow: 0px 1px 2px #939da2; box-shadow: 0px 1px 2px #939da2; }
 
-.links ul li a:hover, a.more:hover, #edit-submit:hover, #edit-preview:hover, input.form-submit:hover {  background: #008ab8; text-decoration:none; }
+.links ul li a:hover, a.more:hover, #edit-submit:hover, #edit-preview:hover, input.form-submit:hover { text-decoration:none; }
 
 .resizable-textarea .grippie { border:1px solid #dddddd; }
 
@@ -577,8 +477,6 @@ ul.social-bookmarks li.delicious a { background:url('images/social-media-delicio
 * Forum
 */
 #forum { padding:20px 0; }
-
-
 
 /*
 * Twitter updates

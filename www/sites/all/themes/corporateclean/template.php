@@ -51,7 +51,7 @@ function corporateclean_form_alter(&$form, &$form_state, $form_id) {
 }
 
 /**
- * Add javascript files for page--front jquery slideshow.
+ * Add javascript files for jquery slideshow.
  */
 drupal_add_js(drupal_get_path('theme', 'corporateclean') . '/js/jquery.cycle.all.min.js');
 
@@ -59,6 +59,7 @@ drupal_add_js(drupal_get_path('theme', 'corporateclean') . '/js/jquery.cycle.all
 $effect=theme_get_setting('slideshow_effect','corporateclean');
 $effect_time=theme_get_setting('slideshow_effect_time','corporateclean')*1000;
 
+//Defined the initial height (300) of slideshow and then the slideshow inherits the height of each slider item dynamically
 drupal_add_js('jQuery(document).ready(function($) {  
 
 $("#slideshow").cycle({
@@ -69,6 +70,7 @@ $("#slideshow").cycle({
 	pagerAnchorBuilder: function(idx, slide) {
 		return "#slider-navigation li:eq(" + (idx) + ") a";
 	},
+	height: 300,
 	after: onAfter
 });
 
