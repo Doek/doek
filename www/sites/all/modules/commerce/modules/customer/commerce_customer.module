@@ -21,7 +21,6 @@ function commerce_customer_entity_info() {
         'id' => 'profile_id',
         'revision' => 'revision_id',
         'bundle' => 'type',
-        'label' => 'profile_id', // TODO: Update to use a custom callback.
       ),
       'bundle keys' => array(
         'bundle' => 'type',
@@ -42,6 +41,7 @@ function commerce_customer_entity_info() {
         ),
       ),
       'uri callback' => 'commerce_customer_profile_uri',
+      'label callback' => 'commerce_customer_profile_label',
       'token type' => 'commerce-customer-profile',
       'metadata controller class' => '',
       'access callback' => 'commerce_entity_access',
@@ -81,6 +81,50 @@ function commerce_customer_profile_uri($profile) {
   }
 
   return NULL;
+}
+
+/**
+ * Entity label callback: returns the label for an individual customer profile.
+ */
+function commerce_customer_profile_label($profile) {
+  // Load the customer profile type to look find the label callback.
+  $profile_type = commerce_customer_profile_type_load($profile->type);
+
+  // Make sure we get a valid label callback.
+  $callback = $profile_type['label_callback'];
+
+  if (!function_exists($callback)) {
+    $callback = 'commerce_customer_profile_default_label';
+  }
+
+  return $callback($profile);
+}
+
+/**
+ * Returns the default label for a customer profile.
+ *
+ * @param $profile
+ *   A fully loaded customer profile object.
+ *
+ * @return
+ *   The full name of the default address if available or the profile ID.
+ */
+function commerce_customer_profile_default_label($profile) {
+  $label = '';
+
+  // If the profile has a default address field...
+  if (!empty($profile->commerce_customer_address)) {
+    // Wrap the customer profile object for easier access to its field data.
+    $profile_wrapper = entity_metadata_wrapper('commerce_customer_profile', $profile);
+    $label = $profile_wrapper->commerce_customer_address->name_line->value();
+  }
+
+  // Return the profile ID if we couldn't derive a label from an address field.
+  if (empty($label)) {
+    $label = $profile->profile_id;
+  }
+
+  return $label;
 }
 
 /**
@@ -348,6 +392,12 @@ function commerce_customer_commerce_checkout_pane_info() {
     $field_name = variable_get('commerce_customer_profile_' . $type . '_field', '');
     $instance = field_info_instance('commerce_order', $field_name, 'commerce_order');
 
+    // If the i18n_field module is available, we'll use it to translate
+    // user-configurable field labels.
+    if (module_exists('i18n_field') && !empty($instance['label'])) {
+      $instance['label'] = i18n_field_translate_property($instance, 'label');
+    }
+
     $checkout_panes['customer_profile_' . $type] = array(
       'title' => !empty($instance['label']) ? check_plain($instance['label']) : $profile_type['name'],
       'file' => 'includes/commerce_customer.checkout_pane.inc',
@@ -410,6 +460,7 @@ function commerce_customer_profile_types() {
           'help' => '',
           'addressfield' => TRUE,
           'module' => $module,
+          'label_callback' => 'commerce_customer_profile_default_label',
         );
 
         $profile_types[$type] = array_merge($defaults, $profile_type);
@@ -435,6 +486,15 @@ function commerce_customer_profile_type_load($type) {
   $type = strtr($type, array('-' => '_'));
   $profile_types = commerce_customer_profile_types();
   return !empty($profile_types[$type]) ? $profile_types[$type] : FALSE;
+}
+
+/**
+ * Resets the cached list of customer profile types.
+ */
+function commerce_customer_profile_types_reset() {
+  $profile_types = &drupal_static('commerce_customer_profile_types');
+  $profile_types = NULL;
+  entity_info_cache_clear();
 }
 
 /**
@@ -549,23 +609,6 @@ function commerce_customer_profile_load($profile_id) {
  */
 function commerce_customer_profile_load_multiple($profile_ids = array(), $conditions = array(), $reset = FALSE) {
   return entity_load('commerce_customer_profile', $profile_ids, $conditions, $reset);
-}
-
-/**
- * Generate an array for rendering the given customer profile.
- *
- * @param $profile
- *   A fully loaded customer profile object.
- * @param $view_mode
- *   The view mode for displaying the profile, 'administrator' or 'customer'.
- *
- * @return
- *   An array as expected by drupal_render().
- *
- * @deprecated since 7.x-1.0-rc1
- */
-function commerce_customer_profile_build_content($profile, $view_mode = 'administrator') {
-  return entity_get_controller('commerce_customer_profile')->view(array($profile->profile_id => $profile), $view_mode);
 }
 
 /**
@@ -951,11 +994,14 @@ function commerce_customer_field_widget_form(&$form, &$form_state, $field, $inst
       $addressfields = array();
 
       foreach (commerce_info_fields('addressfield', 'commerce_customer_profile') as $field_name => $field) {
-        $langcode = $element['profiles'][$key][$field_name]['#language'];
+        // First make sure this addressfield is part of the current profile.
+        if (!empty($element['profiles'][$key][$field_name]['#language'])) {
+          $langcode = $element['profiles'][$key][$field_name]['#language'];
 
-        // Only consider this addressfield if it's represented on the form.
-        if (!empty($element['profiles'][$key][$field_name][$langcode])) {
-          $addressfields[] = array($field_name, $langcode);
+          // Only consider this addressfield if it's represented on the form.
+          if (!empty($element['profiles'][$key][$field_name][$langcode])) {
+            $addressfields[] = array($field_name, $langcode);
+          }
         }
       }
 
@@ -1135,7 +1181,7 @@ function _commerce_customer_match_customer_profiles_standard($field, $ids = arra
   $profile_type_alias = $query->addField('cp', 'type');
 
   // Add a condition to the query to filter by matching profile types.
-  if (is_array($field['settings']['referenceable_types']) && !empty($field['settings']['referenceable_types'])) {
+  if (!empty($field['settings']['referenceable_types']) && is_array($field['settings']['referenceable_types'])) {
     $types = array_diff(array_values($field['settings']['referenceable_types']), array(0, NULL));
 
     // Only filter by type if some types have been specified.
@@ -1146,7 +1192,7 @@ function _commerce_customer_match_customer_profiles_standard($field, $ids = arra
 
   if ($ids) {
     // Otherwise add a profile_id specific condition if specified.
-    $query->condition($product_id_alias, $ids, 'IN', $ids);
+    $query->condition($profile_id_alias, $ids, 'IN');
   }
 
   // Order the results by ID and then profile type.

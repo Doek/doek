@@ -103,11 +103,19 @@ function webform_rules_condition_webform_has_id($form_id, $selected_webform) {
  * Get an option list of all webforms.
  */
 function webform_rules_get_webforms() {
-  $result = db_query("SELECT nid, title FROM {node} WHERE type = :type", array(
-    ':type' => 'webform',
-  ));
+  // Get a list of all webform-enabled content types.
+  $webform_types = webform_variable_get('webform_node_types');
+  // Get a list of all nodes that are configured to use a webform.
+  $query = db_select('node', 'n')
+    ->fields('n', array('nid', 'title'))
+    ->condition('n.type', $webform_types, 'IN');
+  // Join to limi result list to node that really have a webform.
+  $query->join('webform', 'w', 'n.nid = w.nid');
+  // Get the result list.
+  $results = $query->execute();
+
   $options = array();
-  foreach ($result as $record) {
+  foreach ($results as $record) {
     $options["webform-client-form-{$record->nid}"] = $record->title;
   }
   return $options;

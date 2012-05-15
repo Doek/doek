@@ -57,7 +57,7 @@ function commerce_stock_admin_form($form, &$form_state) {
   // Add a checkbox that requires them to say "I do", but don't show it
   // (#access == FALSE) unless they're deleting.
   if (!empty($form_state['commerce_stock']['delete_instances'])) {
-    $type_plural = format_plural(count($form_state['commerce_stock']['delete_instances']), t('type'), t('types'));
+    $type_plural = format_plural(count($form_state['commerce_stock']['delete_instances']), 'type', 'types');
     $affirmation = t('I understand that all stock data will be permanently removed from the product @type_plural %product_types.',
       array(
         '@type_plural' => $type_plural,
@@ -96,6 +96,26 @@ function commerce_stock_admin_form_validate($form, &$form_state) {
 }
 
 /**
+ * This functions parses all the product of the specified bundle, and initialize its stock field (commerce_stock) to a value
+ * @param  String $bundle
+ *  Commerce product bundle type to initialize
+ * @param  int $init_stock_value
+ *  Stock value to initialize to
+ * @return void
+ */
+function commerce_stock_admin_init($bundle, $init_stock_value) {
+  //Load every product of $bundle type
+  $products = commerce_product_load_multiple(array(), array('type' => $bundle));
+  //Parses each product to initialize its stock value
+  foreach($products as $product) {
+    $wrapper = entity_metadata_wrapper('commerce_product', $product);
+    //dpm($wrapper->getPropertyInfo());
+    $wrapper->commerce_stock = $init_stock_value;
+    $wrapper->save();
+  }
+}
+
+/**
  * Add or remove the Stock field from product types.
  */
 function commerce_stock_admin_form_submit($form, &$form_state) {
@@ -107,6 +127,8 @@ function commerce_stock_admin_form_submit($form, &$form_state) {
     // If they want us to enable it and it doesn't currently exist, do the work.
     if ($enable && !$currently_enabled) {
       commerce_stock_create_instance('commerce_stock', 'number_integer', TRUE, 'commerce_product', $type, t('Stock'));
+      //Initialize fields of every existing product of $type bundle to 0
+      commerce_stock_admin_init($type, 0);
       drupal_set_message(t('Stock management has been enabled on the %type product type', array('%type' => $type)));
     }
     // Conversely, if they *don't* want it and it's currently enabled,

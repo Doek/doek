@@ -290,12 +290,17 @@ function _form_type_options_value(&$element, $edit = FALSE) {
       $default_value = NULL;
     }
 
-    return array(
+    $return = array(
       'options' => $options,
       'default_value' => $default_value,
       'options_text' => $edit['options_field'],
-      'default_value_text' => $edit['default_value_field'],
     );
+
+    if (isset($edit['default_value_field'])) {
+      $return['default_value_text'] = $edit['default_value_field'];
+    }
+
+    return $return;
   }
 }
 
@@ -390,7 +395,13 @@ function _form_options_from_text($text, $key_type, $flat = FALSE, &$duplicates =
 
   // Expand the list into a nested array, assign keys and check duplicates.
   $options = array();
-  $new_key = 0;
+  $new_key = 1;
+  foreach ($items as $item) {
+    $int_key = $item['key'] * 1;
+    if (is_int($int_key)) {
+      $new_key = max($int_key, $new_key);
+    }
+  }
   foreach ($items as $item) {
     // Assign a key if needed.
     if ($key_type == 'none') {

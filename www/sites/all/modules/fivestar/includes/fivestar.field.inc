@@ -152,6 +152,7 @@ function _fivestar_field_target($entity, $field, $instance, $item, $langcode) {
  */
 function _fivestar_update_field_value($entity_type, $entity, $field_name, $langcode, $value) {
   $entity->{$field_name}[$langcode][0]['rating'] = $value;
+  field_attach_presave($entity_type, $entity);
   field_attach_update($entity_type, $entity);
 }
 
@@ -182,7 +183,7 @@ function fivestar_field_widget_info() {
         )
       )
     ),
-    'select' => array(
+    'fivestar_select' => array(
       'label' => t('Select list (rated while editing)'),
       'field types' => array('fivestar'),
       'behaviors' => array('multiple values' => FIELD_BEHAVIOR_NONE),
@@ -240,7 +241,7 @@ function fivestar_previews_expand($element) {
 function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
   $element['#tree'] = TRUE;
 
-  if ($instance['widget']['type'] == 'select' || ($instance['widget']['type'] == 'stars' && isset($form['#title']) && $form['#title'] == 'Default value')) {
+  if ($instance['widget']['type'] == 'fivestar_select' || ($instance['widget']['type'] == 'stars' && isset($form['#title']) && $form['#title'] == 'Default value')) {
     $options = array(0 => t('No stars'));
     if (empty($instance['settings']['stars'])) {
       $instance['settings']['stars'] = 5;
@@ -630,6 +631,12 @@ function _fivestar_custom_widget_settings($entity_type, $instance, $display, $id
  *  Array. $widget = array('name' => 'my widget', 'css' => 'sites/all/mymodule/mywidget.css');
  */
 function _fivestar_get_widget($widgets, $display, $instance) {
+  // If the type doesn't required widgets lets get out of here.
+  // TODO: Implement this WAY better.
+  if (in_array($display['type'], array('fivestar_formatter_rating', 'fivestar_formatter_percentage'))) {
+    return FALSE;
+  }
+
   // Stars (rated while viewing) is $type = 'exposed'.
   // Stars (rated while editing) is $type = 'stars'.
   $type = $instance['widget']['type'];

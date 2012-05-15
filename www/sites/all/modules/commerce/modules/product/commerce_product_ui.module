@@ -261,7 +261,7 @@ function commerce_product_ui_entity_info_alter(&$entity_info) {
   $entity_info['commerce_product']['uri callback'] = 'commerce_product_ui_product_uri';
 
   // Add callbacks and urls for administer translations.
-  $entity_info['commerce_product']['translation']['entity_translation'] = array(
+  $entity_info['commerce_product']['translation']['entity_translation'] += array(
     'base path' => 'admin/commerce/products/%commerce_product',
     'access callback' => 'commerce_product_entity_translation_tab_access',
     'access arguments' => array(3),
@@ -366,7 +366,7 @@ function commerce_product_ui_product_type_save($product_type, $configure = TRUE,
     module_invoke_all('commerce_product_type_update', $product_type, $skip_reset);
   }
 
-  // Rebuild the menu to get add this type's product add menu item.
+  // Rebuild the menu to add this product type's menu items.
   if (!$skip_reset) {
     commerce_product_types_reset();
     menu_rebuild();
@@ -393,7 +393,7 @@ function commerce_product_ui_product_type_delete($type, $skip_reset = FALSE) {
     ->condition('type', $type)
     ->execute();
 
-  // Rebuild the menu to get rid of this type's product add menu item.
+  // Rebuild the menu to get rid of this product type's menu items.
   if (!$skip_reset) {
     commerce_product_types_reset();
     menu_rebuild();
@@ -470,6 +470,8 @@ function commerce_product_ui_form_commerce_product_ui_product_form_alter(&$form,
 
   // If translation support is enabled, provide the suitable languages
   if (module_exists('entity_translation') && entity_translation_enabled('commerce_product')) {
+    $translations = $form_state['commerce_product']->translations;
+
     $form['language'] = array(
       '#type' => 'select',
       '#title' => t('Language'),
@@ -477,6 +479,14 @@ function commerce_product_ui_form_commerce_product_ui_product_form_alter(&$form,
       '#options' => array(LANGUAGE_NONE => t('Language neutral')) + locale_language_list('name'),
       '#weight' => -10,
     );
+
+    // Disable languages for existing translations, so it is not possible to
+    // switch this product to some language which is already in the translation set.
+    foreach ($translations->data as $langcode => $translation) {
+      if ($langcode != $translations->original) {
+        unset($form['language']['#options'][$langcode]);
+      }
+    }
 
     // Since this function may change the language of the submitted form values,
     // it has to be the first called.

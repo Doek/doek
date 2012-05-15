@@ -6,9 +6,9 @@ dependencies[] = commerce_product
 dependencies[] = commerce_order
 core = 7.x
 
-; Information added by drupal.org packaging script on 2011-10-20
-version = "7.x-1.0-rc1"
+; Information added by drupal.org packaging script on 2012-03-01
+version = "7.x-1.0-rc2"
 core = "7.x"
 project = "commerce_stock"
-datestamp = "1319136930"
+datestamp = "1330610742"
 
