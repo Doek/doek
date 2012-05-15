@@ -112,11 +112,11 @@ function quickpay_cards() {
       'image' => $images_path . 'visa.jpg',
     ),
     '3d-visa' => array(
-      'name' => t('Visa, issued in Denmark, using 3D-Secure'),
+      'name' => t('Visa, using 3D-Secure'),
       'image' => $images_path . '3d-visa.gif',
     ),
     '3d-visa-dk' => array(
-      'name' => t('Visa, using 3D-Secure'),
+      'name' => t('Visa, issued in Denmark, using 3D-Secure'),
       'image' => $images_path . '3d-visa.gif',
     ),
     'visa-electron' => array(

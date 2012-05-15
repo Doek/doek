@@ -3,9 +3,9 @@ description = "Module for testing/debugging the Quickpay payment window."
 core = 7.x
 package = "QuickPay payment gateway"
 
-; Information added by drupal.org packaging script on 2011-11-13
-version = "7.x-1.0-beta1"
+; Information added by drupal.org packaging script on 2012-04-01
+version = "7.x-1.0"
 core = "7.x"
 project = "quickpay"
-datestamp = "1321217735"
+datestamp = "1333284096"
 
