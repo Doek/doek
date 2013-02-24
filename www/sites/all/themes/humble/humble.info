@@ -1,0 +1,84 @@
+name = Humble
+description = A flexible, recolorable theme with many regions.Developed by <a href="http://tabvn.com/">Tabvn</a> 
+package = Core
+version = VERSION
+core = 7.x
+
+stylesheets[all][] = css/reset.css
+stylesheets[all][] = css/960.css
+stylesheets[all][] = css/superfish.css
+stylesheets[all][] = style.css
+stylesheets[all][] = font/CartoGothicStd/font.css
+stylesheets[all][] = css/custom.css
+stylesheets[all][] = css/colors.css
+
+scripts[] = js/jquery.easing.js
+scripts[] = js/jquery.tools.tabs.min.js
+scripts[] = js/custom.js
+
+regions[sidebar_first]  = Left sidebar
+regions[sidebar_second] = Right sidebar
+regions[content] = Content
+regions[header] = Header
+
+regions[footer_firstcolumn] = Footer first column
+regions[footer_secondcolumn] = Footer second column
+regions[footer_thirdcolumn] = Footer third column
+regions[footer_fourthcolumn] = Footer fourth column
+
+regions[footer] = Footer
+regions[highlighted] = Highlighted
+regions[help] = Help
+regions[page_top] = Page Top
+regions[page_bottom] = Page Bottom
+
+features[] = logo
+features[] = name
+features[] = comment_user_picture
+features[] = favicon
+
+
+settings[slider_display] = 1
+settings[slider_use] = 1
+settings[slider_left_text] = "<h1>WE’D LOVE<br />TO WORK WITH<br />YOU ON YOUR<br />NEXT PROJECT<span>.</span></h1><H2>SO WHY NOT<br>COME AND CHAT<br>WITH US?</H2>"
+settings[nivo_effect] = random
+settings[nivo_slices] = 15
+settings[nivo_boxCols] = 8
+settings[nivo_boxRows] = 4
+settings[nivo_animSpeed] = 500
+settings[nivo_pauseTime] = 3000
+settings[nivo_directionNav] = false
+settings[nivo_controlNav] = true
+settings[nivo_keyboardNav] = true
+settings[nivo_pauseOnHover] = true
+settings[nivo_captionOpacity] = 0.7
+
+settings[default_banners][1][image_path]        = banners/1.jpg
+settings[default_banners][1][image_title]       = Title for image
+settings[default_banners][1][image_description] = Description for image
+settings[default_banners][1][image_published]   = TRUE
+
+settings[default_banners][2][image_path]        = banners/2.jpg
+settings[default_banners][2][image_title]       = Title for image
+settings[default_banners][2][image_description] = Description for image
+settings[default_banners][2][image_published]   = TRUE
+
+settings[default_banners][3][image_path]        = banners/3.jpg
+settings[default_banners][3][image_title]       = Title for image
+settings[default_banners][3][image_description] = Description for image
+settings[default_banners][3][image_published]   = TRUE
+
+settings[default_banners][4][image_path]        = banners/4.jpg
+settings[default_banners][4][image_title]       = Title for image
+settings[default_banners][4][image_description] = Description for image
+settings[default_banners][4][image_published]   = TRUE
+
+settings[default_banners][5][image_path]        = banners/5.jpg
+settings[default_banners][5][image_title]       = Title for image
+settings[default_banners][5][image_description] = Description for image
+settings[default_banners][5][image_published]   = TRUE
+
+settings[default_banners][6][image_path]        = banners/6.jpg
+settings[default_banners][6][image_title]       = Title for image
+settings[default_banners][6][image_description] = Description for image
+settings[default_banners][6][image_published]   = TRUE

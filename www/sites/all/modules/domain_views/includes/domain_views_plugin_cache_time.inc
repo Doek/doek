@@ -30,8 +30,31 @@ class domain_views_plugin_cache_time extends views_plugin_cache_time {
     global $_domain;
 
     if (!isset($this->_results_key)) {
+      // The query data passed to $build_info is not a string, as Views
+      // expects. Since we are a node access module, the query data is still
+      // a raw query object, which we must inspect. Views includes a timestamp
+      // on the query which breaks cache key handling.
+      // See http://drupal.org/node/1705168
+      $args = array();
+      $build_info = $this->view->build_info;
+      foreach ($build_info as $key => $value) {
+        if ($value instanceof SelectQueryInterface && isset($value->alterMetaData['views_substitutions'])) {
+          foreach ($value->alterTags as $key => $data) {
+            $args['alterTags'][$key] = $data;
+          }
+          foreach ($value->alterMetaData['views_substitutions'] as $key => $data) {
+            if ($key != '***CURRENT_TIME***') {
+              $args['alterMetaData']['views_substitutions'][$key] = $data;
+            }
+          }
+        }
+        // Include the non-query information.
+        else {
+          $args[$key] = $value;
+        }
+      }
       $key_data = array(
-        'build_info' => $this->view->build_info,
+        'build_info' => $args,
         'roles' => array_keys($user->roles),
         'super-user' => $user->uid == 1, // Special caching for super user.
         'language' => $GLOBALS['language'],

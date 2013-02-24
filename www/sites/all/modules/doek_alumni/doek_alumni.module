@@ -1,7 +1,71 @@
 <?php
+function doek_alumni_menu() {
+  $items['alumni/update'] = array('page callback' => 'doek_alumni_update_alumni_ids', 'access callback' => true);
+  $items['alumni/graduates'] = array('page callback' => 'doek_alumni_get_recent_graduates', 'access callback' => true);
+  $items['alumni/order'] = array('page callback' => 'doek_alumni_test', 'access callback' => true, 'type' => MENU_CALLBACK, 'title' => "Test page");
+  return $items;
+}
+
+function doek_alumni_update_alumni_ids() {
+	$query = db_query("SELECT max(field_alumnimedlem_value) max FROM field_data_field_alumnimedlem");
+	$result = $query->fetchObject();
+	$current_number = $result->max;
+	$counter = 0;
+
+	$role_users = db_query("SELECT uid FROM users WHERE uid != 0");
+
+	foreach($role_users as $account){
+		$account = user_load($account->uid);
+
+		if(empty($account->field_alumnimedlem)){
+			$edit = array(
+				'field_alumnimedlem' => array(
+					'und' => array(
+						'0' => array(
+							'value' => $current_number + 1,
+							),
+						),
+					),
+				);
+		  $current_number++;	
+			user_save($account, $edit);
+      //$account = user_load($account->uid);
+			//die(var_dump($account->field_alumnimedlem));
+			$counter++;
+		}
+	}
+	drupal_set_message("Updated ".$counter." users.");
+}
+
+function doek_alumni_get_recent_graduates() {
+  $query = new EntityFieldQuery();
+  $entities = $query->entityCondition('entity_type', 'user')
+                    ->fieldCondition('field_bachelor_dimitteret', 'value', date("Y"), '=')
+                    ->execute();
+
+  $users = user_load_multiple(array_keys($entities['user']));
+  
+  $headers = 'Content-type: text/html; charset=utf-8'."\r\n".'From: peter@alumni.doek.dk';
+  $subject = 'Velkommen til DØK Alumni';
+  $message = 'Kære [Navn]!<br />';
+  $message .= 'Først og fremmest vil vi ønske dig tillykke med din bachelorgrad, og samtidig byde dig velkommen til DØK Alumni.<br /><br />';
+  $message .= 'Nu når du har gennemført Ha(it.) er du samtidig automatisk en del af Alumninetværket, som pt. har over 700 medlemmer. Dette netværk giver dig muligheden for at deltage i diverse arrangementer, socialisere på tværs af årgange samt at modtage lønstatistik og jobopslag.<br /><br />';
+  $message .= 'Hvis du har lyst til, at være en del af bestyrelsen, skal du være mere end velkommen til at melde dig på den generalforsamling i forbindelse med den kommende gallafest.<br /><br />';
+  $message .= 'Med venlig hilsen<br />';
+  $message .= 'DØK Alumni';
+  
+  foreach($users as $id => $user) {
+    $names = explode(' ', $user->field_name["und"][0]["value"]);
+    $first = $names[0];
+    $personal = str_replace('[Navn]', $first, $message);
+    die(var_dump($personal));
+    //mail($user->mail, $subject, $message, $headers);
+  }
+  //user_multiple_role_edit($users, 'add_role', 11);
+}
 
 //Put all users who are not students into alumni
-function move_user_to_alumni_role(){
+/*function move_user_to_alumni_role(){
         $query = db_query("SELECT entity_id id FROM field_data_field_study_degree where field_study_degree_value != 'Bachelor-studerende'");
 
         foreach($query as $account){
@@ -16,10 +80,10 @@ function move_user_to_alumni_role(){
         }
         echo "Moved users to Alumni Role";
         return true;
-}
+}*/
 
 //Funcktion update user role by payment info
-function update_user_role_by_payment(){
+/*function update_user_role_by_payment(){
         $query = db_query("SELECT entity_id id, field_payment__value datevalue FROM field_data_field_payment_");
 
         //Foreach user with a regisred payment
@@ -53,20 +117,20 @@ function update_user_role_by_payment(){
         }
 
         return true;
-}
+}*/
 
 
 //Insert Unique ID for a new user
-function doek_alumni_user_insert(&$edit, $account, $category){
+/*function doek_alumni_user_insert(&$edit, $account, $category){
         $query = db_query("SELECT max(field_alumnimedlem_value) max FROM {field_data_field_alumnimedlem}");
 
         $result = $query->fetchObject();
 
         $member_id = $result->max;
 	$edit['field_alumnimedlem']['und'][0]['value'] = $member_id + 1;		
-}
+}*/
 
-function doek_payment_import_users_from_file(){
+/*function doek_payment_import_users_from_file(){
         $count = 0;
 
         $dest = variable_get('file_public_path', conf_path() . '/files');
@@ -104,7 +168,7 @@ function doek_payment_import_users_from_file(){
         }
         fclose($file);
 	return true;
-}
+}*/
 
 /*
 function doek_alumni_form_alter(&$form, &$form_state, $form_id){
@@ -151,7 +215,7 @@ function doek_alumni_form_alter(&$form, &$form_state, $form_id){
 */
 
 
-function assign_membership_number(){
+/*function assign_membership_number(){
 
 	$query = db_query("SELECT max(field_alumnimedlem_value) max FROM field_data_field_alumnimedlem");
 	
@@ -183,10 +247,10 @@ function assign_membership_number(){
 	}
 
 	return true;
-}
+}*/
 
 
-function doek_alumni_cron(){
+/*function doek_alumni_cron(){
 
 	$status = true;
 
@@ -195,5 +259,211 @@ function doek_alumni_cron(){
 	$status = move_user_to_alumni_role();	
 	
 	return $status;
+}*/
+
+function doek_alumni_commerce_checkout_complete($order){
+	watchdog('alumni', "Now I work and we are happy about it", array(), WATCHDOG_WARNING);	
+}
+
+function doek_alumni_test(){
+	global $user;
+	$user = user_load($user->uid);
+
+	echo "TEST";
+	echo "<pre>";
+	$order = commerce_order_load(745);
+	
+	$result = db_query('SELECT * FROM {commerce_payment_transaction} WHERE order_id = :order_id', array(":order_id" => $order->order_number));
+
+	foreach($result as $rec){
+		$transaction = $rec;
+		break;
+	}
+
+	if($transaction->status == "pending" || $transaction->status == "success"){
+	
+		//Get connection to E-Conomics
+		$client = _doek_alumni_connect_commerce();
+		
+		//Get Debtor
+		$debtor = _doek_alumni_get_debtor($user, $client);
+
+		//Create a new E-Conomics order	
+		$ec_order = _doek_alumni_create_order($debtor, $client);
+
+		foreach($order->commerce_line_items['und'] as $item){
+			$item = commerce_line_item_load($item['line_item_id']);
+			
+			$product = commerce_product_load($item->commerce_product['und'][0]['product_id']);
+
+			$organization = $product->field_organisation['und'][0]['value'];
+
+			//Create product in E-conomics or get existing product
+			$ec_product = _doek_alumni_get_product($product, $client);
+		
+			$ec_line_item = _doek_alumni_create_line_item($ec_order, $item, $ec_product, $client);	
+		}
+		
+		//Create invoice from Order
+		$invoice = $client->Order_UpgradeToInvoice(array(
+				'orderHandle' => $ec_order,
+		))->Order_UpgradeToInvoiceResult;	
+
+		$pdf = $client->CurrentInvoice_GetPdf(array(
+				'currentInvoiceHandle' => $invoice,
+		));
+
+		
+	}
+}
+
+function _doek_alumni_create_line_item($ec_order, $line_item, $ec_product, $client){
+
+	$ec_line_item = $client->OrderLine_Create(array(
+				'orderHandle' => $ec_order,
+				))->OrderLine_CreateResult;
+
+	$client->OrderLine_SetProduct(array(
+				'orderLineHandle' => $ec_line_item, 
+				'valueHandle' => $ec_product->Handle,
+				));
+
+	$client->OrderLine_SetQuantity(array(
+				'orderLineHandle' => $ec_line_item, 
+				'value' => $line_item->quantity,
+				));
+
+	$client->OrderLine_SetUnitNetPrice(array(
+				'orderLineHandle' => $ec_line_item, 
+				'value' => $line_item->commerce_unit_price['und'][0]['amount'] / 100,
+				));
+
+	$unit = new StdClass();
+	$unit->Number = "1";
+
+	$client->OrderLine_SetUnit(array(
+				'orderLineHandle' => $ec_line_item, 
+				'valueHandle' => $unit,
+				));
+	
+	$client->OrderLine_SetDescription(array(
+				'orderLineHandle' => $ec_line_item, 
+				'value' => $ec_product->Name,
+				));
+
+	return $ec_line_item;
+}
+
+function _doek_alumni_create_order($debtor, $client){
+
+	$ec_order = $client->Order_Create(array(
+				'debtorHandle' => $debtor,
+				))->Order_CreateResult;
+	return $ec_order;
+}
+
+function _doek_alumni_get_product_group($product, $client){
+
+	if($productGroupHandle = $client->ProductGroup_FindByName(array('name' => $product->field_organisation['und'][0]['value']))->ProductGroup_FindByNameResult){
+		return $productGroupHandle;
+	}else{
+		drupal_set_message(t("Your order was not processed correctly in economics. Please contact your administrator"));
+		return false;
+	}
+	
+}
+
+function _doek_alumni_get_product($product, $client){
+	if($productHandles = $client->Product_FindByNumber(array('number' => $product->product_id))->Product_FindByNumberResult){
+		$ec_product = $client->Product_GetDataArray(array('entityHandles' => array($productHandles)))->Product_GetDataArrayResult->ProductData;
+	}else{
+		//Get Product Group Handle from E-C
+		try{
+			if(!$productGroup = _doek_alumni_get_product_group($product, $client)){
+				watchdog('quickpay', "Your product group does not exist", array(), WATCHDOG_WARNING);
+			}else{
+				$ec_product = $client->Product_Create(array(
+							'number' => $product->product_id,
+							'productGroupHandle' => $ProductGroup,
+							'name' => $product->title,
+							))->Product_CreateResult;
+
+				$client->Product_SetIsAccessible(array(
+							'productHandle' => $ec_product,
+							'value' => 'true',
+							));
+
+				$client->Product_SetSalesPrice(array(
+							'productHandle' => $ec_product,
+							'value' => $product->commerce_price['und'][0]['amount'] / 100,
+								));
+			}
+
+		}catch(Exception $e){
+			echo $e->getMessage();
+		}
+	}
+	return $ec_product;
+}
+
+function _doek_alumni_get_debtor($user, $client){
+
+	if($debtorHandles = $client->Debtor_FindByEmail(array('email' => 'henrikthorn@it-kartellet.dk'))->Debtor_FindByEmailResult->DebtorHandle){
+		$debtor = $client->Debtor_GetDataArray(array('entityHandles' => array($debtorHandles)))->Debtor_GetDataArrayResult->DebtorData;
+	}else{
+		try{
+			$debtorGroupHandles = $client->debtorGroup_GetAll()->DebtorGroup_GetAllResult->DebtorGroupHandle;
+			$firstDebtorGroup = $debtorGroupHandles;
+
+			$debtor = $client->Debtor_Create(array(
+						'number' => $user->uid."2",
+						'debtorGroupHandle' => $firstDebtorGroup,
+						'name' => $user->name,
+						'vatZone' => 'HomeCountry',
+						))->Debtor_CreateResult;
+
+			$client->Debtor_SetEmail(array(
+						'debtorHandle' => $debtor,
+						'value' => $user->mail,
+						));
+
+			$client->Debtor_SetAddress(array(
+						'debtorHandle' => $debtor,
+						'value' => $user->field_address_road['und'][0]['value'],
+						));
+
+			$client->Debtor_SetCity(array(
+						'debtorHandle' => $debtor,
+						'value' => $user->field_address_city['und'][0]['value'],
+						));
+
+			$client->Debtor_SetPostalCode(array(
+						'debtorHandle' => $debtor,
+						'value' => $user->field_address_postal['und'][0]['value'],
+						));
+
+			$client->Debtor_SetTelephoneAndFaxNumber(array(
+						'debtorHandle' => $debtor,
+						'value' => $user->field_phone['und'][0]['value'],
+						));
+
+		}catch(Exception $e){
+			echo $e->getMessage();
+		}
+	}
+	return $debtor;
+}
+
+function _doek_alumni_connect_commerce(){
+	//Connect to E-Conomics         
+	$url = "https://www.e-conomic.com/secure/api1/EconomicWebService.asmx?WSDL";
+	$client = new SoapClient($url, array('trace' => 1, 'exceptions' => 1));
+
+	$client->Connect(array(
+				'agreementNumber' => '470157',
+				'userName' => 'hen',
+				'password' => 'wtfer9nt',
+			      ));
+	return $client;
 }
 

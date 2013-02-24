@@ -93,7 +93,7 @@
       <?php print render($page['content_bottom']); ?>
       <?php print $feed_icons; ?>
     </div> <!-- /#page -->
-
+</div>
       <div id="closure" class="clearfix">
         <div id="info">
           <span id="copyright"><?php print theme_get_setting('copyright_information'); ?></span><?php if (theme_get_setting('copyright_information') != ''): ?>. <?php endif; ?>
@@ -106,4 +106,6 @@
         <?php endif; ?>
       </div> <!-- /#closure -->
   </div> <!-- /#main -->
+</div> <!-- /#main-wrapper -->
+</div> <!-- /#main-wrapper -->
 </div> <!-- /#main-wrapper -->

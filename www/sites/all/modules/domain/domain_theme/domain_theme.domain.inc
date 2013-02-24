@@ -79,13 +79,26 @@ function domain_theme_domain_warning() {
 }
 
 /**
+ * Implements hook_domain_delete().
+ */
+function domain_theme_domain_delete($domain, $form_values = array()) {
+  db_delete('domain_theme')
+    ->condition('domain_id', $domain['domain_id'])
+    ->execute();
+}
+
+/**
  * Return a theme setting for batch processing.
  *
  * @param $domain
  *   The domain being processed.
  * @return
- *   A valid domain id.
+ *   A valid theme name or -1 on failure.
  */
 function domain_theme_batch_lookup($domain) {
-  return domain_theme_lookup($domain['domain_id']);
+  $theme = domain_theme_lookup($domain['domain_id']);
+  if (isset($theme['theme'])) {
+    return $theme['theme'];
+  }
+  return -1;
 }

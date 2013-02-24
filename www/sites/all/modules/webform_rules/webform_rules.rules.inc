@@ -24,7 +24,7 @@ function webform_rules_rules_event_info() {
       'access callback' => 'rules_node_integration_access',
     ),
     'webform_rules_insert' => array(
-      'label' => t('After a webform submission has been added'),
+      'label' => t('After a submission draft has been submitted'),
       'group' => t('Webform'),
       'variables' => _webform_rules_event_variables(),
       'access callback' => 'rules_node_integration_access',

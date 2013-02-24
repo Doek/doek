@@ -96,10 +96,10 @@ function commerce_custom_product_commerce_line_item_type_info() {
   $line_item_types = array();
 
   // Look for product line item types currently defined in the database.
-  $result = db_query('SELECT * FROM {commerce_product_line_item_type}')->fetchAllAssoc('type', PDO::FETCH_ASSOC);
+  $db_types = commerce_custom_product_line_item_types();
 
-  if (!empty($result)) {
-    foreach ($result as $type => $line_item_type) {
+  if (!empty($db_types)) {
+    foreach ($db_types as $type => $line_item_type) {
       $line_item_types[$type] = array(
         'name' => check_plain($line_item_type['name']),
         'description' => t('A customizable product line item type.'),
@@ -114,36 +114,56 @@ function commerce_custom_product_commerce_line_item_type_info() {
 }
 
 /**
+ * Returns an array of all available customizable product line item types.
+ */
+function commerce_custom_product_line_item_types() {
+  return db_query('SELECT * FROM {commerce_product_line_item_type}')->fetchAllAssoc('type', PDO::FETCH_ASSOC);
+}
+
+/**
  * Saves a customizable product line item type.
  *
  * @param $line_item_type
  *   The full line item type info array to save.
+ * @param $configure
+ *   Boolean indicating whether or not line item type configuration should be
+ *   performed in the event of a new line item type being saved.
+ * @param $skip_rebuild
+ *   Boolean indicating whether or not this save should result in the menu being
+ *   rebuilt; defaults to FALSE. This is useful when you intend to perform many
+ *   saves at once, as menu rebuilding is very costly to performance.
  *
  * @return
  *   The return value of the call to drupal_write_record() to save the line item
  *   type, either FALSE on failure or SAVED_NEW or SAVED_UPDATED indicating the
  *   type of query performed to save the line item type.
  */
-function commerce_custom_product_line_item_type_save($line_item_type) {
+function commerce_custom_product_line_item_type_save($line_item_type, $configure = TRUE, $skip_rebuild = FALSE) {
   $op = drupal_write_record('commerce_product_line_item_type', $line_item_type, commerce_line_item_type_load($line_item_type['type']) ? 'type' : array());
-  commerce_tax_types_reset();
+  commerce_line_item_types_reset();
 
-  // If this was a new line item type...
   if ($op == SAVED_NEW) {
-    // Rebuild the line item type menu items.
-    commerce_line_item_types_reset();
-    menu_rebuild();
+    // Notify the field API that a new bundle has been created.
+    field_attach_create_bundle('commerce_line_item', $line_item_type['type']);
+
+    // Load the full line item type array.
+    $line_item_type = commerce_line_item_type_load($line_item_type['type']);
 
     // Configure the new line item type with default fields.
-    $line_item_type = commerce_line_item_type_load($line_item_type['type']);
-    commerce_line_item_configure_line_item_type($line_item_type);
+    if ($configure) {
+      commerce_line_item_configure_line_item_type($line_item_type);
+    }
 
     // Notify other modules that a new line item type has been created.
-    module_invoke_all('commerce_custom_product_line_item_type_insert', $line_item_type);
+    module_invoke_all('commerce_custom_product_line_item_type_insert', $line_item_type, $skip_reset);
   }
   elseif ($op == SAVED_UPDATED) {
     // Notify other modules that an existing line item type has been updated.
-    module_invoke_all('commerce_custom_product_line_item_type_update', $line_item_type);
+    module_invoke_all('commerce_custom_product_line_item_type_update', $line_item_type, $skip_reset);
+  }
+
+  if (!$skip_rebuild) {
+    variable_set('menu_rebuild_needed', TRUE);
   }
 
   return $op;
@@ -163,10 +183,11 @@ function commerce_custom_product_line_item_type_delete($type) {
     ->condition('type', $type)
     ->execute();
 
-  // Rebuild the line item type menu items.
   commerce_line_item_types_reset();
-  menu_rebuild();
 
-  // Notify other modules that this line item type has been deleted.
+  // Notify other modules that this bundle / line item type has been deleted.
+  field_attach_delete_bundle('commerce_line_item', $line_item_type['type']);
   module_invoke_all('commerce_custom_product_line_item_type_delete', $line_item_type);
+
+  menu_rebuild();
 }

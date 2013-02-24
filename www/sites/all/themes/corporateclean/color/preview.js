@@ -17,8 +17,8 @@
 		$('#preview', form).css('color', $('#palette input[name="palette[base]"]', form).val());
 		$('#preview a', form).css('color', $('#palette input[name="palette[link]"]', form).val());
 		$('#preview-header-menu a', form).css('color', $('#palette input[name="palette[headermenulink]"]', form).val());
-		$('#preview-footer a', form).css('color', $('#palette input[name="palette[headermenulink]"]', form).val());
-		$('#preview-footer-bottom a', form).css('color', $('#palette input[name="palette[headermenulink]"]', form).val());
+		$('#preview-footer a', form).css('color', $('#palette input[name="palette[footerlink]"]', form).val());
+		$('#preview-footer-bottom a', form).css('color', $('#palette input[name="palette[footerlink]"]', form).val());
 		$('#preview-slogan', form).css('color', $('#palette input[name="palette[slogan]"]', form).val());
 		
 		// Headings.

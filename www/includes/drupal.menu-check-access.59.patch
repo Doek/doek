@@ -1,0 +1,18 @@
+diff --git a/includes/menu.inc b/includes/menu.inc
+index b25a374..4af3cd2 100644
+--- a/includes/menu.inc
++++ b/includes/menu.inc
+@@ -634,6 +634,13 @@ function _menu_check_access(&$item, $map) {
+     elseif (function_exists($callback)) {
+       $item['access'] = call_user_func_array($callback, $arguments);
+     }
++    else {
++      $item['access'] = FALSE;
++      watchdog('menu', 'Undefined access callback %function() for router path @path', array(
++        '%function' => $callback,
++        '@path' => isset($item['path']) ? $item['path'] : '',
++      ), WATCHDOG_ERROR);
++    }
+   }
+ }
+ 

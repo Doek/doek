@@ -6,7 +6,7 @@
  */
 
 /**
- * Implementation of hook_webform_submission_insert().
+ * Implements hook_webform_submission_insert().
  *
  * @param $node
  *   The webform node.
@@ -19,7 +19,7 @@ function webform_rules_webform_submission_insert($node, $submission) {
 }
 
 /**
- * Implementation of hook_webform_submission_update().
+ * Implements hook_webform_submission_update().
  *
  * @param $node
  *   The webform node.
@@ -32,7 +32,7 @@ function webform_rules_webform_submission_update($node, $submission) {
 }
 
 /**
- * Implementation of hook_webform_submission_update().
+ * Implements hook_webform_submission_delete().
  *
  * @param $node
  *   The webform node.
@@ -81,7 +81,12 @@ function webform_rules_client_form_submit($form, &$form_state) {
     // Map submitted data to submission data.
     foreach ($form_state['values']['submitted'] as $cid => $value) {
       if (isset($submission->data[$cid])) {
-        $submission->data[$cid]['value'] = $value;
+        if (isset($value['value'])) {
+          $submission->data[$cid]['value'] = $value;
+        }
+        else {
+          $submission->data[$cid] = $value;
+        }
       }
     }
     // Invoke event.
@@ -115,7 +120,12 @@ function webform_rules_rules_invoke_event($submission, $node, $op = 'insert') {
   // Map values to field names.
   foreach ($submission->data as $cid => $value) {
     $component = $webform['components'][$cid];
-    $data['components'][$component['form_key']]['value'] = $value['value'];
+    $data['components'][$component['form_key']]['value'] = isset($value['value']) ? $value['value'] : $value;
+    if (!is_array($data['components'][$component['form_key']]['value'])) {
+      // Convert the value to an array to equalize the data with saved
+      // submissions.
+      $data['components'][$component['form_key']]['value'] = array($data['components'][$component['form_key']]['value']);
+    }
     $data['components'][$component['form_key']]['component'] = $component;
   }
   // Invoke the rules event.
@@ -129,13 +139,10 @@ function webform_rules_rules_invoke_event($submission, $node, $op = 'insert') {
       }
       break;
     case 'submit':
-      rules_invoke_event('webform_rules_submit', $user, $node, $data, $form_id);
+      rules_invoke_event('webform_rules_insert', $user, $node, $data, $form_id);
       break;
     case 'update':
       rules_invoke_event('webform_rules_update', $user, $node, $data, $form_id);
-      break;
-    case 'delete':
-      rules_invoke_event('webform_rules_delete', $user, $node, $data, $form_id);
       break;
     case 'delete':
       rules_invoke_event('webform_rules_delete', $user, $node, $data, $form_id);
@@ -178,7 +185,7 @@ function webform_rules_token_info() {
   );
   $webform['{component}-value-raw'] = array(
     'name' => t('Raw component value'),
-    'description' => t('The title of the selected component, e.g. "email-title".'),
+    'description' => t('The raw value of the selected component, e.g. "email-value-raw". However this is not cleaned up by check_plain(). This is raw user input so take care if you use this somewhere else.'),
   );
   $webform['{component}-display'] = array(
     'name' => t('Component display'),
@@ -321,6 +328,9 @@ function webform_rules_render_component($component, $value, $format = 'text', $t
   }
   if (!$title) {
     $display_element['#title'] = NULL;
+  }
+  if (!isset($display_element['#webform_component'])) {
+    $display_element['#webform_component'] = $component;
   }
   return drupal_render($display_element);
 }

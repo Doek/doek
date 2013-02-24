@@ -6,14 +6,15 @@ configure = admin/structure/domain/settings
 files[] = domain.admin.inc
 files[] = domain.install
 files[] = domain.bootstrap.inc
+files[] = domain.migrate.inc
 files[] = domain.module
 files[] = settings_custom_url.inc
 files[] = settings.inc
 files[] = tests/domain.test
 
-; Information added by drupal.org packaging script on 2012-01-11
-version = "7.x-3.3"
+; Information added by drupal.org packaging script on 2013-01-27
+version = "7.x-3.8"
 core = "7.x"
 project = "domain"
-datestamp = "1326295538"
+datestamp = "1359324096"
 

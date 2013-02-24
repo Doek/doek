@@ -1,0 +1,347 @@
+
+@import "compass/css3";
+@import "base";
+
+/**
+ * Disable Safari Mobile automatic font upscaling in landscape mode
+ */
+
+html {
+  -webkit-font-smoothing: antialiased;
+  font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+@media screen and (orientation:landscape) {
+  html {
+    -webkit-text-size-adjust: none;
+  }
+}
+
+/**
+ * Default Layout
+ */
+html,
+body {
+  width:100%;
+  height:100%;
+}
+
+.mast {
+  position: relative;
+  margin: 0 auto;
+  width: 960px;
+  width:90%;
+}
+
+.wrap-columns {
+  width:100%;
+  position:relative;
+}
+
+.content-column,
+.region-sidebar-first,
+.region-sidebar-second {
+  float: left;
+  word-wrap:break-word;
+}
+
+.content-column {
+  width:100%;
+}
+
+.two-sidebars .main {
+  margin: 0 20%;
+}
+
+.sidebar-first .main {
+  margin-left: 20%;
+}
+
+.sidebar-last .main {
+  margin-right: 20%;
+}
+
+.region-sidebar-first {
+  width: 20%;
+  margin-left: -100%;
+}
+
+.region-sidebar-second {
+  width: 20%;
+  margin-left: -20%;
+}
+
+.content {
+  @include clearfix;
+}
+
+/**
+ * Responsive images
+ */
+
+img {
+  max-width:100%;
+  height:auto;
+  -ms-interpolation-mode: bicubic;
+  // Make sure borders don't overflow the grid units!
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+// max-width doesn't work if there's a bunch of width:auto divs around it
+.field-name-field-image div {width:100%}
+
+/* Override max-width 100% for Gmaps & Getlocations*/
+.gmap img,
+.view-gmap img,
+.openlayers-map img,
+#getlocations_map_canvas img {
+  max-width: none !important;
+}
+
+/* Improve IE's resizing of images */
+svg:not(:root) {
+  overflow: hidden;
+}
+
+/**
+ * Attribution link
+ */
+
+.arctica-attr-link {
+  @include opacity(0.3);
+  text-align:center;
+  clear:both;
+  padding:0.5em 0;
+  font-size:90%;
+  color: #444;
+  a,
+  a:link,
+  a:visited,
+  a:hover,
+  a:focus,
+  a:active,{
+    color: #444;
+  }
+}
+
+/**
+ * Support for Twitter Pull
+ */
+
+div.tweets-pulled-listing ul {
+  list-style: none;
+}
+
+div.tweets-pulled-listing div.tweet-authorphoto {
+  margin: 0 5px 0 0;
+  float: left;
+}
+
+div.tweets-pulled-listing div.tweet-authorphoto img {
+  max-height: 40px;
+  max-width: 40px;
+}
+
+/**
+ * Arctica skinr skins
+ */
+// We load the css here and not via skinr so that one could also use alternative
+// methods such as block_class module, or simply in theme-specific stylesheets
+
+
+.arctica-left-content .grid-inner {
+  text-align: left; /* LTR */
+}
+
+/* required to override drupal core */
+.arctica-left-content #user-login-form {
+  text-align: left; /* LTR */
+}
+
+.arctica-center-content .grid-inner {
+  text-align: center;
+}
+
+.arctica-center-content .grid-inner ul.menu {
+  display: inline-block;
+  text-align: center;
+}
+
+/* required to override drupal core */
+.arctica-center-content #user-login-form {
+  text-align: center;
+}
+
+.arctica-right-content .grid-inner {
+  text-align: right; /* LTR */
+}
+
+/* required to override drupal core */
+.arctica-right-content #user-login-form {
+  text-align: right; /* LTR */
+}
+
+
+// Forced removal of styling added by any theme or module
+.no-style {
+  border:none!important;
+  border-radius:0!important;
+  outline:0!important;
+  padding:0!important;
+  background:none!important;
+  .grid-inner {
+    border:none!important;
+    border-radius:0!important;
+    outline:0!important;
+    padding:0!important;
+    background:none!important;
+    .block-content {
+      border:none!important;
+      border-radius:0!important;
+      outline:0!important;
+      padding:0!important;
+      background:none!important;
+    }
+  }
+}
+
+.html .arctica-squared .grid-inner {
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
+}
+
+.html .arctica-rounded-medium .grid-inner {
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  overflow:hidden;
+}
+
+.html .arctica-rounded-small .grid-inner {
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  overflow:hidden;
+}
+
+.html .arctica-rounded-large .grid-inner {
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+  overflow:hidden;
+}
+
+.html .arctica-rounded-xlarge .grid-inner {
+  -webkit-border-radius: 25px;
+  -moz-border-radius: 25px;
+  border-radius: 25px;
+  overflow:hidden;
+}
+
+.arctica-icon-block .grid-inner,
+.arctica-icon-block-right .grid-inner {
+  position:relative;
+}
+
+.arctica-icon-block .block-title {
+  padding-left:55px;
+}
+
+.arctica-icon-block-right .block-title {
+  padding-right:55px;
+  padding-left:0;
+}
+
+.arctica-icon-block  .block-icon {
+  position:absolute;
+  top:0;
+  left:0;
+}
+
+.arctica-icon-block-right .block-icon {
+  left:auto;
+  right:0;
+}
+
+.arctica-xsmall {
+  font-size:75%;
+  line-height:1.3em;
+}
+
+.arctica-small {
+  font-size:90%;
+  line-height:1.3em;
+}
+
+.arctica-large {
+  font-size:125%;
+  line-height:1.3em;
+}
+
+.arctica-xlarge {
+  font-size:150%;
+  line-height:1.3em;
+}
+
+.arctica-xxlarge {
+  font-size:200%;
+  line-height:1.3em;
+}
+
+.arctica-xxxlarge {
+  font-size:230%;
+  line-height:1.3em;
+}
+
+.arctica-bold .content {
+  font-weight:bold;
+}
+
+.arctica-italic .content {
+  font-style:italic;
+}
+
+.arctica-underlined .content {
+  text-decoration:underline;
+}
+
+.float-left {
+  float:left;
+}
+
+.float-right {
+  float:right;
+}
+
+.float-none {
+  float:none;
+}
+
+/**
+ * Multi column lists
+ */
+
+
+/* Split list across multiple columns */
+.arctica-2-col-list ul,
+.arctica-3-col-list ul {
+  margin:0;
+  padding:0;
+}
+
+.arctica-2-col-list ul li,
+.arctica-3-col-list ul li {
+  float: left;
+  width: 50%;
+  margin:0;
+  padding:0;
+  list-style:none;
+  list-style-type:none;
+}
+
+.arctica-3-col-list ul li {
+  width: 33%;
+}

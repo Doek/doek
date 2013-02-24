@@ -114,6 +114,58 @@ function domain_views_views_data() {
       'handler' => 'views_handler_sort',
     ),
   );
+  // New fields in 7.x.3.
+  if (domain_views_api_version() > 2) {
+    $data['domain']['weight'] = array(
+      'title' => t('Weight'),
+      'help' => t('The sort order for domain lists.'),
+      'field' => array(
+        'handler' => 'views_handler_field_numeric',
+        'click sortable' => TRUE,
+      ),
+      // Information for accepting a domain_id as a filter
+      'filter' => array(
+        'handler' => 'views_handler_filter_numeric',
+        'label' => t('Weight'),
+      ),
+      // Information for sorting on a domain_id.
+      'sort' => array(
+        'handler' => 'views_handler_sort',
+      ),
+    );
+    $data['domain']['is_default'] = array(
+      'title' => t('Default domain'),
+      'help' => t('A boolean flag indicating the default domain.'),
+      'field' => array(
+        'handler' => 'views_handler_field_boolean',
+        'click sortable' => TRUE,
+      ),
+      // Information for accepting a domain_id as a filter
+      'filter' => array(
+        'handler' => 'views_handler_filter_boolean_operator',
+        'label' => t('Default domain'),
+      ),
+      // Information for sorting on a domain_id.
+      'sort' => array(
+        'handler' => 'views_handler_sort',
+      ),
+    );
+    $data['domain']['machine_name'] = array(
+      'title' => t('Machine name'),
+      'help' => t('The machine-readable name of this domain.'),
+      'field' => array(
+        'click sortable' => TRUE,
+      ),
+      // Information for accepting a domain_id as a filter
+      'filter' => array(
+        'handler' => 'domain_views_handler_filter_domain_machine_name',
+      ),
+      // Information for sorting on a domain_id.
+      'sort' => array(
+        'handler' => 'views_handler_sort',
+      ),
+    );
+  }
 
   // Define the {domain_access} table.
   $data['domain_access']['table']['group'] = t('Domain Access');
@@ -130,6 +182,9 @@ function domain_views_views_data() {
   $data['domain_access']['table']['join']['node_revision'] = array(
     'left_field' => 'nid',
     'field' => 'nid',
+    'extra' => array(
+      array('field' => 'realm', 'value' => 'domain_id', 'numeric' => FALSE),
+    ),
   );
   // Join the two domain tables.
   // Note that we only JOIN on domain_id records.
@@ -204,8 +259,9 @@ function domain_views_views_data() {
   // Define available on current domain field
   $data['domain_access']['current_all'] = array(
     'title' => t('Available on current domain'),
-    'help' => t('Filters out nodes not available on current domain (published to current domain or all affiliates'),
+    'help' => t('Filters out nodes not available on current domain (published to current domain or all affiliates)'),
     'field' => array(
+      'field' => 'gid',
       'handler' => 'views_handler_field_boolean',
       'click sortable' => TRUE,
     ),
@@ -337,6 +393,8 @@ function domain_views_views_query_substitutions($view) {
   return array(
     '***CURRENT_DOMAIN***' => $domain['domain_id'],
     '***PRIMARY_DOMAIN***' => $default['domain_id'],
+    '***CURRENT_DOMAIN_MACHINE_NAME***' => $domain['machine_name'],
+    '***PRIMARY_DOMAIN_MACHINE_NAME***' => $default['machine_name'],
   );
 }
 

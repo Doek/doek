@@ -16,10 +16,11 @@
  * @ingroup rules
  */
 function content_access_rules_rules_event_info() {
-  $events['content_access_content_type'] = array('label' => t('Content type access changed'));
+  $events['content_access_content_type'] = array('label' => t('Content type access control was changed'));
+  $events['content_access_per_node'] = array('label' => t('Per node access control was changed'));
 
   if (module_exists('acl')) {
-    $events['content_access_content_user'] = array('label' => t('Grant user on content'));
+    $events['content_access_user_acl'] = array('label' => t('User was added to ACL'));
   }
 
   $items = array();
@@ -41,31 +42,31 @@ function content_access_rules_rules_event_info() {
 function content_access_rules_rules_action_info() {
   $role_actions = array(
     'content_access_action_grant_node_permissions' => array(
-      'label' => t('Grant content permissions by role'),
-      'description' => t('Grant node permissions to specific role(s).'),
+      'label' => t('Grant access by role'),
+      'description' => t('Grant access to the following content'),
     ),
     'content_access_action_revoke_node_permissions' => array(
-      'label' => t('Revoke content permissions by role'),
-      'description' => t('Revoke node permissions from specific role(s).'),
+      'label' => t('Revoke access by role'),
+      'description' => t('Revoke access to the following content'),
     ),
   );
 
   $reset_actions = array(
     'content_access_action_reset_node_permissions' => array(
-      'label' => t('Reset content permissions'),
-      'description' => t('Reset node permissions to default permissions.'),
+      'label' => t('Reset access to content type defaults'),
+      'description' => t('Reset node permissions to default permissions'),
     ),
   );
 
   $user_actions = array(
     'content_access_action_user_grant' => array(
-      'label' => t('Grant user access'),
-      'description' => t('Grant node view to specific user(s).'),
+      'label' => t('Grant access by user'),
+      'description' => t('Grant access to the following content'),
       'ca_action' => 'Grant',
     ),
     'content_access_action_user_revoke' => array(
-      'label' => t('Revoke user access'),
-      'description' => t('Revoke user access'),
+      'label' => t('Revoke access by user'),
+      'description' => t('Revoke access to the following content'),
       'ca_action' => 'Revoke',
     ),
   );
@@ -124,21 +125,21 @@ function content_access_rules_rules_action_info() {
           ),
           'content_access_user_view' => array(
             'type' => 'user',
-            'label' => t('@action user view access', array('@action' => $action['ca_action'])),
+            'label' => t('@action view access', array('@action' => $action['ca_action'])),
             'optional' => TRUE,
-            'description' => t('@action the following user.', array('@action' => $action['ca_action'])),
+            'description' => t('@action view access to the following user.', array('@action' => $action['ca_action'])),
           ),
           'content_access_user_update' => array(
             'type' => 'user',
-            'label' => t('@action user update access', array('@action' => $action['ca_action'])),
+            'label' => t('@action update access', array('@action' => $action['ca_action'])),
             'optional' => TRUE,
-            'description' => t('@action the following user.', array('@action' => $action['ca_action'])),
+            'description' => t('@action edit access to the following user.', array('@action' => $action['ca_action'])),
           ),
           'content_access_user_delete' => array(
             'type' => 'user',
-            'label' => t('@action user delete access', array('@action' => $action['ca_action'])),
+            'label' => t('@action delete access', array('@action' => $action['ca_action'])),
             'optional' => TRUE,
-            'description' => t('@action the following user.', array('@action' => $action['ca_action'])),
+            'description' => t('@action delete access to the following user.', array('@action' => $action['ca_action'])),
           ),
         ),
         'group' => t('Content Access User'),

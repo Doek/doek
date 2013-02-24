@@ -85,6 +85,7 @@ function commerce_product_entity_info() {
         'bundle' => 'type',
         'label' => 'title',
         'revision' => 'revision_id',
+        'language' => 'language',
       ),
       'bundle keys' => array(
         'bundle' => 'type',
@@ -115,6 +116,11 @@ function commerce_product_entity_info() {
         'locale' => TRUE,
         'entity_translation' => array(
           'class' => 'EntityTranslationCommerceProductHandler',
+          'bundle callback' => 'commerce_product_entity_translation_supported_type',
+          'default settings' => array(
+            'default_language' => LANGUAGE_NONE,
+            'hide_language_selector' => FALSE,
+          ),
         ),
       ),
 
@@ -231,6 +237,12 @@ function commerce_product_field_extra_fields() {
           'theme' => 'commerce_product_title',
           'weight' => -5,
         ),
+        'status' => array(
+          'label' => t('Status'),
+          'description' => t('Whether the product is active or disabled'),
+          'theme' => 'commerce_product_status',
+          'weight' => 5,
+        ),
       ),
     );
   }
@@ -332,6 +344,9 @@ function commerce_product_configure_product_fields($modules = NULL) {
   if (empty($modules)) {
     $modules = module_implements('commerce_product_type_info');
   }
+
+  // Reset the product type cache to get types added by newly enabled modules.
+  commerce_product_types_reset();
 
   // Loop through all the enabled modules.
   foreach ($modules as $module) {
@@ -771,7 +786,7 @@ function commerce_product_autocomplete($entity_type, $field_name, $bundle, $stri
  *     ...
  *   )
  */
-function commerce_product_match_products($field, $instance = NULL, $string = '', $match = 'contains', $ids = array(), $limit = NULL, $access_tag = FALSE) {
+function commerce_product_match_products($field, $instance = NULL, $string = '', $match = 'contains', $ids = array(), $limit = 50, $access_tag = FALSE) {
   $results = &drupal_static(__FUNCTION__, array());
 
   // Create unique id for static cache.
@@ -797,7 +812,7 @@ function commerce_product_match_products($field, $instance = NULL, $string = '',
  *
  * Returns an array of products matching the specific parameters.
  */
-function _commerce_product_match_products_standard($instance, $string = '', $match = 'contains', $ids = array(), $limit = NULL, $access_tag = FALSE) {
+function _commerce_product_match_products_standard($instance, $string = '', $match = 'contains', $ids = array(), $limit = 50, $access_tag = FALSE) {
   // Build the query object with the necessary fields.
   $query = db_select('commerce_product', 'cp');
 
@@ -805,6 +820,9 @@ function _commerce_product_match_products_standard($instance, $string = '', $mat
   if ($access_tag) {
     $query->addTag('commerce_product_access');
   }
+
+  // Add a global query tag so anyone can alter this query.
+  $query->addTag('commerce_product_match');
 
   $product_id_alias = $query->addField('cp', 'product_id');
   $product_sku_alias = $query->addField('cp', 'sku');
@@ -885,13 +903,7 @@ function _commerce_product_match_products_standard($instance, $string = '', $mat
  * Access callback: determines access to a product's translation tab.
  */
 function commerce_product_entity_translation_tab_access($product) {
-  if (!empty($product->language) && $product->language != LANGUAGE_NONE) {
-    if (commerce_product_entity_translation_supported_type($product->type)) {
-      return entity_translation_tab_access('commerce_product');
-    }
-  }
-
-  return FALSE;
+  return entity_translation_tab_access('commerce_product', $product);
 }
 
 /**
@@ -919,4 +931,21 @@ function template_preprocess_commerce_product_sku(&$variables) {
  */
 function template_preprocess_commerce_product_title(&$variables) {
   $variables['title'] = check_plain($variables['title']);
+}
+
+/**
+ * Returns the options list for the product status property.
+ */
+function commerce_product_status_options_list() {
+  return array(
+    0 => t('Disabled'),
+    1 => t('Active'),
+  );
+}
+
+/**
+ * Converts the product status integer to a string before output.
+ */
+function template_preprocess_commerce_product_status(&$variables) {
+  $variables['status'] = empty($variables['status']) ? t('Disabled') : t('Active');
 }

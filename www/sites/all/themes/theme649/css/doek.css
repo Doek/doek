@@ -1,0 +1,125 @@
+a.follow-link-cbs {
+	background-image: url(../images/cbs_logo.png);
+	background-repeat: no-repeat;
+	min-height: 30px !important;
+}
+.block-views-testimonials-block .views-field-field-name {
+	float: right;
+}
+.view-testimonials .view-content .views-field-field-name {
+        text-align:right;
+        padding-right:6px;
+}
+.view-testimonials .view-content .views-field-field-name a {
+        font-size:14px;
+        line-height:17px;
+        font-family:"Open sans Condensed", sans-serif;
+        color:#706460;
+        text-decoration:none;
+}
+.view-testimonials .view-content .views-field-field-name a:hover {
+        color:#f17f60;
+}
+.view-testimonials .view-content .views-field-field-author-ttitle {
+        text-align:right;
+        padding-right:6px;
+	font-style: italic;
+        color:#706460;
+}
+
+/*****************Main menu*****************/
+#block-superfish-2 {padding:49px 5px 0 0;}
+#superfish-2 { 
+        background:none;
+        margin:0px;
+        position:relative;
+        width:auto;
+}               
+#superfish-2:after {display:block; width:100%; clear:both; content:"";}
+        #superfish-2 li {
+                background:none;
+                border:0;
+                overflow:inherit;
+                padding:0;
+                text-align:center;
+                font-family:"Open sans Condensed", sans-serif;
+                font-size:13px;
+                line-height:16px;
+                text-transform:uppercase;
+                }
+        #superfish-2 > li {
+                float:left;
+                margin-left:2px;
+                }       
+        #superfish-2 > li.first {margin-left:0;}
+        #superfish-2 > li.last {margin-left:1px;}
+                #superfish-2 > li > a {
+                        border:0; 
+                        color:#59504d;
+                        padding:11px 15px 12px;
+                        border-radius:5px;
+                        text-decoration:none;
+                }
+                #superfish-2 > li > a:hover, #superfish-2 > li > a.active, #superfish-2 > li > a.sfHover {
+                        color:#fff;
+                        background:#f17f60;
+                }
+
+        #superfish-2 ul {
+                background:none;
+                border:0px solid #1b1b1b;
+                display:none;
+                padding:15px 0;
+                top:47px !important;
+                width:160px !important;
+        }
+        .sf-navbar > li > ul { margin-top:3px;}
+
+                #superfish-2 ul li {
+                        background:none;
+                        border-bottom:0;
+                        height:auto;
+                        padding:0;
+                        text-align:left;
+                        margin-bottom:1px;
+                }
+                #superfish-2 ul li a {
+                        border:0;
+                        color:#fff;
+                        font-size:13px;
+                        display:inline-block;
+                        text-decoration:none;
+                        border-radius:5px;
+                        font-weight:normal;
+                        padding:11px 12px 12px 12px !important;
+                        text-align:left;
+                        background:#867a76;
+                }
+                #superfish-2 ul li a:hover, #superfish-2 ul li a.active, #superfish-2 ul li a.sfHover { background:#f17f60;}
+
+        #superfish-2 ul li ul{
+                left:160px !important;
+                padding:10px 0 !important;
+                top:0 !important;
+        }
+        #superfish-2 ul li ul li {
+                background:none;
+                margin-bottom:1px;
+        }
+/****************************************/
+#block-views-profiles-block .views-field {
+        font-size:18px;
+        line-height:18px;
+        margin-bottom:7px;
+        text-transform:uppercase;
+        font-family:"Open sans Condensed", sans-serif;
+        float:left;
+        width:90%;
+}
+#block-views-profiles-block .views-field-field-name, #block-views-profiles-block .views-field-field-job-title {
+	padding-left: 5px;
+	color: #fff;
+}
+.legendColorBox {
+	width: 10px;
+}

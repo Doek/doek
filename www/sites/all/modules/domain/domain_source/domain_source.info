@@ -7,11 +7,12 @@ files[] = domain_source.domain.inc
 files[] = domain_source.install
 files[] = domain_source.module
 files[] = domain_source.views.inc
+files[] = includes/domain_source_handler_filter_domain_id.inc
+files[] = tests/domain_source.test
 
-
-; Information added by drupal.org packaging script on 2012-01-11
-version = "7.x-3.3"
+; Information added by drupal.org packaging script on 2013-01-27
+version = "7.x-3.8"
 core = "7.x"
 project = "domain"
-datestamp = "1326295538"
+datestamp = "1359324096"
 

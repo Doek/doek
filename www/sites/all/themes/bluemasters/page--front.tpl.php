@@ -27,18 +27,6 @@ var google_conversion_value = 0;
         <div id="header-top-inside-left"><?php print render($page['header']); ?></div>
         <!--EOF:header-top-inside-left-->
         
-        <!--header-top-inside-left-feed-->
-        <div id="header-top-inside-left-feed">
-            <div id="topSocial">
-            <ul>									
-                <li><a class="twitter" href="http://twitter.com/morethanthemes" title="Follow Us on Twitter!"></a></li>
-                <li><a class="facebook" href="http://www.facebook.com/pages/More-than-just-themes/194842423863081" title="Join Us on Facebook!"></a></li>
-                <li><a class="rss" title="RSS" href="#" title="Subcribe to Our RSS Feed"></a></li>
-            </ul>
-            </div>
-        </div>
-        <!--EOF:header-top-inside-left-feed-->
-        
         <!--header-top-inside-left-right-->
         <div id="header-top-inside-right"><?php print render($page['search_area']);?></div> 
         <!--EOF:header-top-inside-left-right-->
@@ -54,23 +42,11 @@ var google_conversion_value = 0;
     	
         <!--logo-floater-->
         <div id="logo-floater"> 
-			<?php if ($logo): ?>
+        <?php if ($logo): ?>
             <a href="<?php print check_url($front_page); ?>" title="<?php print t('Home'); ?>">
             <img src="<?php print $logo; ?>" alt="<?php print t('Home'); ?>" />
             </a>
-            <?php endif; ?>
-            
-            <?php if ($site_name || $site_slogan): ?>
-            <div class="clearfix">
-				<?php if ($site_name): ?>
-                <span id="site-name"><a href="<?php print check_url($front_page); ?>" title="<?php print t('Home'); ?>"><?php print $site_name; ?></a></span>
-                <?php endif; ?>
-                
-                <?php if ($site_slogan): ?>
-                <span id="slogan"><?php print $site_slogan; ?></span>
-                <?php endif; ?>
-            </div>
-            <?php endif; ?>
+        <?php endif; ?>
         </div> <!--EOF:logo-floater-->
         
         <!--navigation-->
@@ -85,26 +61,38 @@ var google_conversion_value = 0;
     <div id="banner">
     <?php print render($page['banner']); ?>
     
+        <?php
+      $url1 = theme_get_setting('slide1_url','bluemasters'); $cap1 = theme_get_setting('slide1_desc','bluemasters'); $img1 = file_create_url(theme_get_setting('slide1_image','bluemasters'));
+      $url2 = theme_get_setting('slide2_url','bluemasters'); $cap2 = theme_get_setting('slide2_desc','bluemasters'); $img2 = file_create_url(theme_get_setting('slide2_image','bluemasters'));
+      $url3 = theme_get_setting('slide3_url','bluemasters'); $cap3 = theme_get_setting('slide3_desc','bluemasters'); $img3 = file_create_url(theme_get_setting('slide3_image','bluemasters'));
+      
+      $show1 = !empty($url1) && !empty($cap1) && !empty($img1);
+      $show2 = !empty($url2) && !empty($cap2) && !empty($img2);
+      $show3 = !empty($url3) && !empty($cap3) && !empty($img3);
+          
+        ?>
+        <?php if (theme_get_setting('slideshow_display','bluemasters') && ($show1 || $show2 || $show3)) : ?>
         <div class="main_view">
             <div class="window">
                 <div class="image_reel">
-                    <a href="<?php print url('node/3'); ?>"><img src="<?php print base_path() . drupal_get_path('theme', 'bluemasters') . '/images/slide-image-3.jpg'; ?>"></a>
-                    <a href="<?php print url('node/2'); ?>"><img src="<?php print base_path() . drupal_get_path('theme', 'bluemasters') . '/images/slide-image-2.jpg'; ?>"></a>
-                    <a href="<?php print url('node/1'); ?>"><img src="<?php print base_path() . drupal_get_path('theme', 'bluemasters') . '/images/slide-image-1.jpg'; ?>"></a>
+                    <?php if ($show1) : ?><a href="<?php print url($url1); ?>"><img src="<?php print $img1; ?>" /></a><?php endif; ?>
+                    <?php if ($show2) : ?><a href="<?php print url($url2); ?>"><img src="<?php print $img2; ?>" /></a><?php endif; ?>
+                    <?php if ($show3) : ?><a href="<?php print url($url3); ?>"><img src="<?php print $img3; ?>" /></a><?php endif; ?>
                 </div>
                 <div class="descriptions">
-                    <div class="desc" style="display: none;">About Bluemasters</div>
-                    <div class="desc" style="display: none;">Our Portfolio</div>
-                    <div class="desc" style="display: none;">Creation of Beaches</div>
+                    <?php if ($show1) : ?><div class="desc" style="display: none;"><?php print $cap1; ?></div><?php endif; ?>
+                    <?php if ($show2) : ?><div class="desc" style="display: none;"><?php print $cap2; ?></div><?php endif; ?>
+                    <?php if ($show3) : ?><div class="desc" style="display: none;"><?php print $cap3; ?></div><?php endif; ?>
                 </div>
             </div>
         
             <div class="paging">
-                <a rel="1" href="#">1</a>
-                <a rel="2" href="#">2</a>
-                <a rel="3" href="#">3</a>
+                <?php if ($show1) : ?><a rel="1" href="#">1</a><?php endif; ?>
+                <?php if ($show1) : ?><a rel="2" href="#">2</a><?php endif; ?>
+                <?php if ($show1) : ?><a rel="3" href="#">3</a><?php endif; ?>
             </div>
         </div>
+        <?php endif; ?>
     </div><!--EOF:banner-->
 
     <div id="home-blocks-area" class="clearfix">
@@ -157,18 +145,9 @@ var google_conversion_value = 0;
 <!--footer-bottom-->
 <div id="footer-bottom">
     <div id="footer-bottom-inside" class="clearfix">
-    	<div id="footer-bottom-inside-left">
+    	<div>
     		<?php print render($page['footer']);?>
     	</div>
-    	<div id="footer-bottom-inside-right">
-		<?php print theme('links__system_secondary_menu', array('links' => $secondary_menu, 'attributes' => array('id' => 'secondary-menu', 'class' => array('links', 'inline', 'clearfix')))); ?>
-    	</div>
-    	<div class="credits-container" style="clear:both; padding-top:12px;">Ported to Drupal for the Open Source Community by <a href="http://www.drupalizing.com">Drupalizing</a>, a Project of <a href="http://www.morethanthemes.com">More than Themes</a></div>     
-    </div>
-    <div class="credits-container clearfix">
-        <a title="Brought To You By: www.SmashingMagazine.com" class="smashing" href="http://www.smashingmagazine.com" target="_blank">Brought to you By: www.SmashingMagazine.com</a>
-        <a title="Drupalizing" class="drupalizing" href="http://www.drupalizing.com" target="_blank">Drupalizing</a> 
-    </div>  
 </div>
 <!--EOF:footer-bottom-->
 

@@ -60,7 +60,7 @@ function media_gallery_install() {
   cache_clear_all('*', 'cache', TRUE);
   drupal_static_reset('image_styles');
   drupal_static_reset('image_effects');
-  if (module_exists('styles')) {
+  if (module_exists('styles') && function_exists('styles_style_flush')) {
     styles_style_flush();
   }
 
@@ -293,18 +293,15 @@ function _media_gallery_controlled_fields() {
       'field_name' => 'media_description',
       'locked' => TRUE,
       'type' => 'text_long',
-      'translatable' => TRUE,
     ),
     'media_title' => array(
       'field_name' => 'media_title',
       'locked' => TRUE,
       'type' => 'text',
-      'translatable' => TRUE,
     ),
     'field_license' => array(
       'field_name' => 'field_license',
       'locked' => TRUE,
-      'translatable' => TRUE,
       'settings' => array(
         'allowed_values_function' => '_media_gallery_get_field_license_values',
       ),

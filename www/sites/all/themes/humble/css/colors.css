@@ -1,0 +1,20 @@
+
+
+body {
+  color: #666; 
+}
+
+a, #portfolio #filters a.current, ul.minitabs a:hover,#footer-top .block .item-list ul li h5 a:hover,.portfolio #filters a.selected { color:#ff3131; }
+
+#sidebar .hb_flickr_widget .flickr_badge_image img:hover, #footer .hb_flickr_widget .flickr_badge_image img:hover{ border-color:#ff3131; }
+
+a:hover, .entry h3.title a:hover, #post_content .meta .comment a:hover, .entry .meta .comment a:hover, #breadcrumb a:hover, #sidebar a:hover, #sidebar .hb_flickr_widget .flickr_badge_image img:hover, #footer .hb_flickr_widget .flickr_badge_image img:hover, #footer .hb_recentpost_widget .recentpost h5 a:hover, #sidebar .hb_tweet_widget #twitter_update_list li span a:hover, #footer .hb_tweet_widget #twitter_update_list li span a:hover, #comments .details .name span.date a:hover, #respond a:hover, ol.pinglist li a:hover, #portfolio .one_col h3 a:hover, #portfolio .one_col .comment a:hover, #portfolio h3.mini_title a:hover, .node h2 a:hover { color: #ff3131; }
+
+#nav ul li.current > a,#nav ul li > a.active,#nav ul li > a.active-trail { background-color: #ff3131; }
+
+.container_12 { background-color: rgba(255, 255, 255, 0.3); }
+#nav { float: left;}
+body { background-color: #f3f3f3 }
+#nav a{
+  color: #FFF;
+}

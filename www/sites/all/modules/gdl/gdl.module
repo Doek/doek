@@ -1,60 +1,7 @@
 <?php
 function gdl_menu() {
 	$items['gdl/gdl'] = array('page callback' => 'gdl_gdl', 'access callback' => true);
-        $items['gdl/boarding'] = array('page callback' => 'gdl_boarding', 'access callback' => true);
-	$items['gdl/test'] = array('page callback' => 'gdl_test', 'access callback' => true);
 	return $items;
-}
-
-function gdl_test() {
-	$fraggler = array();
-	$tjanser = array();
-	for($i = 1; $i <= 80; $i++) {
-		array_push($fraggler, array('id' => $i, 'tjanser' => array()));
-	}
-	for($i = 1; $i <= 5; $i++) {
-		switch($i) {
-			case 1:
-				$dag = 'sunday';
-				break;
-
-                        case 2:
-                                $dag = 'monday';
-                                break;
-
-                        case 3:
-                                $dag = 'tuesday';
-                                break;
-
-                        case 4:
-                                $dag = 'wednesday';
-                                break;
-
-                        case 5:
-                                $dag = 'thursday';
-                                break;
-		}
-		for($j = 0; $j < 10; $j++) {
-			array_push($tjanser, array('type' => 'kitchen', 'dag' => $dag));
-		}
-		for($j = 0; $j < 6; $j++) {
-			array_push($tjanser, array('type' => 'frokost', 'dag' => $dag));
-		}
-                for($j = 0; $j < 6; $j++) {
-                        array_push($tjanser, array('type' => 'opvask', 'dag' => $dag));
-                }
-	}
-        foreach($tjanser as $tkey => $tjans) {
-                uasort($fraggler, 'cmp');
-		foreach($fraggler as $fkey => $fraggle) {
-	                if (isFraggleEligeble($fraggle, $tjans)) {
-				array_push($fraggler[$fkey]['tjanser'], $tjans);
-				break;
-			}
-                }
-        }
-	uasort($fraggler, 'cmp');
-        die(var_dump($fraggler));
 }
 
 function pushTjans(&$tjanser, $type, $dag, $title, $count) {
@@ -65,12 +12,14 @@ function pushTjans(&$tjanser, $type, $dag, $title, $count) {
 
 function getSlutRen() {
 	$tjans = array();
-	pushTjans($tjans, 'Rengøring', '', 'Rengøre storhus A', 2);
-	pushTjans($tjans, 'Rengøring', '', 'Rengøre storhus C', 2);
-	pushTjans($tjans, 'Rnegøring', '', 'Rengøre storhus E', 2);
-	pushTjans($tjans, 'Rengøring', '', 'Rengøre fællessalen', 2);
-	pushTjans($tjans, 'Rangøring', '', 'Rengøre yderområderne', 2);
-	pushTjans($tjans, 'Rengøring', '', 'Rengøre køkkenet', 1);
+	pushTjans($tjans, 'Rengøring', '', 'rengøre hytte A', 1);
+	pushTjans($tjans, 'Rengøring', '', 'rengøre hytte B', 1);
+	pushTjans($tjans, 'Rengøring', '', 'rengøre hytte C', 1);
+	pushTjans($tjans, 'Rengøring', '', 'rengøre hytte D', 1);
+	pushTjans($tjans, 'Rnegøring', '', 'rengøre hytte E', 1);
+	pushTjans($tjans, 'Rengøring', '', 'rengøre indendørsområderne', 2);
+	pushTjans($tjans, 'Rangøring', '', 'rengøre yderområderne', 2);
+	pushTjans($tjans, 'Rengøring', '', 'rengøre køkkenet', 1);
 	return $tjans;
 }
 
@@ -79,51 +28,42 @@ function getTjanser() {
         for($i = 1; $i <= 5; $i++) {
                 switch($i) {
                         case 1:
-                                $dag = 'SÃ¸ndag';
+                                $dag = 'Fredag';
                                 pushTjans($tjanser, 'Kiosk', $dag, 'Kiosk Opfyldning', 2);
                                 break;
 
                         case 2:
-                                $dag = 'Mandag';
-                                pushTjans($tjanser, 'RengÃ¸ring', $dag, 'RengÃ¸ring A', 5);
-                                pushTjans($tjanser, 'RengÃ¸ring', $dag, 'RengÃ¸ring C', 5);
-                                pushTjans($tjanser, 'RengÃ¸ring', $dag, 'RengÃ¸ring E', 5);
-                                pushTjans($tjanser, 'RengÃ¸ring', $dag, 'RengÃ¸ring FÃ¦llessal', 5);
+                                $dag = 'Lørdag';
+                                pushTjans($tjanser, 'Rengøring', $dag, 'Rengøring Indendørsområder', 5);
                                 pushTjans($tjanser, 'Morgenmad', $dag, 'Morgenmad', 6);
                                 pushTjans($tjanser, 'Opvask', $dag, 'Frokost Opvask', 6);
-                                pushTjans($tjanser, 'KÃ¸kkenhold', $dag, 'Aftensmad Tilberedning', 14);
+                                pushTjans($tjanser, 'Køkkenhold', $dag, 'Aftensmad Tilberedning', 10);
                                 pushTjans($tjanser, 'Opvask', $dag, 'Aftensmad Opvask', 10);
                                 pushTjans($tjanser, 'Kiosk', $dag, 'Kiosk Opfyldning', 2);
                                 break;
 
                         case 3:
-                                $dag = 'Tirsdag';
-                                pushTjans($tjanser, 'RengÃ¸ring', $dag, 'RengÃ¸ring A', 5);
-                                pushTjans($tjanser, 'RengÃ¸ring', $dag, 'RengÃ¸ring C', 5);
-                                pushTjans($tjanser, 'RengÃ¸ring', $dag, 'RengÃ¸ring E', 5);
-                                pushTjans($tjanser, 'RengÃ¸ring', $dag, 'RengÃ¸ring FÃ¦llessal', 5);
+                                $dag = 'Søndag';
+                                pushTjans($tjanser, 'Rengøring', $dag, 'Rengøring Indendørsområder', 5);
                                 pushTjans($tjanser, 'Morgenmad', $dag, 'Morgenmad', 6);
                                 pushTjans($tjanser, 'Opvask', $dag, 'Frokost Opvask', 6);
-                                pushTjans($tjanser, 'Koekkenhold', $dag, 'Aftensmad Tilberedning', 13);
+                                pushTjans($tjanser, 'Køkkenhold', $dag, 'Aftensmad Tilberedning', 10);
                                 pushTjans($tjanser, 'Opvask', $dag, 'Aftensmad Opvask', 10);
                                 pushTjans($tjanser, 'Kiosk', $dag, 'Kiosk Opfyldning', 2);
                                 break;
 
                         case 4:
-                                $dag = 'Onsdag';
-                                pushTjans($tjanser, 'RengÃ¸ring', $dag, 'RengÃ¸ring A', 5);
-                                pushTjans($tjanser, 'RengÃ¸ring', $dag, 'RengÃ¸ring C', 5);
-                                pushTjans($tjanser, 'RengÃ¸ring', $dag, 'RengÃ¸ring E', 5);
-                                pushTjans($tjanser, 'RengÃ¸ring', $dag, 'RengÃ¸ring FÃ¦llessal', 5);
+                                $dag = 'Mandag';
+                                pushTjans($tjanser, 'Rengøring', $dag, 'Rengøring Indendørsområder', 5);
                                 pushTjans($tjanser, 'Morgenmad', $dag, 'Morgenmad', 6);
                                 pushTjans($tjanser, 'Opvask', $dag, 'Frokost Opvask', 6);
-                                pushTjans($tjanser, 'Koekkenhold', $dag, 'Aftensmad Tilberedning', 13);
+                                pushTjans($tjanser, 'Køkkenhold', $dag, 'Aftensmad Tilberedning', 10);
                                 pushTjans($tjanser, 'Opvask', $dag, 'Aftensmad Opvask', 10);
                                 pushTjans($tjanser, 'Kiosk', $dag, 'Kiosk Opfyldning', 2);
                                 break;
 
                         case 5:
-                                $dag = 'Torsdag';
+                                $dag = 'Tirsdag';
                                 pushTjans($tjanser, 'Morgenmad', $dag, 'Morgenmad', 6);
                                 break;
                 }
@@ -143,66 +83,60 @@ function getWorkers($fraggler, $title, $dag) {
 }
 
 function getFraggler($productId) {
-        $orders = commerce_order_load_multiple(array(), array('status' => 'completed'));
-        $uids = array();
-        foreach($orders as $order) {
-		$skip = false;
-		foreach($uids as $user) {
-			if ($user['id'] == $order->uid) {
-				$skip = true;;
-			}
-		}
-		if ($skip) {
-			continue;
-		}
-                foreach($order->commerce_line_items as $line_items) {
-                        foreach($line_items as $line_item) {
-                                $items = commerce_line_item_load($line_item['line_item_id']);
-                                foreach($items->commerce_product as $item) {
-                                        foreach($item as $product_entity) {
-						if ($product_entity['product_id'] == $productId) {
-	                                                $product = commerce_product_load($product_entity['product_id']);
-							$name = field_get_items('user', user_load($order->uid), 'field_name');
-                                                        array_push($uids, array('id' => $order->uid, 'tjanser' => array(), 'navn' => $name[0]['value']));
-                                                }
-                                        }
-                                }
-                        }
-                }
+  $orders = commerce_order_load_multiple(array(), array('status' => 'pending'));
+  $uids = array();
+  foreach($orders as $order) {
+    $skip = false;
+    foreach($uids as $user) {
+      if ($user['id'] == $order->uid) {
+        $skip = true;;
+      }
+    }
+    if ($skip) {
+      continue;
+    }
+    foreach($order->commerce_line_items as $line_items) {
+      foreach($line_items as $line_item) {
+        $items = commerce_line_item_load($line_item['line_item_id']);
+        foreach($items->commerce_product as $item) {
+          foreach($item as $product_entity) {
+            if ($product_entity['product_id'] == $productId) {
+              $product = commerce_product_load($product_entity['product_id']);
+              $name = field_get_items('user', user_load($order->uid), 'field_name');
+              array_push($uids, array('id' => $order->uid, 'tjanser' => array(), 'navn' => mb_convert_encoding($name[0]['value'], 'ISO-8859-1', mb_detect_encoding($name[0]['value'], 'auto'))));
+            }
+          }
         }
-	return $uids;
-}
-
-function gdl_boarding() {
-        $fraggler = getBoarding();
-	printBoarding($fraggler);
+      }
+    }
+  }
+  return $uids;
 }
 
 function gdl_gdl() {
 	$tjanser = getTjanser();
-	$fraggler = getFraggler(1);
-        foreach($tjanser as $tkey => $tjans) {
-                uasort($fraggler, 'cmp');
-                foreach($fraggler as $fkey => $fraggle) {
-                        if (isFraggleEligeble($fraggle, $tjans)) {
-                                array_push($fraggler[$fkey]['tjanser'], $tjans);
-                                break;
-                        }
-                }
-        }
-        uasort($fraggler, 'cmp');
+	$fraggler = getFraggler(24);
+  foreach($tjanser as $tkey => $tjans) {
+    uasort($fraggler, 'cmp');
+    foreach($fraggler as $fkey => $fraggle) {
+      if (isFraggleEligeble($fraggle, $tjans)) {
+        array_push($fraggler[$fkey]['tjanser'], $tjans);
+        break;
+      }
+    }
+  }
+  uasort($fraggler, 'cmp');
 	printGDL($fraggler);
 }
 
 function isFraggleEligeble($fraggle, $tjans) {
-	$eligeble = true;
+  return true;
 	foreach ($fraggle['tjanser'] as $fraggletjans) {
 		if ($fraggletjans['type'] == $tjans['type'] || $fraggletjans['dag'] == $tjans['dag']) {
-			$eligeble = false;
-			break;
+			return false;
 		}
 	}
-	return $eligeble;
+	return true;
 }
 
 function cmp($a, $b) {
@@ -220,130 +154,6 @@ function trimName($name, $maxlength) {
 	return $name;
 }
 
-function printBoarding($fraggler) {
-echo <<<END
-<html>
-<head>
-<title>Boarding Pass</title>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-<style>
-* {
-	margin:			0px;
-	padding:		0px;
-}
-#container {
-}
-.ticket {
-	position: 		relative;
-	width: 			680px;
-	height:			340px;
-}
-.ticket img {
-	width:			680px;
-	height:			340px;
-}
-.t_class {
-	position:		absolute;
-	top:			84px;
-	left:			35px;
-	font-family: 	Courier;
-	font-size: 		13px;
-	text-transform: uppercase;
-	font-weight: 	normal;
-}
-.t_name {
-	position:		absolute;
-	top:			139px;
-	left:			35px;
-	font-family: 	Courier;
-	font-size: 		13px;
-	text-transform: uppercase;
-}
-.t_date {
-	position:		absolute;
-	top:			140px;
-	left:			252px;
-	font-family: 	Courier;
-	font-size: 		12px;
-	letter-spacing: -2px;
-	text-transform: uppercase;
-}
-.t_boarding {
-	position:		absolute;
-	top:			188px;
-	left:			68px;
-	font-family: 	Courier;
-	font-size: 		13px;
-	letter-spacing: -2px;
-}
-.t_arrival {
-	position:		absolute;
-	top:			188px;
-	left:			216px;
-	font-family: 	Courier;
-	font-size: 		13px;
-	letter-spacing: -2px;
-}
-.t_from {
-	position:		absolute;
-	top:			231px;
-	left:			35px;
-	font-family: 	Courier;
-	font-size: 		13px;
-	text-transform: uppercase;
-}
-.t_to {
-	position:		absolute;
-	top:			269px;
-	left:			35px;
-	font-family: 	Courier;
-	font-size: 	13px;
-	text-transform: uppercase;
-}
-@media all {
-	.page-break:	display:none;
-}
-@media print {
-	.page-break:	display:block;
-	page-break-before:always;
-}
-</style>
-</head>
-<body>
-<div id="container">
-END;
-	sort($fraggler);
-	$i = 0;
-	$dest = 'Sunny Beach';
-	foreach($fraggler as $fraggle) {
-		if ($i%3 == 0) {
-			echo '<div class="page-break"></div>';
-		}
-		if ($i == 55) {
-			$dest = 'Ibiza';
-		}
-echo <<<END
-			<div class="ticket">
-				<img src="http://www.danielfrom.dk/ticket/boardingpass.png">
-				<div class="t_class">Monkeyclass</div>
-				<div class="t_name">$fraggle</div>
-				<div class="t_date">14/08-2011 - 18/08-2011</div>
-				<div class="t_boarding">12:00ish SUN 14 AUG</div>
-				<div class="t_arrival">14:30ish SUN 14 AUG</div>
-				<div class="t_from">DIT-Lab - Howitzvej 60 - Frederiksberg</div>
-				<div class="t_to">$dest</div>
-			</div>
-END;
-		$i++;
-	}
-echo <<<END
-</div>
-</body>
-</html>
-END;
-
-}
-
 function pushRum(&$pladser, $hus, $title, $count) {
 	for ($i = 0; $i < $count; $i++) {
 		array_push($pladser, $title);
@@ -352,100 +162,246 @@ function pushRum(&$pladser, $hus, $title, $count) {
 
 function getPladser() {
 	$pladser = array();
-	pushRum($pladser, 'Storhus A', 'A.1', 4);
-        pushRum($pladser, 'Storhus A', 'A.2', 4);
-        pushRum($pladser, 'Storhus A', 'A.3', 4);
-        pushRum($pladser, 'Storhus A', 'A.4', 4);
-        pushRum($pladser, 'Storhus A', 'A.5', 4);
-        pushRum($pladser, 'Storhus A', 'A.6', 6);
-        pushRum($pladser, 'Storhus C', 'C.1', 6);
-        pushRum($pladser, 'Storhus C', 'C.2', 6);
-        pushRum($pladser, 'Storhus C', 'C.3', 6);
-        pushRum($pladser, 'Storhus C', 'C.4', 6);
-        pushRum($pladser, 'Storhus C', 'C.5', 6);
-        pushRum($pladser, 'Storhus C', 'C.6', 6);
-        pushRum($pladser, 'Storhus E', 'E.2', 8);
-        pushRum($pladser, 'Storhus E', 'E.3', 8);
-        pushRum($pladser, 'Storhus E', 'E.4', 8);
-        pushRum($pladser, 'Storhus E', 'E.5', 8);
-        pushRum($pladser, 'Storhus E', 'E.6', 6);
+	//pushRum($pladser, 'Hytte A', 'A.1', 9); // For the ladies!
+  pushRum($pladser, 'Hytte A', 'A.2', 9);
+  pushRum($pladser, 'Hytte B', 'B.1', 9);
+  pushRum($pladser, 'Hytte B', 'B.2', 9);
+  pushRum($pladser, 'Hytte C', 'C.1', 9);
+  pushRum($pladser, 'Hytte C', 'C.2', 9);
+  pushRum($pladser, 'Hytte D', 'D.1', 9);
+  pushRum($pladser, 'Hytte D', 'D.2', 9);
+  pushRum($pladser, 'Hytte E', 'E.1', 9);
+  pushRum($pladser, 'Hytte E', 'E.2', 9);
 	return $pladser;
 }
 
 function getLadies() {
-	$ladies = array('Anna Vingaard Sehested', 'Ida Elhøj Henriksen', 'Sofie Højgaard', 'Nathalie Cordua', 'Marie-Louise Tønnov Schou', 'Fregne Amalie Aahøj Isaksen', 'Pamela Pedersen', 'Iben Buus');
+	$ladies = array('Louise Jylling', 'Trine Kølle', 'Simone Fitzwilliams', 'Amalie Sørensen Midskard', 'Victoria Handskemager Wagner', 'Katrine Refvem');
 	return $ladies;
 }
 
 function printGDL($fraggler) {
-$tja = array('Kiosk Opfyldning', 'RengÃ¸ring A', 'RengÃ¸ring C', 'RengÃ¸ring E', 'RengÃ¸ring FÃ¦llessal', 'Morgenmad', 'Frokost Opvask', 'Aftensmad Tilberedning', 'Aftensmad Opvask');
-$dage = array('SÃ¸ndag', 'Mandag', 'Tirsdag', 'Onsdag', 'Torsdag');
-echo '<html><head><meta http-equiv="content-type" content="text/html; charset=utf-8" /><style type="text/css">td { vertical-align: top; } table { page-break-after: always; }</style></head><body><div>';
-foreach($dage as $dag) {
-echo "<h2>$dag</h2>";
-echo "<table><tr>";
-$i = 0;
-foreach($tja as $tjans) {
-	if ($i%3 == 0) {
-		echo "</tr><tr>";
-	}
-echo "<td>";
-$workers = getWorkers($fraggler, $tjans, $dag);
-if (count($workers) > 0) {
-echo "<h3>$tjans</h3>";
-echo '<p>';
-foreach($workers as $worker) {
-	echo $worker.'<br />';
-}
-echo '</p>';
-}
-echo "<br /></td>";
-$i++;
-}
-$rest = $i%3;
-for($i = 0; $i < $rest; $i++) {
-	echo "<td></td>";
-}
-echo "</tr></table>";
-}
-echo '</div><div>';
-
-$pladser = getPladser();
-$ladies = getLadies();
-$slutTjanser = getSlutRen();
-
-$i = 0;
-$j = 0;
-$beboere = array();
-foreach($fraggler as $fraggle) {
-	if ($i%7 == 0) {
-		echo '<div style="page-break-after: always;"></div>';
-	}
-	$slut = $slutTjanser[$j%11]['title'];
-	echo '<br /><br />';
-	if (array_search($fraggle['navn'], $ladies)) {
-		$rum = 'E.1';
-	}
-	else {
-		$rum = $pladser[$i];
-		$i++;
-	}
-	array_push($beboere, array('navn' => $fraggle['navn'], 'rum' => $rum));
-	echo '<strong>'.$fraggle['navn'].'</strong><br />';
-	echo utf8_encode("Du skal bo på værelse ".$rum.", og dine tjanser er som følger:");
-	foreach($fraggle['tjanser'] as $tjans) {
-		echo '<br />'.$tjans['dag'].': '.$tjans['title'];
-	}
-	echo utf8_encode('<br />Under slutrengøringen skal du '.$slut.'.');
-	$j++;
+  $tja = array('Kiosk Opfyldning', 'Rengøring Indendørsområder', 'Morgenmad', 'Frokost Opvask', 'Aftensmad Tilberedning', 'Aftensmad Opvask');
+  $dage = array('Fredag', 'Lørdag', 'Søndag', 'Mandag', 'Tirsdag');
+  echo '
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="da" lang="da">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<style type="text/css">td { vertical-align: top; } table { page-break-after: always; }
+.container {
+  position: relative;
 }
 
-echo '<div style="page-break-after: always;"></div>';
-usort($beboere, 'compareArray');
-foreach($beboere as $beboer) {
-	echo '<br />'.$beboer['navn'].': '.$beboer['rum'];
+.ticket {
+  width: 640px;
 }
-echo '</div></body></html>';
+
+p {
+	font-family:"Lucida Console", Monaco, monospace;
+	font-size:0.8em;
+	line-height: 150%;
+}
+
+.destination{
+  position: absolute;
+  top: 150px;
+  left: 70px;
+}
+
+.navn {
+  position: absolute;
+  top: 150px;
+  left: 260px;
+}
+
+.plads {
+  position: absolute;
+  top: 200px;
+  left: 70px;
+}
+
+.flynummer {
+  position: absolute;
+  top: 200px;
+  left: 260px;
+}
+
+.afgangstid {
+  position: absolute;
+  top: 250px;
+  left: 70px;
+}
+
+.dato {
+  position: absolute;
+  top: 250px;
+  left: 260px;
+}
+
+.ankomst {
+  position: absolute;
+  top: 300px;
+  left: 70px;
+}
+
+.wakeup {
+  position: absolute;
+  top: 415px;
+  left: 70px;
+  width: 230px;
+}
+
+.tilvalg {
+  position: absolute;
+  top: 415px;
+  left: 350px;
+  width: 240px;
+}
+
+.tjanser {
+  position: absolute;
+  top: 625px;
+  left: 70px;
+  width: 525px;
+}
+
+.clear {
+	clear:both;
+	
+}
+.page-break, .container {
+	display:block;
+	page-break-before:always;
+}
+</style>
+</head>
+<body><div>';
+  foreach($dage as $dag) {
+    echo "<h2>$dag</h2>";
+    echo "<table><tr>";
+    $i = 0;
+    foreach($tja as $tjans) {
+      if ($i%3 == 0) {
+        echo "</tr><tr>";
+      }
+      echo "<td>";
+      $workers = getWorkers($fraggler, $tjans, $dag);
+      if (count($workers) > 0) {
+      echo "<h3>$tjans</h3>";
+      echo '<p>';
+      foreach($workers as $worker) {
+        echo $worker.'<br />';
+      }
+      echo '</p>';
+    }
+    echo "<br /></td>";
+    $i++;
+    }
+    $rest = $i%3;
+    for($i = 0; $i < $rest; $i++) {
+      echo "<td></td>";
+    }
+    echo "</tr></table>";
+  }
+  echo '</div><div>';
+
+  $pladser = getPladser();
+  $ladies = getLadies();
+  $slutTjanser = getSlutRen();
+  $slutcount = count($slutTjanser);
+
+  $i = 0;
+  $j = 0;
+  $beboere = array();
+  
+	sort($fraggler);
+	$dest = 'Sunny Beach';
+	$threshold = intval(count($fraggler) / 2) + 1;
+	
+	echo '<div id="container">';
+  foreach($fraggler as $fraggle) {
+		if ($j > $threshold) {
+			$dest = 'Ibiza';
+		}
+    // FOrdel på slutrengøringstjanser.
+    $slut = $slutTjanser[$j%$slutcount]['title'];
+    echo '<br /><br />';
+    
+    // Fordel på værelser.
+    if (array_search($fraggle['navn'], $ladies)) {
+      $rum = 'A.1';
+    }
+    else {
+      $rum = $pladser[$i];
+      $i++;
+    }
+    array_push($beboere, array('navn' => $fraggle['navn'], 'rum' => $rum));
+    
+    
+echo <<<END
+END;
+echo '
+  <div class="container">
+    <img src="/sites/default/files/boarding.png" class="ticket" />
+    <div class="destination"><p>'.$dest.'</p></div> 
+    <div class="navn"><p>'.$fraggle['navn'].'</p></div>
+    <div class="clear">&nbsp;</div>
+    <div class="plads"><p>'.$rum.'</p></div>
+    <div class="flynummer"><p>50366FD</p></div>
+    <div class="clear">&nbsp;</div>
+    <div class="afgangstid"><p>10:30</p></div>
+    <div class="dato"><p>24. August 2012</p></div>
+    <div class="ankomst"><p>15:30ish</p></div>
+    <div class="clear">&nbsp;</div>
+    <div class="wakeup">
+    	<p>
+    	Lørdag: 9:00 <br/>
+        Søndag: 9:00 <br/>
+        Mandag: 9:00 <br/>
+        Tirsdag: 9:00 <br/>
+        <i>Vær oppe til tiden. Toiletterne i vejlederområdet trænger til vask!</i>
+        </p>
+    </div>
+    <div class="tilvalg">
+    <p>
+    	Fredag: Bustur<br />
+      Lørdag: Djøf Cup. \'90\'er\' fest<br/>
+      Søndag: CBS 360*. \'For lækker til love\' fest<br/>
+      Mandag: Kommunikation og find job. \'Romer\' fest<br/>
+      Tirsdag: Party Bus
+    </p>
+    </div>
+    <div class="clear">&nbsp;</div>
+    <div class="tjanser">
+    	<p>';
+    	foreach ($fraggle['tjanser'] as $tjans) {
+        echo $tjans['dag'].': '.$tjans['title'].'<br />';
+    	}
+      echo 'Under slutrengøringen skal du '.$slut.'.<br />
+        <i>Skulle du af mystiske årsager udeblive fra en tjans, skal du glæde dig til vejledernes straf.</i>
+        </p>
+    </div>
+  </div>
+';
+    $j++;
+	}
+echo '
+</div>
+';
+    
+    
+    
+
+  echo '<div style="page-break-after: always;"></div>';
+  usort($beboere, 'compareArray');
+  echo '<table>';
+  foreach($beboere as $beboer) {
+    echo '<tr><td>'.$beboer['navn'].'</td><td>'.$beboer['rum'] . '</td></tr>';
+  }
+  echo '</table>';
+  echo '</div></body></html>';
 }
 
 function compareArray($a, $b) {
@@ -453,119 +409,5 @@ function compareArray($a, $b) {
 		return 0;
 	}
 	return ($a['navn'] < $b['navn']) ? -1 : 1;
-}
-
-function getBoarding() {
-return array (
-'Christensen, Kasper SÃ¸gaard',
-'Gramstrup, Daniel KÃ¸lner',
-'GÃ¼r, Faruk',
-'Hansen, RenÃ© Munch Rosendal',
-'Jensen, Mark Kuhre',
-'JÃ¸rgensen, Christian Jung',
-'Langpapp, Marc',
-'LindstrÃ¸m, Marcus KÃ¸hnke',
-'Lovrenovic, Bruno',
-'Matthiesen, Philip Sander',
-'Moseley, David Hvolby',
-'Pham, Cuu van',
-'Rasmussen, Jacob MÃ¸ller',
-'Riis, Jacob Alexander',
-'Tahir, Anam Nusrat',
-'Ameen, Ahsan Bilal',
-'Ashty Ismail, Shawis',
-'Bondum, Mikael Hazan',
-'Carlsen, Christian Schou',
-'Eppers, Per Bork',
-'Jensen, Jaspar Bo Neergaard',
-'Joachimsohn, Kerstin Maibritt',
-'Larsen, Kenny Sune Lynghamar',
-'Lockwood, Rasmus',
-'Ntaho, Franck Arnaud',
-'Poulsen, Kasper Bagge',
-'Romerdahl, Frederik RÃ¸nberg',
-'Sehested, Anna Vingaard',
-'Thompson, Jakob Sebastian',
-'Vind, Frederik Bang',
-'Bagger, Phillip Michael',
-'Beudard-Andersen, RÃ©mi Kim',
-'BjÃ¸rlig, Alex',
-'BrÃ¦ndstrup, Mads Sebastian',
-'Buus, Iben',
-'Deni, Monir',
-'El-Wali, Mohammad Taha Sami',
-'Ginnerup, Daniel',
-'HÃ¸jgaard, Sofie Roer',
-'Larsen, Christian Ahlefeldt',
-'Meilvang, Nicolas Beck',
-'Nielsen, Jacob Bach',
-'Ranch, Jacob',
-'Samadi, Hamid',
-'Zaatari, Ayman',
-'Ã˜sterby, Kasper',
-'Al-Kabani, Hawrae',
-'Andersen, Klas',
-'Charity, Christian Blem',
-'Cordua, Nathalie',
-'Nielsen, Mathias Langedill Schau',
-'Hedegaard, Jakob Alexander',
-'Isaksen, Fregne Amalie AahÃ¸j',
-'Jensen, Mick Lindblad',
-'Joensen, Ragnar',
-'Johnson, Lucas Wentworth Weinberger',
-'Landgreen, Marc Pascal',
-'Pedersen, Pamela',
-'Pontoppidan, Frederik BaandhÃ¸j',
-'Tahseen, Arsal',
-'Thalbitzer, Andreas',
-'YstrÃ¸m, Kuno Marchel Foldager',
-'Arndtsen, Nicolaj Hangaard',
-'Bengtsen, Niclas AngelsÃ¸',
-'Danielsen, Christian De Fries',
-'Finnerup, Jens-Christian',
-'Hansen, Rasmus Stjerne',
-'Hansen, Lars Vang',
-'Henriksen, Elmer SkjÃ¸dt',
-'Jensen, Anders Hejselbak',
-'JÃ³nsson, JÃ¶rundur Albert',
-'Krog, Kristian Mark Heukendorff',
-'MÃ¸ller, Martin Hegelund',
-'Nyegaard, Nicolaj Steen',
-'Pedersen, Christian Vestergaard',
-'Petersen, Jesper BjÃ¸rn',
-'Varming, Anders Kokkenborg',
-'Vindis, Sebastian',
-'Waag, Helgi',
-'Ahadi, Nabil-Ahmad',
-'Bentzen, Frederik Engelbrecht',
-'Brandt, Bo Overgaard',
-'Brix, Niels Peter',
-'Johansen, Alexander Rosenberg',
-'Kabrit, Rida Andrew',
-'Kaspersen, Nicklas Billeskov',
-'Lindholm, Joachim Julius',
-'NÃ¸rgaard, Malte Lillelund',
-'Ryberg, Toke Abildgaard',
-'SÃ¸rensen, Danny Selim',
-'Thorsen, Martin Hechmann',
-'Toft, Tobias',
-'Varle, Mikael Jarlkov Buch',
-'Vissing, Emil Hawwa',
-'Do, John',
-'Hansen, Christian Weait',
-'Henriksen, Ida ElhÃ¸j',
-'Jensen, Andreas Bo',
-'Karlsen, Anders KÃ¸ster',
-'Kristiansen, Mikkel Jordahn',
-'Liang, Daniel Kai-Kuan',
-'LillebÃ¦k, Niklas Suhr',
-'Neven, Mikkel',
-'Olsson, Lars',
-'Schou, Marie-Louise TÃ¸nnov',
-'Stephansen, Nicolai',
-'Stokholm, Lasse',
-'Welling, Tobias Hvilsted',
-'Worm, Lasse'
-);
 }
 ?>

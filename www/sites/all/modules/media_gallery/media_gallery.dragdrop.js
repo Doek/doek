@@ -5,7 +5,7 @@ Drupal.behaviors.mediaGallerySort.attach = function (context, settings) {
   var $ = jQuery;
   // Create a drag-and-drop editor for gallery collections.
   var $collection = $('.media-gallery-collection', context).once('media-gallery-sortable');
-  $('.node-media-gallery.node-teaser .float-overflow', $gallery).once('media-gallery-draggable', Drupal.mediaGallerySort.addDraggableIcon);
+  $('.media-collection-item-wrapper', $collection).once('media-gallery-draggable', Drupal.mediaGallerySort.addDraggableIcon);
   if ($collection.length && settings.mediaGallerySortCollectionUrl) {
     $collection.sortable();
     //Drupal.mediaGallerySort.setHeight($collection);
@@ -15,7 +15,7 @@ Drupal.behaviors.mediaGallerySort.attach = function (context, settings) {
     $collection.bind('sortstop', Drupal.mediaGallerySort.setHeight);
   }
   // Create a drag-and-drop editor for individual gallery grid pages.
-  var $gallery = $('body.page-node #block-system-main .node-media-gallery .media-gallery-media > .field-items').once('media-gallery-sortable');
+  var $gallery = $('.media-gallery-view-full.media-gallery-media > .field-items').once('media-gallery-sortable');
   $('.media-gallery-item-wrapper', $gallery).once('media-gallery-draggable', Drupal.mediaGallerySort.addDraggableIcon);
   if ($gallery.length && settings.mediaGallerySortGalleryUrl) {
     $gallery.sortable();
@@ -77,7 +77,7 @@ Drupal.mediaGallerySort.handle_update = function (event, ui) {
     if (reorder) {
       var $ = jQuery;
       var i, newId, $item;
-      var $toReorder = $('#block-system-main [id^=' + data.idPrefix + ']').addClass('media-gallery-to-reorder');
+      var $toReorder = $('.media-gallery-view-full [id^=' + data.idPrefix + ']').addClass('media-gallery-to-reorder');
       if ($toReorder.length !== data.order.length) {
         // We seem to have the wrong set of objects to reorder, so just
         // refresh the page; the server has the right order already.

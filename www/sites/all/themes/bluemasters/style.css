@@ -71,7 +71,7 @@ html[xmlns] .clearfix { display: block; }
 
 #header { padding: 29px 0 21px 0; }
 
-#logo-floater { float:left;  margin: 0; text-align: left; width:385px; }
+#logo-floater { float:left;  margin: 0; text-align: left; width:300px; }
 
 #logo-floater a { outline:none; }
 
@@ -79,7 +79,7 @@ html[xmlns] .clearfix { display: block; }
 
 #slogan { color:#485766; text-transform:uppercase; font-size:10px; }
 
-#navigation { float:right; width:525px; margin:10px 0 0 40px;  display:block; }
+#navigation { float:right; /*width:525px;*/ margin:10px 0 0 40px;  display:block; }
 
 #main-area { background: transparent; clear:both; display:block; overflow:hidden;  background-image:url(images/home-block-box-bg.png); padding: 20px;}
 
@@ -507,3 +507,15 @@ ol ol { list-style-type:upper-alpha; }
 ol ol ol {list-style-type:lower-alpha; }
 li { display:list-item; }
 ul li a { text-decoration:none; }
+
+
+.view-sponsors td, .view-sponsors table {
+	border-width: 0px !important;
+}
+.view-sponsors .view-content {
+	text-align: center;
+}
+.view-sponsors .view-content table {
+	margin-left: auto;
+	margin-right: auto;
+}

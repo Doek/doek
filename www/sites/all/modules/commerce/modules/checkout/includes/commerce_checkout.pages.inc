@@ -32,7 +32,7 @@ function commerce_checkout_router($order, $checkout_page = NULL) {
     // Only redirect if the target page is different from the page the user was
     // trying to access. Otherwise give a 403 error.
     if (!empty($target_uri) && $target_uri !== $_GET['q']) {
-      return drupal_goto($target_uri);
+      drupal_goto($target_uri);
     }
     else {
       return MENU_ACCESS_DENIED;
@@ -128,8 +128,9 @@ function commerce_checkout_form($form, &$form_state, $order, $checkout_page) {
         if (!isset($GLOBALS['_rules_action_drupal_goto_do'])){
           $form_state['storage']['themed_messages'][$pane_id] = theme('status_messages');
 
-          $form[$pane_id . '_messages'] = array(
+          $pane_form[$pane_id . '_messages'] = array(
             '#markup' =>  $form_state['storage']['themed_messages'][$pane_id],
+            '#weight' => -50,
           );
         }
       }
@@ -181,6 +182,8 @@ function commerce_checkout_form($form, &$form_state, $order, $checkout_page) {
     // submit handlers because we're using hook_forms() to use this form builder
     // function and to avoid issues if other modules implement button level submit
     // handlers on these or custom checkout buttons.
+    $button_operator = '<span class="button-operator">' . t('or') . '</span>';
+
     if (!$checkout_page['prev_page'] && !empty($checkout_page['back_value'])) {
       // Add an empty "Back" button value to avoid submission errors.
       $form['buttons']['back'] = array(
@@ -197,7 +200,7 @@ function commerce_checkout_form($form, &$form_state, $order, $checkout_page) {
         '#attributes' => array('class' => array('checkout-cancel')),
         '#submit' => array('commerce_checkout_form_cancel_submit'),
         '#limit_validation_errors' => array(),
-        '#prefix' => t('or'),
+        '#prefix' => $button_operator,
       );
     }
     elseif ($checkout_page['prev_page'] && !empty($checkout_page['back_value'])) {
@@ -207,7 +210,7 @@ function commerce_checkout_form($form, &$form_state, $order, $checkout_page) {
         '#attributes' => array('class' => array('checkout-back')),
         '#submit' => array('commerce_checkout_form_back_submit'),
         '#limit_validation_errors' => array(),
-        '#prefix' => t('or'),
+        '#prefix' => $button_operator,
       );
     }
   }

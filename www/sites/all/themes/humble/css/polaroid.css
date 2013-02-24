@@ -1,0 +1,47 @@
+/*-----------------------------------------------*/
+/* POLAROID SLIDE
+/*-----------------------------------------------*/
+
+#polaroid {
+	width: 650px;
+	height: 350px;
+	position: relative;
+	overflow: hidden;
+	background-color: transparent;
+	background-position: 0px 0px;
+	background-repeat: no-repeat;
+}
+
+#big, #altern {
+	height: 350px;
+}
+
+#thumbs {
+	display: none;
+	position: absolute;
+	left:0;
+	bottom: 50px;
+	z-index: 100;
+}
+
+#thumbs .thumb {
+	position: absolute;
+	height: 120px;
+	cursor: pointer;
+}
+
+#thumbs img {
+	border:5px solid #fff;
+    -moz-box-shadow:1px 1px 7px rgba(0, 0, 0, 0.50);
+    -webkit-box-shadow:1px 1px 7px rgba(0, 0, 0, 0.50);
+    box-shadow:1px 1px 7px rgba(0, 0, 0, 0.50);
+}
+
+#goto {
+	display: block;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+}

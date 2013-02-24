@@ -64,7 +64,7 @@ function quickpay_test_page() {
 }
 
 /**
- *
+ * Form builder.
  */
 function quickpay_test_settings_form() {
   $form['quickpay_test_settings'] = array(
@@ -108,7 +108,7 @@ function quickpay_test_cancel_page($order_id) {
 }
 
 /**
- *
+ * Implements hook_quickpay_factory().
  */
 function quickpay_test_quickpay_factory($order_id) {
   return new Quickpay(_quickpay_test_settings());

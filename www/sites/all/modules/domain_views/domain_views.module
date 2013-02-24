@@ -23,6 +23,35 @@ function domain_views_views_api() {
 }
 
 /**
+ * Provides a switch fo 7.x.2 / 7.x.3 compatibility.
+ */
+function domain_views_api_version() {
+  if (function_exists('domain_api_version')) {
+    return domain_api_version();
+  }
+  return 2;
+}
+
+/**
+ * Implement hook_ctools_plugin_api().
+ */
+function domain_views_ctools_plugin_api($module, $api) {
+  if ($module == 'views_ui') {
+    return array('version' => 2);
+  }
+}
+
+/**
+ * Implement hook_ctools_plugin_directory().
+ */
+function domain_views_ctools_plugin_directory($module, $plugin) {
+  // Only supported by Domain Access 7.x.3
+    if (domain_views_api_version() > 2 && $module == 'views_ui' && !empty($plugin)) {
+    return "plugins/$plugin";
+  }
+}
+
+/**
  * Implement hook_theme().
  */
 function domain_views_theme() {
@@ -127,7 +156,7 @@ function domain_views_get_grants($account = NULL)  {
   // Domain All gets in the way of normal grants.
   if (!empty($user_grants['domain_all'])) {
     $user_grants['domain_id'] = array($_domain['domain_id']);
-    _domain_views_alter_grants($user_grants);
+    _domain_views_alter_grants($user_grants, $account, 'view');
   }
   $grants[$account->uid] = $user_grants;
   return $grants[$account->uid];
@@ -137,15 +166,15 @@ function domain_views_get_grants($account = NULL)  {
  * Helper function to hook_domaingrants().
  * This should be replaced by a drupal_alter().
  */
-function _domain_views_alter_grants(&$grants) {
+function _domain_views_alter_grants(&$grants, $account, $op) {
   static $_modules;
   if (!isset($_modules)) {
-    $_modules = module_implements('domaingrants');
+    $_modules = module_implements('node_grants_alter');
   }
   if (!empty($_modules)) {
     foreach ($_modules as $module) {
       // Cannot use module_invoke_all() since these are passed by reference.
-      $function = $module . '_domaingrants';
+      $function = $module . '_node_grants_alter';
       $function($grants, $account, $op);
     }
   }

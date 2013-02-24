@@ -1,0 +1,82 @@
+
+body { font: normal normal normal 12px/normal arial; color: #666; }
+
+h1{ font-size:34px; }
+h2{ font-size:30px; }
+h3{ font-size:26px; }
+h4{ font-size:20px; }
+h5{ font-size:18px; }
+h6{ font-size:14px; }
+#footer .block h2{
+  font-size: 14px;
+}
+
+h1, h2, h3, h4, h5, h6, #nav ul li a, blockquote cite {
+  font-family:  "CartoGothicStdRegular";
+}
+
+blockquote p {
+  font-family: "CartoGothicStdItalic";
+}
+
+a, #portfolio #filters a.current, ul.minitabs a:hover,#footer-top .block .item-list ul li h5 a:hover,.portfolio #filters a.selected { color:#ff3131; }
+
+#sidebar .hb_flickr_widget .flickr_badge_image img:hover, #footer .hb_flickr_widget .flickr_badge_image img:hover{ border-color:#ff3131; }
+
+a:hover, .entry h3.title a:hover, #post_content .meta .comment a:hover, .entry .meta .comment a:hover, #breadcrumb a:hover, #sidebar a:hover, #sidebar .hb_flickr_widget .flickr_badge_image img:hover, #footer .hb_flickr_widget .flickr_badge_image img:hover, #footer .hb_recentpost_widget .recentpost h5 a:hover, #sidebar .hb_tweet_widget #twitter_update_list li span a:hover, #footer .hb_tweet_widget #twitter_update_list li span a:hover, #comments .details .name span.date a:hover, #respond a:hover, ol.pinglist li a:hover, #portfolio .one_col h3 a:hover, #portfolio .one_col .comment a:hover, #portfolio h3.mini_title a:hover, .node h2 a:hover { color: #ff3131; }
+
+#nav ul li.current > a,#nav ul li > a.active,#nav ul li > a.active-trail { background-color: #ff3131; }
+
+.container_12 { background-color: rgba(255, 255, 255, 0.3); }
+
+#slide #sleft h1 { font-size: 34px; }
+#slide #sleft h2 { font-size: 20px; }
+
+#slide #sright #texture { background: transparent url(../images/textures/noisestrip.png) repeat 0 0; }
+
+#nav { float: left;}
+body { background: #f3f3f3 url(../images/body_bg.jpg) no-repeat center center fixed; }
+.view-galla .views-row {
+	width: 31%;
+	margin-right: 2%;
+	float: left;
+}
+.view-galla .views-row .views-field-title h3
+,.view-galla .views-row .views-field-title h3 a 
+,.view-galla .views-row .views-field-title h3 a:hover 
+,.view-galla .views-row .views-field-title h3 a:visited {
+	height: 25px;
+	padding-top: 5px;
+	background: transparent url(../images/boxes_bg.png) repeat-x center 0;
+	text-align: center;
+	font-size: 18px;
+	color: white !important;
+}
+.view-galla .views-row img {
+	width: 60px;
+	height: 50px;
+	float: right;
+	margin-top: 18px;
+}
+.view-galla .views-row p 
+,.view-galla .views-row p span {
+	color: #888 !important;
+	padding-left: 5px;
+}
+#node-76 .form-text {
+	width: 293px;
+}
+#block-views-sponsors-block-1 *  {
+	background: transparent;
+	border: none;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+}
+#block-views-sponsors-block-1 table tbody td {
+	vertical-align: middle;
+}
+#block-views-sponsors-block-1 table tbody td img {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}

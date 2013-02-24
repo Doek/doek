@@ -11,23 +11,22 @@ class QuickpayException extends Exception {}
  * associated with a Quickpay class, containing the configuration.
  */
 class Quickpay {
-  private static $currency_info = array();
-  private $test_mode = FALSE;
-  private $debug = FALSE;
-  private $merchant;
-  private $secret;
-  private $order_prefix = '';
-  private $accepted_cards = array('creditcard');
-  // private $auto_fee
-  private $popup = FALSE;
-  // private $link_message // needed? shouldn't the calling module create that page?
-  private $language = LANGUAGE_NONE; // With a 'use user language' default option.
+  protected static $currency_info = array();
+  protected $test_mode = FALSE;
+  protected $debug = FALSE;
+  protected $merchant;
+  protected $secret;
+  protected $order_prefix = '';
+  protected $accepted_cards = array('creditcard');
+  protected $popup = FALSE;
+  // With a 'use user language' default option.
+  protected $language = LANGUAGE_NONE;
 
   /**
    * Constructor. Takes a settings array.
    */
   public function __construct($options) {
-    // Check options, throw exception if problems
+    // Check options, throw exception if problems.
     if (empty($options['merchant']) || !preg_match('/^[0-9]{8}$/', $options['merchant'])) {
       throw new QuickpayException(t('Invalid merchant number'));
     }
@@ -68,46 +67,51 @@ class Quickpay {
    * Load a transaction from $_POST.
    */
   public function transaction_callback() {
-   static $md5_order = array(
-    'msgtype',
-    'ordernumber',
-    'amount',
-    'currency',
-    'time',
-    'state',
-    'qpstat',
-    'qpstatmsg',
-    'chstat',
-    'chstatmsg',
-    'merchant',
-    'merchantemail',
-    'transaction',
-    'cardtype',
-    'cardnumber',
-    'cardexpire',
-    'fraudprobability',
-    'fraudremarks',
-    'fraudreport',
-    'fee',
-  );
+    static $md5_order = array(
+      'msgtype',
+      'ordernumber',
+      'amount',
+      'currency',
+      'time',
+      'state',
+      'qpstat',
+      'qpstatmsg',
+      'chstat',
+      'chstatmsg',
+      'merchant',
+      'merchantemail',
+      'transaction',
+      'cardtype',
+      'cardnumber',
+      'cardhash',
+      'cardexpire',
+      'splitpayment',
+      'fraudprobability',
+      'fraudremarks',
+      'fraudreport',
+      'fee',
+    );
 
-  // Check that it validates.
-  $md5_string = "";
-  foreach ($md5_order as $field) {
-    if (isset($_POST[$field])) {
-      $md5_string .= $_POST[$field];
+    // Check that it validates.
+    $md5_string = "";
+    foreach ($md5_order as $field) {
+      if (isset($_POST[$field])) {
+        $md5_string .= $_POST[$field];
+      }
     }
-  }
-  if (md5($md5_string . $this->secret) != $_POST['md5check']) {
-    watchdog('quickpay', 'Transaction callback md5 didn\'t verify. MD5 calculated: @md5 Data: @data',
-      array('@data' => print_r($_POST, TRUE), '@md5' => md5($md5_string . $this->secret)), WATCHDOG_ERROR);
-    return NULL;
-  }
+    if (md5($md5_string . $this->secret) != $_POST['md5check']) {
+      watchdog('quickpay', 'Transaction callback md5 didn\'t verify. MD5 calculated: @md5 Data: @data',
+        array(
+          '@data' => print_r($_POST, TRUE),
+          '@md5' => md5($md5_string . $this->secret),
+        ), WATCHDOG_ERROR);
+      return NULL;
+    }
 
-  $txn = new QuickpayTransaction($this);
-  $txn->load_response($_POST);
-  return $txn;
- }
+    $txn = new QuickpayTransaction($this);
+    $txn->load_response($_POST);
+    return $txn;
+  }
 
   /**
    * Returns a form for redirecting user to Quickpay for payment.
@@ -119,6 +123,7 @@ class Quickpay {
       'description' => NULL,
       'continue_url' => NULL,
       'cancel_url' => NULL,
+      'splitpayment' => TRUE,
     );
 
     if (empty($options['continue_url'])) {
@@ -181,6 +186,7 @@ class Quickpay {
     $data['callbackurl'] = url(_quickpay_md5_path('quickpay/' . $order_id . '/' . $module), array('absolute' => TRUE));
 
     $data['autocapture'] = ($options['autocapture']) ? '1' : '0';
+    $data['splitpayment'] = ($options['splitpayment']) ? '1' : '0';
 
     if (!empty($options['description'])) {
       $data['description'] = $options['description'];
@@ -202,7 +208,6 @@ class Quickpay {
 
     // Other possible variables:
     // $data['CUSTOM_*'];
-
     $data['md5check'] = $this->md5checksum($data);
 
     $form['#method'] = 'POST';
@@ -219,44 +224,6 @@ class Quickpay {
       '#id' => $button_id,
     );
 
-    // Create a popup, if so instructed
-    // Not supported, for the moment being.
-/*     if ($this->popup) { */
-/*     // The oddity of setting the return urls by JavaScript, ensures that */
-/*     // we're only using the JavaScript requiring popdown page if JavaScript is */
-/*     // enabled. */
-
-/*     // Replace continueurl and cancelurl with a md5 protected call to */
-/*     // quickpay_popdown. */
-/*     $data['continueurl'] = url(_quickpay_md5_path('quickpay_popdown/' . rawurlencode($data['continueurl'])), array( 'absolute' => TRUE)); */
-/*     $data['cancelurl'] = url(_quickpay_md5_path('quickpay_popdown/' . rawurlencode($data['cancelurl'])), array('absolute' => TRUE)); */
-
-/*     $data['md5check'] = $this->md5checksum($data); */
-/*     // Interpolation of arrays in strings is iffy. Lets just use regular scalars. */
-/*     $continueurl = $data['continueurl']; */
-/*     $cancelurl = $data['cancelurl']; */
-/*     $md5check = $data['md5check']; */
-/*       $js = <<<EOF */
-/*         jQuery(document).ready(function() { */
-/*             console.dir(jQuery('#$button_id').closest('form')); */
-/*             jQuery('#$button_id').closest('form').submit(function() { */
-/*                 var left = (screen.width) ? (screen.width-670)/2 : 0; */
-/*                 var top = (screen.height) ? (screen.height-500)/2 : 0; */
-/*                 jQuery(this).find('#edit-continueurl').val('$continueurl'); */
-/*                 jQuery(this).find('#edit-cancelurl').val('$cancelurl'); */
-/*                 jQuery(this).find('#edit-md5check').val('$md5check'); */
-/*                 window.open('','quickpay_payment', 'top=' + top + ',left=' + left + ',height=500,width=670,scrollbars=yes,toolbars=no,statusbar=yes,location=0'); */
-/*                 jquery(this).attr('target', 'quickpay_payment'); */
-/*                 return false; */
-/*               }); */
-/*           }); */
-/* EOF; */
-/*       $form['submit']['#attached'] = array( */
-/*         'js' => array( */
-/*           $js => array('type' => 'inline'), */
-/*         ), */
-/*       ); */
-/*     } */
     return $form;
   }
 
@@ -278,7 +245,7 @@ class Quickpay {
     }
 
     if (!$this->validate_request($request_data)) {
-      throw new QuickpayException(t("Request message didn\'t pass validation."));
+      throw new QuickpayException(t("Request message didn't pass validation."));
     }
     $request_options = array(
       'headers' => array('Content-Type' => 'application/x-www-form-urlencoded'),
@@ -286,14 +253,17 @@ class Quickpay {
       'data' => http_build_query($request_data, FALSE, '&'),
       'max_redirects' => 0,
     );
-    /**
+    /*
      * We're using curl as drupal_http_request cannot be used in unit tests.
      */
+    if (!function_exists('curl_init')) {
+      throw new QuickpayException(t("cURL not found."));
+    }
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, 'https://secure.quickpay.dk/api');
     curl_setopt($ch, CURLOPT_POST, count($request_data));
     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($request_data, FALSE, '&'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     $response = curl_exec($ch);
 
 
@@ -331,7 +301,6 @@ class Quickpay {
       'cvd',
       // 'autofee',
       'cardtypelock',
-      //
       'ipaddress',
       'transaction',
       'description',
@@ -356,47 +325,49 @@ class Quickpay {
    *
    * Throws an exception on failure.
    *
-   * @param $data Associative array of params.
+   * @param array $data
+   *   Associative array of parameters.
    *
+   * @return bool
+   *   Always true, an exception is thrown on error.
    */
   protected function validate_request($data) {
-    $fields =
-      array(
-        'protocol' => '/^(' . QUICKPAY_VERSION_API . '|' . QUICKPAY_VERSION_POST. ')$/',
-        'msgtype' => '/^[a-z]+$/',
-        'merchant' => '/^[0-9]{8}$/',
-        'ordernumber' => '/^[a-zA-Z0-9]{4,20}$/',
-        'amount' => '/^[0-9]{1,10}$/',
-        'finalize' => '/^[0-1]{1}$/',
-        'currency' => '/^[A-Z]{3}$/',
-        'autocapture' => '/^[0-1]{1}$/',
-        'cardnumber' => '/^[0-9]{13,19}$/',
-        'expirationdate' => '/^[0-9]{4}$/',
-        'cvd' => '/^[0-9]{0,4}$/',
-        'cardtypelock' => '/^[a-zA-Z,]{0,128}$/',
-        'splitpayment' => '/^[0-1]{1}$/',
-        'transaction' => '/^[0-9]{1,32}$/',
-        'description' => '/^[\w _\-\.]{0,20}$/',
-        'md5check' => '/^[a-z0-9]{32}$/',
-        'CUSTOM_' => '/^[\w _\-\.]{0,20}$/'
-      );
+    $fields = array(
+      'protocol' => '/^(' . QUICKPAY_VERSION_API . '|' . QUICKPAY_VERSION_POST . ')$/',
+      'msgtype' => '/^[a-z]+$/',
+      'merchant' => '/^[0-9]{8}$/',
+      'ordernumber' => '/^[a-zA-Z0-9]{4,20}$/',
+      'amount' => '/^[0-9]{1,10}$/',
+      'finalize' => '/^[0-1]{1}$/',
+      'currency' => '/^[A-Z]{3}$/',
+      'autocapture' => '/^[0-1]{1}$/',
+      'cardnumber' => '/^[0-9]{13,19}$/',
+      'expirationdate' => '/^[0-9]{4}$/',
+      'cvd' => '/^[0-9]{0,4}$/',
+      'cardtypelock' => '/^[a-zA-Z,]{0,128}$/',
+      'splitpayment' => '/^[0-1]{1}$/',
+      'transaction' => '/^[0-9]{1,32}$/',
+      'description' => '/^[\w _\-\.]{0,20}$/',
+      'md5check' => '/^[a-z0-9]{32}$/',
+      'CUSTOM_' => '/^[\w _\-\.]{0,20}$/',
+    );
 
     foreach ($data as $field => $value) {
-      // No NULL values please
+      // No NULL values please.
       if (is_null($value)) {
         throw new QuickpayException(t('%field cannot be NULL', array('%field' => $field)));
       }
       elseif ($fields[$field]) {
         if (!preg_match($fields[$field], $value)) {
           // We're not logging the actual value, as that might be
-          // sensitive information
-          throw new QuickpayException(t('%field didn\'t pass validation.',
+          // sensitive information.
+          throw new QuickpayException(t("%field didn't pass validation.",
               array('%field' => $field)));
         }
       }
       elseif (preg_match('/^CUSTOM_/', $field)) {
         if (!preg_match($fields['CUSTOM_'], $value)) {
-          throw new QuickpayException(t('%field didn\'t pass validation.',
+          throw new QuickpayException(t("%field didn't pass validation.",
               array('%field' => $field)));
         }
       }
@@ -412,19 +383,23 @@ class Quickpay {
    * Parses the XML response from Quickpay into an associative
    * array. Internal use only.
    *
-   * @param string $response the XML response.
-   * @return array associative array
+   * @param string $response
+   *   The XML response.
+   *
+   * @return array
+   *   XML as an associative array.
    */
   protected function response($response) {
-    // Load XML in response into DOM
+    // Load XML in response into DOM.
     $result = array();
-    $dom = new DOMDocument;
+    $dom = new DOMDocument();
     $dom->loadXML($response);
-    // Find elements en response and put them in an associative array
+    // Find elements en response and put them in an associative array.
     $xpath = new DOMXPath($dom);
     $elements = $xpath->query('/response/*');
     foreach ($elements as $cn) {
-      // If the element has (real) children - this is the case for status->history and chstatus->entry
+      // If the element has (real) children - this is the case for
+      // status->history and chstatus->entry.
       if ($cn->childNodes->length > 1) {
         $child = array();
         foreach ($cn->childNodes as $hn) {
@@ -500,7 +475,7 @@ class Quickpay {
     // Ensure that Order number is at least 4 characters.
     if (strlen($ordernumber) < 4) {
       $ordernumber = $this->order_prefix . substr('0000' . $order_id,
-                     -4+strlen($this->order_prefix));
+                     -4 + strlen($this->order_prefix));
     }
     return $ordernumber;
   }
@@ -511,7 +486,8 @@ class Quickpay {
   protected function get_cardtypelock() {
     if (is_array($this->accepted_cards)) {
       $cards = $this->accepted_cards;
-      unset($cards['ikano']); // Aren't supported in cardtypelock.
+      // Aren't supported in cardtypelock.
+      unset($cards['ikano']);
       return join(',', $cards);
     }
     // Already set to the proper string.
@@ -521,7 +497,8 @@ class Quickpay {
   /**
    * Returns the settings form.
    *
-   * @param $settings array Previously saved setting.
+   * @param array $settings
+   *   Previously saved setting.
    */
   public static function settings_form($settings = array()) {
     $settings += array(
@@ -533,6 +510,7 @@ class Quickpay {
       'test_mode' => FALSE,
       'debug' => FALSE,
       'popup' => FALSE,
+      'splitpayment' => TRUE,
     );
 
     $form['merchant'] = array(
@@ -588,12 +566,12 @@ class Quickpay {
       '#default_value' => $settings['accepted_cards'],
     );
 
-    /* $form['popup'] = array( */
-    /*   '#type' => 'checkbox', */
-    /*   '#title' => t('Use popup'), */
-    /*   '#description' => t('Create a popup window instead of redirecting to the payment form.'), */
-    /*   '#default_value' => $settings['popup'], */
-    /* ); */
+    $form['splitpayment'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Split payments'),
+      '#description' => t('Allows for capturing payments in parts.'),
+      '#default_value' => $settings['splitpayment'],
+    );
 
     $form['test_mode'] = array(
       '#type' => 'checkbox',
@@ -614,9 +592,11 @@ class Quickpay {
   /**
    * Get information about an currency.
    *
-   * @param $code the ISO 4217 currency code.
+   * @param string $code
+   *   The ISO 4217 currency code.
    *
-   * @return NULL or an array with the keys 'code' and 'multiplier'.
+   * @return NULL|array
+   *   An array with the keys 'code' and 'multiplier', or null if not found.
    */
   public static function currency_info($code) {
     // @todo if commerce module is enabled, use its list.
@@ -644,8 +624,10 @@ class Quickpay {
   /**
    * Returns the amount adjusted by the multiplier for the currency.
    *
-   * @param $amount the amount.
-   * @param $currency_info an currency_info() array, or a currency code.
+   * @param decimal $amount
+   *   The amount.
+   * @param array|string $currency_info
+   *   An currency_info() array, or a currency code.
    */
   public static function wire_amount($amount, $currency_info) {
     if (!is_array($currency_info)) {
@@ -660,15 +642,17 @@ class Quickpay {
   /**
    * Reverses wire_amount().
    *
-   * @param $amount the amount.
-   * @param $currency_info an currency_info() array, or a currency code.
+   * @param int $amount
+   *   The amount.
+   * @param array|string $currency_info
+   *   An currency_info() array, or a currency code.
    */
   public static function unwire_amount($amount, $currency_info) {
     if (!is_array($currency_info)) {
       $currency_info = Quickpay::currency_info($currency_info);
     }
     return (function_exists('bcdiv') ?
-        bcdiv($amount, $currency_info['multiplier']) :
+        bcdiv($amount, $currency_info['multiplier'], log10($currency_info['multiplier'])) :
         $amount / $currency_info['multiplier']);
 
   }
@@ -802,6 +786,25 @@ class QuickpayTransaction {
   }
 
   /**
+   * Return the balance for this transaction.
+   */
+  public function balance() {
+    $history = $this->history();
+    $balance = 0;
+    foreach ($history as $hist) {
+      if ($hist['msgtype'] == 'authorize' && $hist['qpstat'] == '000') {
+        $balance = $hist['amount'];
+      }
+      elseif ($hist['msgtype'] == 'capture' && $hist['qpstat'] == '000') {
+        $balance -= $hist['amount'];
+      }
+      elseif ($hist['msgtype'] == 'refund' && $hist['qpstat'] == '000') {
+        $balance += $hist['amount'];
+      }
+    }
+    return Quickpay::unwire_amount($balance, $this->currency());
+  }
+  /**
    * Extract named object properties into an associative array.
    */
   public function extract() {
@@ -835,7 +838,7 @@ class QuickpayTransaction {
       if (isset($response[$field])) {
         // Only overwrite with empty values when the request was a
         // success. Quickpay returns empty fields on failure.
-        if ($success || !empty($response[$field])){
+        if ($success || !empty($response[$field])) {
           $this->data[$field] = $response[$field];
         }
       }
@@ -848,7 +851,7 @@ class QuickpayTransaction {
    * loading. This is what modules using Quickpay should use as a reference.
    */
   public function store() {
-    if ($this->data['currency']){
+    if ($this->data['currency']) {
       return serialize(array($this->data['transaction'], $this->data['currency']));
     }
     return $this->transaction;
@@ -866,10 +869,10 @@ class QuickpayTransaction {
    */
   public function status() {
     $this->qp->request('status', $this->extract('transaction'), $this);
-    // Throw an exception if Quickpay doesn't know this transaction.
-    // Perhaps this is better?
-    /* if (!$this->data['qpstatmsg'] == 'Transaction not found') { */
+    // Throw an exception if Quickpay complains.
     if (!$this->success()) {
+      watchdog('quickpay', 'Error from Quickpay on status request. Message: @message',
+      array('@message' => $this->data['qpstatmsg']), WATCHDOG_ERROR);
       throw new QuickpayException(t("Status error."));
     }
   }
@@ -899,7 +902,7 @@ class QuickpayTransaction {
    * Create a new payment on a subscription transaction.
    */
   function recurring($order_id, $amount, $currency, $options = array()) {
-     $options += array(
+    $options += array(
       'autocapture' => FALSE,
     );
     $currency_info = Quickpay::currency_info($currency);

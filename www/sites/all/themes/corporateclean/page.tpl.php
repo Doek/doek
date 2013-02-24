@@ -1,8 +1,8 @@
-<!-- Header. -->
+<!-- #header -->
 <div id="header">
-
+	<!-- #header-inside -->
     <div id="header-inside">
-    
+    	<!-- #header-inside-left -->
         <div id="header-inside-left">
             
             <?php if ($logo): ?>
@@ -17,36 +17,44 @@
             <?php if ($site_slogan): ?>
             <span id="slogan"><?php print $site_slogan; ?></span>
             <?php endif; ?>
-            </div><!-- /site-name-wrapper -->
+            </div>
             <?php endif; ?>
             
-        </div>
-            
+        </div><!-- EOF: #header-inside-left -->
+        
+        <!-- #header-inside-right -->
         <div id="header-inside-right">
 		<?php print render($page['search_area']); ?>    
-        </div>
+        </div><!-- EOF: #header-inside-right -->
     
     </div><!-- EOF: #header-inside -->
 
 </div><!-- EOF: #header -->
 
-<!-- Header Menu. -->
+<!-- #header-menu -->
 <div id="header-menu">
 
-<div id="header-menu-inside">
-    <?php 
-	if (module_exists('i18n')) {
-	$main_menu_tree = i18n_menu_translated_tree(variable_get('menu_main_links_source', 'main-menu'));
-	} else {
-	$main_menu_tree = menu_tree(variable_get('menu_main_links_source', 'main-menu')); 
-	}
-	print drupal_render($main_menu_tree);
-	?>
-</div><!-- EOF: #header-menu-inside -->
+    <!-- #header-menu-inside -->
+    <div id="header-menu-inside">
+    
+        <div id="navigation" class="clearfix">
+        <?php if ($page['navigation']) :?>
+        <?php print drupal_render($page['navigation']); ?>
+        <?php else :
+        if (module_exists('i18n_menu')) {
+        $main_menu_tree = i18n_menu_translated_tree(variable_get('menu_main_links_source', 'main-menu'));
+        } else {
+        $main_menu_tree = menu_tree(variable_get('menu_main_links_source', 'main-menu')); 
+        }
+        print drupal_render($main_menu_tree);
+        endif; ?>
+        </div>
+
+    </div><!-- EOF: #header-menu-inside -->
 
 </div><!-- EOF: #header-menu -->
 
-<!-- Banner. -->
+<!-- #banner -->
 <div id="banner">
 
 	<?php print render($page['banner']); ?>
@@ -55,16 +63,16 @@
     
     <?php if ($is_front): ?>
     
-    <!--slideshow-->
+    <!-- #slideshow -->
     <div id="slideshow">
     
         <!--slider-item-->
-        <div class="slider-item">
+        <div class="slider-item clearfix">
             <div class="content">
                 
                 <!--slider-item content-->
                 <div style="float:left; padding:0 30px 0 0;">
-                <img height="250px" class="masked" src="<?php print base_path() . drupal_get_path('theme', 'corporateclean') ;?>/mockup/slide-1.jpg"/>
+                <img class="masked" src="<?php print base_path() . drupal_get_path('theme', 'corporateclean') ;?>/mockup/slide-1.jpg"/>
                 </div>
                 <h2>Sample product name</h2>
                 <strong>General</strong><br/>
@@ -79,12 +87,12 @@
         <!--EOF:slider-item-->
         
         <!--slider-item-->
-        <div class="slider-item">
+        <div class="slider-item clearfix">
             <div class="content">
             
                 <!--slider-item content-->
                 <div style="float:right; padding:0 0 0 30px;">
-                <img height="250px" class="masked" src="<?php print base_path() . drupal_get_path('theme', 'corporateclean') ;?>/mockup/slide-2.jpg"/>
+                <img class="masked" src="<?php print base_path() . drupal_get_path('theme', 'corporateclean') ;?>/mockup/slide-2.jpg"/>
                 </div>
                 <h2>Sample service name</h2>
                 <strong>General</strong><br/>
@@ -99,7 +107,7 @@
         <!--EOF:slider-item-->
         
         <!--slider-item-->
-        <div class="slider-item">
+        <div class="slider-item clearfix">
             <div class="content">
             
                 <!--slider-item content-->
@@ -116,11 +124,11 @@
         <!--EOF:slider-item-->
         
         <!--slider-item-->
-        <div class="slider-item">
+        <div class="slider-item clearfix">
             <div class="content">
                 
                 <!--slider-item content-->
-                <img height="250px" class="masked" src="<?php print base_path() . drupal_get_path('theme', 'corporateclean') ;?>/mockup/slide-3.jpg"/>
+                <img class="masked" src="<?php print base_path() . drupal_get_path('theme', 'corporateclean') ;?>/mockup/slide-3.jpg"/>
                 <!--EOF:slider-item content-->
             
             </div>
@@ -150,11 +158,19 @@
 </div><!-- EOF: #banner -->
 
 
-<!-- Content. -->
+<!-- #content -->
 <div id="content">
-
-    <div id="content-inside" class="inside">
+	<!-- #content-inside -->
+    <div id="content-inside">
     
+    	<?php if ($page['sidebar_first']) :?>
+        <!-- #sidebar-first -->
+        <div id="sidebar-first">
+        	<?php print render($page['sidebar_first']); ?>
+        </div><!-- EOF: #sidebar-first -->
+        <?php endif; ?>  
+    
+        <!-- #main -->
         <div id="main">
             
             <?php if (theme_get_setting('breadcrumb_display','corporateclean')): print $breadcrumb; endif; ?>
@@ -193,19 +209,20 @@
             
         </div><!-- EOF: #main -->
         
-        <div id="sidebar">
-             
-            <?php print render($page['sidebar_first']); ?>
-
-        </div><!-- EOF: #sidebar -->
+    	<?php if ($page['sidebar_second']) :?>
+        <!-- #sidebar-second -->
+        <div id="sidebar-second">
+        	<?php print render($page['sidebar_second']); ?>
+        </div><!-- EOF: #sidebar-second -->
+        <?php endif; ?>  
 
     </div><!-- EOF: #content-inside -->
 
 </div><!-- EOF: #content -->
 
-<!-- Footer -->    
+<!-- #footer -->    
 <div id="footer">
-
+	<!-- #footer-inside -->
     <div id="footer-inside">
     
         <div class="footer-area first">
@@ -224,11 +241,11 @@
 
 </div><!-- EOF: #footer -->
 
-<!-- Footer -->    
+<!-- #footer-bottom -->    
 <div id="footer-bottom">
-
+	<!-- #footer-bottom-inside -->    
     <div id="footer-bottom-inside">
-    
+    	<!-- #footer-bottom-inside-left --> 
     	<div id="footer-bottom-left">
         
             <?php print theme('links__system_secondary_menu', array('links' => $secondary_menu, 'attributes' => array('class' => array('secondary-menu', 'links', 'clearfix')))); ?>
@@ -236,7 +253,7 @@
             <?php print render($page['footer']); ?>
             
         </div>
-        
+        <!-- #footer-bottom-inside-right -->
         <div id="footer-bottom-right">
         
         	<?php print render($page['footer_bottom_right']); ?>

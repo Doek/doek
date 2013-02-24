@@ -87,12 +87,14 @@ function content_access_page_submit($form, &$form_state) {
   if (module_exists('acl')) {
     foreach (array('view', 'update', 'delete') as $op) {
       acl_save_form($form_state['values']['acl'][$op]);
-      module_invoke_all('content_user', $settings);
+      module_invoke_all('user_acl', $settings);
     }
   }
 
   // Apply new settings.
   node_access_acquire_grants($node);
+
+  module_invoke_all('per_node', $settings);
 
   drupal_set_message(t('Your changes have been saved.'));
 }

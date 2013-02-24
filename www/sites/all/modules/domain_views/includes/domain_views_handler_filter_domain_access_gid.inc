@@ -28,9 +28,11 @@ class domain_views_handler_filter_domain_access_gid extends views_handler_filter
   /**
    * Filter the query properly.
    */
-  function query() {
-    parent::query();
+  function query($group_by = FALSE) {
+    parent::query($group_by);
     $table = $this->ensure_my_table();
-    $this->query->add_where(0, "$table.realm", 'domain_id');
+    if ($table == 'domain_access') {
+      $this->query->add_where(0, "$table.realm", 'domain_id');
+    }
   }
 }

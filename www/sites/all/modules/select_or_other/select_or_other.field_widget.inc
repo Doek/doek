@@ -20,6 +20,7 @@ function select_or_other_field_widget_info() {
     'available_options_php' => '',
     'markup_available_options_php' => t('&lt;none&gt;'),
     'other' => t('Other'),
+    'other_title' => '',
     'other_unknown_defaults' => 'other',
   );
   return array(
@@ -33,7 +34,7 @@ function select_or_other_field_widget_info() {
       'settings' => $settings,
     ),
     'select_or_other_sort' => array(
-      'label' => t('Select (or other) drag and drop lists'),
+      'label' => t('Select (or other) drag and drop lists [deprecated in favor of Field Collection]'),
       'field types' => $field_types,
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_DEFAULT,
@@ -149,6 +150,7 @@ function select_or_other_field_widget_form(&$form, &$form_state, $field, $instan
     '#type' => 'select_or_other',
     '#title' => isset($instance['label']) ? $instance['label'] : NULL,
     '#other' => isset($instance['widget']['settings']['other']) ? $instance['widget']['settings']['other'] : t('Other'),
+    '#other_title' => !empty($instance['widget']['settings']['other_title']) ? $instance['widget']['settings']['other_title'] : NULL,
     '#default_value' => !empty($items[$delta]) ? $items[$delta] : NULL,
     '#options' => select_or_other_field_widget_form_prepare_options($field, $instance, !empty($items[$delta])),
     '#description' => isset($instance['description']) ? $instance['description'] : '',
@@ -238,6 +240,12 @@ function select_or_other_field_widget_settings_form($field, $instance) {
     '#default_value' => isset($settings['other']) ? $settings['other'] : t('Other'),
     '#required' => TRUE,
   );
+  $form['other_title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('<em>Other</em> field title'),
+    '#description' => t('Label for the field in which the user will supply an <em>other</em> value.'),
+    '#default_value' => isset($settings['other_title']) ? $settings['other_title'] : '',
+  );
   $form['other_unknown_defaults'] = array(
     '#type' => 'select',
     '#title' => t('<em>Other</em> value as default value'),
@@ -287,12 +295,13 @@ function select_or_other_field_widget_settings_validate($element, &$form_state, 
  * Element validate callback for a Select (or other) field widget.
  */
 function select_or_other_field_widget_validate($element, &$form_state) {
-  $field_name = $element['#parents'][0];
+  //$field_name = $element['#parents'][count($element['#parents']) - 2];
+  $field_name = $element['#field_name'];
   $field_info = field_info_field($field_name);
 
   $other_selected = FALSE;
 
-  if (is_array($element['select']['#value']) && in_array('select_or_other', $element['select']['#value'])) {
+  if (is_array($element['select']['#value']) && isset($element['select']['#value']['select_or_other'])) {
     // This is a multiselect. assoc arrays
     $other_selected = TRUE;
     $value = $element['select']['#value'];
@@ -344,12 +353,21 @@ function select_or_other_field_widget_validate($element, &$form_state) {
     form_set_value($element, $value, $form_state);
     $form_state['clicked_button']['#post'][$element['#name']] = $value; // Is this something we should do?
   }
+  else {
+    form_set_value($element, array(array('value' => '')), $form_state);
+  }
 
   // Add values to available options is configured to do so.
-  $instance = $form_state['field'][$field_name][$element['#parents'][1]]['instance'];
+  if (!empty($form_state['field'][$field_name][$element['#parents'][1]]['instance'])) {
+    $instance = $form_state['field'][$field_name][$element['#parents'][1]]['instance'];
+  }
+  else {
+    $instance = field_widget_instance($element, $form_state);
+  }
+
   if ($instance['widget']['settings']['other_unknown_defaults'] == 'available') {
     if (
-      $element['select']['#value'] == 'select_or_other' &&
+      ($element['select']['#value'] == 'select_or_other' || (is_array($element['select']['#value']) && isset($element['select']['#value']['select_or_other']))) &&
       !empty($element['other']['#value']) &&
       !isset($element['#options'][$element['other']['#value']])
     ) {

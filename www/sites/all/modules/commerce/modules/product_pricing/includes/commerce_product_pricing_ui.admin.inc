@@ -25,6 +25,10 @@ function commerce_product_pricing_ui_sell_price_rules() {
   $content['disabled']['rules'] = RulesPluginUI::overviewTable($conditions, $options);
   $content['disabled']['rules']['#empty'] = t('There are no disabled sell price calculation rules.');
 
+  // Store the function name in the content array to make it easy to alter the
+  // contents of this page.
+  $content['#page_callback'] = 'commerce_product_pricing_ui_sell_price_rules';
+
   return $content;
 }
 
@@ -48,8 +52,8 @@ function commerce_product_pre_calculation_settings_form($form, &$form_state) {
     // Build a description for the fieldset indicating how many rows are in the
     // table and when they were last processed.
     $description = format_plural($count,
-      t('There is 1 product sell price in the calculated price table.'),
-      t('There are @count product sell prices in the calculated price table.'));
+      'There is 1 product sell price in the calculated price table.',
+      'There are @count product sell prices in the calculated price table.');
 
     // If there are prices, add the timestamp for the last calculation.
     if ($count > 0) {

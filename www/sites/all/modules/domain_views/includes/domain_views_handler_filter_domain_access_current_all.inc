@@ -21,3 +21,4 @@ class domain_views_handler_filter_domain_access_current_all extends views_handle
     }
   }
 }
+

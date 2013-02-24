@@ -209,7 +209,7 @@ function select_or_other_element_process($element, &$form_state) {
  */
 function select_or_other_element_validate($element, &$form_state) {
   $other_selected = FALSE;
-  if (is_array($element['select']['#value']) && in_array('select_or_other', $element['select']['#value'])) {
+  if (is_array($element['select']['#value']) && isset($element['select']['#value']['select_or_other'])) {
     // This is a multiselect. assoc arrays
     $other_selected = TRUE;
     $value = $element['select']['#value'];

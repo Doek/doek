@@ -14,7 +14,7 @@
  *
  * @see commerce_custom_product_line_item_type_save()
  */
-function hook_commerce_custom_product_line_item_type_insert($line_item_type) {
+function hook_commerce_custom_product_line_item_type_insert($line_item_type, $skip_reset = FALSE) {
   // No example.
 }
 
@@ -26,7 +26,7 @@ function hook_commerce_custom_product_line_item_type_insert($line_item_type) {
  *
  * @see commerce_custom_product_line_item_type_save()
  */
-function hook_commerce_custom_product_line_item_type_update($line_item_type) {
+function hook_commerce_custom_product_line_item_type_update($line_item_type, $skip_reset = FALSE) {
   // No example.
 }
 

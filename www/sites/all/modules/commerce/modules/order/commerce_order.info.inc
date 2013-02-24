@@ -25,7 +25,6 @@ function commerce_order_entity_property_info() {
     'label' => t('Order number', array(), array('context' => 'a drupal commerce order')),
     'description' => t('The order number displayed to the customer.'),
     'setter callback' => 'entity_property_verbatim_set',
-    'required' => TRUE,
     'schema field' => 'order_number',
   );
   $properties['status'] = array(
@@ -43,7 +42,7 @@ function commerce_order_entity_property_info() {
     'description' => t('The state of the order derived from its status.'),
     'getter callback' => 'commerce_order_get_properties',
     'options list' => 'commerce_order_state_options_list',
-    'schema field' => 'state',
+    'computed' => TRUE,
   );
   $properties['created'] = array(
     'type' => 'date',
@@ -94,8 +93,9 @@ function commerce_order_entity_property_info() {
     'getter callback' => 'commerce_order_get_properties',
     'setter callback' => 'commerce_order_set_properties',
     'setter permission' => 'administer commerce_order entities',
-    'clear' => array('uid'),
     'required' => TRUE,
+    'computed' => TRUE,
+    'clear' => array('uid'),
   );
   $properties['mail'] = array(
     'label' => t('Order e-mail'),
